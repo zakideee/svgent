@@ -8,6 +8,8 @@
 
 SVGENT **composes an agent session and keeps it as images and video**. Author a script for either the App or TUI surface, then export it as SVG, PNG, WebP, GIF, or MP4. The Studio runs entirely in your browser, and the CLI entirely on your machine.
 
+**Try it:** [svgent.zakideee.dev](https://svgent.zakideee.dev/) is the Studio. [agent.svgent.zakideee.dev](https://agent.svgent.zakideee.dev/) is the same Studio with WebMCP site tools for a browser agent.
+
 The session screen is drawn as SVG. Text is converted to outlines at export, so the file looks the same on a machine without those fonts.
 
 Note: selectors, `@keyframes` names, and `clipPath` ids all carry a unique prefix, and no element selectors are used. Embed with `<img>` or `<object>`. Inline the SVG into HTML and the page's own CSS applies to what is inside it too.

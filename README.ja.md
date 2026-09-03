@@ -8,6 +8,8 @@
 
 SVGENT は、**エージェントとの会話を創作して画像と動画に残す**ツールです。台本をアプリ / ターミナルの2種類の画面で組み立て、SVG・PNG・WebP・GIF・MP4 へ書き出します。Studio はブラウザだけで、CLI はローカルだけで動きます。
 
+**試す:** [svgent.zakideee.dev](https://svgent.zakideee.dev/) が Studio です。[agent.svgent.zakideee.dev](https://agent.svgent.zakideee.dev/) は同じ Studio に、ブラウザのエージェント向けの WebMCP サイトツールを付けたものです。
+
 セッション画面は SVG で描かれています。文字は書き出す時点でアウトライン化されるため、開く環境に同じフォントがなくても表示は変わりません。
 
 ※ CSS セレクタ、`@keyframes` 名、`clipPath` の id はすべて固有の接頭辞付きで、`path` や `g` のような要素セレクタは使いません。埋め込みは `<img>` か `<object>` を推奨します。HTML へインライン展開した場合は、ページ側の CSS も中の要素に適用されます。
