@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "title": "Scroll stress: 12 messages",
+  "surface": "app",
+  "modelLabel": "Cascade 7",
+  "workspaceLabel": "fictional/ledger",
+  "branchLabel": "refactor/journal-core",
+  "pagination": {
+    "flow": "scroll",
+    "scrollDistancePx": 2400
+  },
+  "timing": {
+    "userTypingCps": 40,
+    "agentTypingCps": 120,
+    "thinkingMs": 900,
+    "toolRunMs": 800,
+    "permissionMs": 900,
+    "transitionMs": 140,
+    "finalHoldMs": 900
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "[[仕訳|しわけ]]エンジンのリファクタを[[お願い|おねがい]]。[[丸め誤差|まるめごさ]]が[[月次集計|げつじしゅうけい]]でずれる[[問題|もんだい]]も[[一緒|いっしょ]]に[[直したい|なおしたい]]。"
+    },
+    {
+      "role": "thinking",
+      "content": "丸め処理の呼び出し箇所と集計パスの依存関係を確認しています"
+    },
+    {
+      "role": "tool",
+      "language": "bash",
+      "content": "rg -n \"round|toFixed\" src/journal src/summary"
+    },
+    {
+      "role": "assistant",
+      "content": "原因が見えました。\n\n- `postEntry` が**行単位で丸め**てから合計している\n- 月次側は**合計してから丸め**ている\n- 二つの経路で丸め順序が逆なので、端数が多い月ほどずれます\n\n影響範囲を整理すると、日次レポートは行単位経路のみを通るため常に旧仕様の値になり、月次と突き合わせた瞬間に差分が表面化します。税率計算は独立の経路で既に整数化されているので影響なし、外部APIへ渡す金額は表示層を経由するため自動的に追従します。\n\n修正方針は「内部は最小通貨単位の整数で持ち、表示時にだけ丸める」です。丸めモードは銀行丸め (half-even) に統一し、既存の切り上げ指定があった 2 箇所は仕様確認のうえ移行します。"
+    },
+    {
+      "role": "user",
+      "content": "その[[方針|ほうしん]]で。[[既存|きぞん]]データのマイグレーションはどうなる？"
+    },
+    {
+      "role": "permission",
+      "content": "src/journal 以下 6 ファイルを編集し、マイグレーションスクリプトを追加します"
+    },
+    {
+      "role": "tool",
+      "language": "bash",
+      "content": "node scripts/migrate-minor-units.mjs --dry-run\n# 12,408 entries / diff 0.00 in 12,391 / +-0.01 in 17"
+    },
+    {
+      "role": "assistant",
+      "content": "dry-run の結果、17 件だけ ±0.01 の差が出ます。これは旧実装が行単位で丸めた際の**既知の誤差そのもの**で、新実装が正です。監査ログに旧値を残す形で移行します。\n\n```ts\nexport function toMinorUnits(amount: Decimal): bigint {\n  return BigInt(amount.times(100).toDecimalPlaces(0, HALF_EVEN).toString());\n}\n\nexport function addEntries(entries: readonly Entry[]): bigint {\n  return entries.reduce((sum, entry) => sum + entry.minorUnits, 0n);\n}\n```\n\n合計は `bigint` の加算だけになるので、桁あふれも浮動小数の再丸めも起こりません。"
+    },
+    {
+      "role": "thinking",
+      "content": "集計側のテストを丸め境界のケースで補強しています",
+      "highlight": true
+    },
+    {
+      "role": "tool",
+      "language": "bash",
+      "content": "pnpm vitest run tests/summary --reporter=dot\n# 84 passed (84)"
+    },
+    {
+      "role": "user",
+      "content": "[[表示側|ひょうじがわ]]の[[桁区切り|けたくぎり]]は[[変わらない|かわらない]]？[[請求書|せいきゅうしょ]]PDFのスナップショットも[[確認|かくにん]]して。"
+    },
+    {
+      "role": "assistant",
+      "content": "表示フォーマッタは `Intl.NumberFormat` のまま変更なしで、請求書PDFのスナップショット 32 件も全て一致しました。まとめ:\n\n1. 内部表現を最小通貨単位の `bigint` に統一\n2. 丸めは表示層でのみ、銀行丸め (half-even)\n3. 旧誤差 17 件は監査ログ付きで移行\n\n月次と日次の合計が常に一致することをプロパティテストで担保しています。"
+    }
+  ],
+  "appearance": {
+    "canvasWidth": 1080,
+    "canvasHeight": 1920,
+    "theme": "ember",
+    "backdrop": "sky",
+    "terminalOpacity": 0.7
+  }
+}

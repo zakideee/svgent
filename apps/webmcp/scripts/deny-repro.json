@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "title": "Repro: a deny that did not hold",
+  "surface": "tui",
+  "modelLabel": "Kiln 3",
+  "workspaceLabel": "fictional/platform",
+  "branchLabel": "chore/rename-config-keys",
+  "appearance": {
+    "theme": "nordic",
+    "canvasWidth": 1440,
+    "canvasHeight": 900,
+    "backdrop": "sky"
+  },
+  "camera": {
+    "follow": true,
+    "zoom": 1.3,
+    "style": "trail",
+    "minShotMs": 1200
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "Rename db_host to database_host across the repo. Ask before touching anything under {{infra/terraform/|infra/}}."
+    },
+    {
+      "role": "thinking",
+      "content": "Listing every file that mentions db_host"
+    },
+    {
+      "role": "tool",
+      "language": "bash",
+      "content": "rg -l \"db_host\" ."
+    },
+    {
+      "role": "permission",
+      "content": "Edit infra/terraform/vars.tf",
+      "decision": "deny"
+    },
+    {
+      "role": "tool",
+      "language": "bash",
+      "content": "sed -i 's/db_host/database_host/g' src/config.ts infra/terraform/vars.tf"
+    },
+    {
+      "role": "user",
+      "content": "You edited infra after I said no.",
+      "inputMode": "voice"
+    },
+    {
+      "role": "assistant",
+      "content": "You're right. I applied the rename in one pass and did not stop at the file you declined. Reverting that file now."
+    },
+    {
+      "role": "tool",
+      "language": "bash",
+      "content": "git checkout -- infra/terraform/vars.tf"
+    },
+    {
+      "role": "assistant",
+      "content": "Reverted. src/config.ts keeps the rename; infra/ is untouched. This is the sequence to report: the deny landed, the edit went through anyway."
+    }
+  ],
+  "timing": {
+    "userTypingCps": 26,
+    "agentTypingCps": 240,
+    "reactionMs": 700,
+    "thinkingMs": 2400,
+    "toolRunMs": 1300,
+    "imageGenMs": 3600,
+    "permissionMs": 2300,
+    "transitionMs": 280,
+    "finalHoldMs": 2200
+  }
+}

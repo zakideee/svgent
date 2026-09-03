@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "title": "Embed: chrome stripped",
+  "surface": "app",
+  "modelLabel": "Bezier 4",
+  "workspaceLabel": "fictional/embed",
+  "branchLabel": "feat/embed",
+  "display": {
+    "composer": false,
+    "footer": false,
+    "productMark": false,
+    "productVersion": false,
+    "headerIcons": false,
+    "headerText": false
+  },
+  "appearance": {
+    "fontScale": 1.4,
+    "theme": "synth",
+    "backdrop": "dawn",
+    "terminalOpacity": 0.86
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "I want to see the chrome-less look used for embedding."
+    },
+    {
+      "role": "assistant",
+      "content": "The header, composer, and footer are all removed. **Only the conversation** shows, expanding into the space the transcript reclaimed."
+    }
+  ],
+  "chrome": {
+    "clockTime": ""
+  }
+}

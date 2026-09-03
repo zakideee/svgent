@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "title": "Multiple attached images (TUI)",
+  "surface": "tui",
+  "modelLabel": "Pixel 3",
+  "messages": [
+    {
+      "role": "user",
+      "content": "[[参考|さんこう]]に2[[枚|まい]][[添付|てんぷ]]します(ターミナルではスタブ[[行|ぎょう]]になります)。",
+      "images": [
+        {
+          "dataUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+          "mediaType": "image/png",
+          "width": 640,
+          "height": 960,
+          "alt": "image"
+        },
+        {
+          "dataUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+          "mediaType": "image/png",
+          "width": 800,
+          "height": 450,
+          "alt": "image"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": "2枚ともスタブ行として一覧できます。"
+    }
+  ]
+}

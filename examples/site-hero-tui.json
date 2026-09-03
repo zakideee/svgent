@@ -1,0 +1,66 @@
+{
+  "title": "README に載せるまで",
+  "surface": "tui",
+  "basis": "fictional",
+  "modelLabel": "Kiln 3",
+  "workspaceLabel": "svgent/studio",
+  "branchLabel": "feat/readme-demo",
+  "appearance": {
+    "theme": "ink",
+    "backdrop": "peach",
+    "canvasWidth": 1440,
+    "canvasHeight": 900,
+    "imageSkeleton": "sweep"
+  },
+  "chrome": {
+    "contextPercent": 38,
+    "clockTime": "9:20"
+  },
+  "timing": {
+    "userTypingCps": 12,
+    "agentTypingCps": 180,
+    "thinkingMs": 1400,
+    "toolRunMs": 1100,
+    "permissionMs": 1600,
+    "finalHoldMs": 2200
+  },
+  "messages": [
+    {
+      "role": "user",
+      "inputMode": "voice",
+      "content": "このセッション、README に置ける形にしてくれる?"
+    },
+    {
+      "role": "thinking",
+      "content": "セッションの流れを確認中。返答ごとの間合いを測っています"
+    },
+    {
+      "role": "tool",
+      "content": "rg \"animated-svg\" README.md",
+      "language": "bash"
+    },
+    {
+      "role": "assistant",
+      "content": "README には3通りで置けます。\n\n- **animated SVG 1本** — ページの中でそのまま再生される\n- **ポスター+リンク** — どこでも表示される静止画\n- **スライド** — 場面ごとに1ページを並べる\n\n1本にすると動きが残ります。カメラワークもそのまま出ます。"
+    },
+    {
+      "role": "choice",
+      "content": "どの形で置きますか?",
+      "options": ["animated SVG 1本", "ポスター+リンク", "スライド — 場面ごとに1ページ"],
+      "chosenIndex": 0
+    },
+    {
+      "role": "user",
+      "content": "{{@examples/readme-demo.json|@exa}} に[[台本|だいほん]]を[[書|か]]いて。[[間|ま]]は Studio で[[直|なお]]す。"
+    },
+    {
+      "role": "permission",
+      "content": "examples/readme-demo.json を作成",
+      "decision": "allow"
+    },
+    {
+      "role": "assistant",
+      "content": "台本にしました。間は Studio で調整でき、`pnpm render` で SVG になります。\n\n```json\n{\n  \"title\": \"README デモ\",\n  \"surface\": \"app\",\n  \"basis\": \"fictional\",\n  \"camera\": { \"follow\": true, \"zoom\": 1.6 },\n  \"messages\": [\n    { \"role\": \"user\", \"content\": \"要約から始めて\" },\n    { \"role\": \"assistant\", \"content\": \"回します。カメラはお任せで。\" }\n  ]\n}\n```\n\n上のやり取りも、この形の行が並んでいるだけです。"
+    }
+  ]
+}

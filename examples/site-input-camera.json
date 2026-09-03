@@ -1,0 +1,44 @@
+{
+  "title": "追従カメラ",
+  "surface": "app",
+  "basis": "fictional",
+  "modelLabel": "Kiln 3",
+  "workspaceLabel": "fictional/atlas-console",
+  "branchLabel": "feat/cover",
+  "appearance": {
+    "theme": "ink",
+    "backdrop": "peach",
+    "canvasWidth": 1200,
+    "canvasHeight": 720,
+    "imageSkeleton": "sweep"
+  },
+  "chrome": {
+    "contextPercent": 22,
+    "clockTime": "9:20"
+  },
+  "camera": {
+    "follow": true,
+    "zoom": 1.9,
+    "style": "sync"
+  },
+  "timing": {
+    "userTypingCps": 12,
+    "agentTypingCps": 170,
+    "imageGenMs": 2600,
+    "finalHoldMs": 1800
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "[[表紙|ひょうし]]の[[案|あん]]を1枚[[描いて|えがいて]]。"
+    },
+    {
+      "role": "image",
+      "content": "夕暮れの静かな海辺"
+    },
+    {
+      "role": "assistant",
+      "content": "1枚目です。色を落ち着かせるか、被写体を変えるか選べます。"
+    }
+  ]
+}

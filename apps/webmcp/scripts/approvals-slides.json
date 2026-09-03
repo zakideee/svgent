@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "title": "Approvals and choices, in three slides",
+  "surface": "app",
+  "modelLabel": "Bezier 4",
+  "workspaceLabel": "fictional/api",
+  "branchLabel": "feat/health-endpoint",
+  "appearance": {
+    "theme": "paper",
+    "canvasWidth": 1920,
+    "canvasHeight": 1080,
+    "backdrop": "plain",
+    "transparentCanvas": true,
+    "fontScale": 1.4
+  },
+  "pagination": {
+    "flow": "slides",
+    "messagesPerPage": 3,
+    "scrollDistancePx": 0
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "Add a health endpoint to the API.",
+      "inputMode": "voice"
+    },
+    {
+      "role": "thinking",
+      "content": "Checking how the existing routes are registered",
+      "highlight": true
+    },
+    {
+      "role": "choice",
+      "content": "Where should it live?",
+      "options": [
+        "/healthz — matches the Kubernetes probes",
+        "/status — matches the existing admin routes",
+        "Both — one redirects to the other"
+      ],
+      "chosenIndex": 0,
+      "afterSelection": "keep"
+    },
+    {
+      "role": "permission",
+      "content": "Create src/routes/health.ts and register it in the router",
+      "decision": "allow-always",
+      "pageBreakBefore": true,
+      "afterSelection": "keep"
+    },
+    {
+      "role": "tool",
+      "language": "bash",
+      "content": "pnpm test routes"
+    },
+    {
+      "role": "assistant",
+      "content": "Registered `/healthz`. It returns `200` with the build id and skips auth, like the probes expect."
+    },
+    {
+      "role": "user",
+      "content": "{{/explain|/ex}} what allow-always changed.",
+      "pageBreakBefore": true
+    },
+    {
+      "role": "thinking",
+      "content": "Explaining the scope of the standing approval"
+    },
+    {
+      "role": "assistant",
+      "content": "**Allow** approves one action. **Allow always** approves that kind of action for the rest of the session — here, creating files under `src/routes/` — so I stop asking for each one. It ends when the session does."
+    }
+  ],
+  "timing": {
+    "userTypingCps": 26,
+    "agentTypingCps": 240,
+    "reactionMs": 700,
+    "thinkingMs": 2400,
+    "toolRunMs": 1300,
+    "imageGenMs": 3600,
+    "permissionMs": 2300,
+    "transitionMs": 280,
+    "finalHoldMs": 2200
+  }
+}

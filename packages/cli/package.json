@@ -1,0 +1,44 @@
+{
+  "name": "@svgent/cli",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Headless Node CLI for rendering svgent scripts",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zakideee/svgent.git",
+    "directory": "packages/cli"
+  },
+  "type": "module",
+  "bin": {
+    "svgent": "./dist/bin.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./internal/*": null
+  },
+  "files": [
+    "dist",
+    "LICENSE-MIT",
+    "LICENSE-APACHE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup src/index.ts src/bin.mts --format esm --dts --sourcemap --clean",
+    "render": "node dist/bin.js",
+    "test": "vitest run --root ../.. packages/cli/tests",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@boundsvg/core": "0.4.0",
+    "@svgent/assets": "workspace:*",
+    "@svgent/render": "workspace:*",
+    "@svgent/scene": "workspace:*"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

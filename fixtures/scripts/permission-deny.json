@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "title": "Denied permission",
+  "surface": "app",
+  "modelLabel": "Quill 2",
+  "workspaceLabel": "fictional/payments",
+  "branchLabel": "fix/refund-rounding",
+  "messages": [
+    {
+      "role": "user",
+      "content": "The rounding on fractional amounts is off. Please fix it."
+    },
+    {
+      "role": "thinking",
+      "content": "Checking where the rounding helper is called"
+    },
+    {
+      "role": "tool",
+      "content": "rg -n \"roundHalfUp\" src/",
+      "language": "bash"
+    },
+    {
+      "role": "permission",
+      "content": "Rewrite the production pricing table",
+      "decision": "deny"
+    },
+    {
+      "role": "assistant",
+      "content": "Understood — I will leave the table alone.\n\nInstead, here is a diff that fixes the rounding function itself. Review it before applying."
+    },
+    {
+      "role": "permission",
+      "content": "Edit rounding.ts only"
+    },
+    {
+      "role": "assistant",
+      "content": "Replaced `roundHalfUp` with **banker's rounding**."
+    }
+  ],
+  "appearance": {
+    "backdrop": "plain",
+    "canvasWidth": 1080,
+    "canvasHeight": 1350,
+    "theme": "phosphor",
+    "terminalOpacity": 0.86
+  },
+  "timing": {
+    "agentTypingCps": 35,
+    "thinkingMs": 4000,
+    "toolRunMs": 2600,
+    "permissionMs": 2200
+  }
+}

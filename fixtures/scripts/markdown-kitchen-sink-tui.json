@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "title": "Markdown kitchen sink (TUI)",
+  "surface": "tui",
+  "modelLabel": "Quill 2",
+  "messages": [
+    {
+      "role": "user",
+      "content": "[[同じ|おなじ]]MarkdownをTUIで。"
+    },
+    {
+      "role": "assistant",
+      "content": "## TUI見出し\n\n本文 **強調** *斜体* `code` [link](https://example.com)。\n\n- 箇条書き `chip`\n1. 番号付き\n\n> TUIの引用ガター確認\n\n```bash\nrg -n 'pattern' src | head -3\n```"
+    }
+  ],
+  "appearance": {
+    "theme": "synth",
+    "backdrop": "sky",
+    "terminalOpacity": 0.86
+  }
+}

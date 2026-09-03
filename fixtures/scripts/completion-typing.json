@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "title": "Completion typing",
+  "surface": "tui",
+  "modelLabel": "Bezier 4",
+  "workspaceLabel": "fictional/queue-worker",
+  "branchLabel": "fix/retry-backoff",
+  "basis": "fictional",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{{pnpm test -- retry|pnpm te}} が[[落ちる|おちる]]。{{--reporter=verbose|--rep}} を付けて[[原因|げんいん]]を[[見て|みて]]。"
+    },
+    {
+      "role": "thinking",
+      "content": "失敗しているケースを絞り込んでいます",
+      "highlight": true
+    },
+    {
+      "role": "tool",
+      "language": "bash",
+      "content": "pnpm test -- retry --reporter=verbose"
+    },
+    {
+      "role": "assistant",
+      "content": "**3件中1件が落ちています。** バックオフの上限が効かず、4回目の待ち時間が想定の倍になっていました。"
+    },
+    {
+      "role": "user",
+      "content": "{{@src/retry/backoff.ts|@src/ret}} を直して。"
+    },
+    {
+      "role": "permission",
+      "content": "backoff.ts とテストを編集します",
+      "decision": "allow"
+    },
+    {
+      "role": "assistant",
+      "content": "上限を `Math.min` で挟みました。境界のテストも足しています。"
+    }
+  ]
+}

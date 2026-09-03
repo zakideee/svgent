@@ -1,0 +1,41 @@
+{
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.mts", "tests/**/*.ts"],
+      "project": ["scripts/**/*.mts", "tests/**/*.ts"],
+      "ignoreDependencies": ["@svgent/*"]
+    },
+    "apps/studio": {
+      "entry": ["src/main.tsx", "src/gallery.ts", "src/view.ts"],
+      "project": ["src/**/*.{ts,tsx}"]
+    },
+    "packages/assets": {
+      "entry": ["src/index.ts", "src/node.ts", "scripts/*.mts", "tests/**/*.test.ts"],
+      "project": ["src/**/*.ts", "scripts/*.mts", "tests/**/*.ts"]
+    },
+    "packages/authoring": {
+      "entry": ["src/index.ts", "tests/**/*.test.ts"],
+      "project": ["src/**/*.ts", "tests/**/*.ts"]
+    },
+    "packages/cli": {
+      "entry": ["src/index.ts", "src/bin.mts", "tests/**/*.test.ts"],
+      "project": ["src/**/*.{ts,mts}", "tests/**/*.ts"]
+    },
+    "packages/render": {
+      "entry": ["src/index.ts", "tests/**/*.test.ts"],
+      "project": ["src/**/*.ts", "tests/**/*.ts"]
+    },
+    "packages/scene": {
+      "entry": ["src/index.ts", "tests/**/*.test.ts"],
+      "project": ["src/**/*.ts", "tests/**/*.ts"]
+    },
+    "packages/studio": {
+      "entry": ["src/index.ts", "tests/**/*.test.ts"],
+      "project": ["src/**/*.{ts,tsx}", "tests/**/*.ts"]
+    },
+    "apps/webmcp": {
+      "entry": ["src/main.tsx"],
+      "project": ["src/**/*.{ts,tsx}"]
+    }
+  }
+}

@@ -1,0 +1,1328 @@
+/*
+ * Styles for the static pages around the studio: the landing pages at / and
+ * /ja/, and the 404. These pages ship no framework, so the tokens are a
+ * deliberate copy of the studio's dark defaults rather than an import —
+ * app.css belongs to the studio bundle, and the landing must not pull it in.
+ *
+ * The studio picks its theme from a stored preference; a static page has no
+ * such preference to read, so it follows the operating system instead.
+ */
+
+:root {
+  color-scheme: dark;
+  --ink: #e9eaf0;
+  --muted: #9aa1b0;
+  --faint: #6d7484;
+  --border: #2a2e39;
+  --violet: #8b7cf6;
+  --shell-bg: #090a0f;
+  --field-bg: #0d0f15;
+  --panel-bg: #101219;
+  --panel-2-bg: #171a23;
+  --shell-glow: rgba(139, 124, 246, 0.14);
+  --mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+
+/*
+ * Two ways to be light: the operating system says so and the studio's stored
+ * choice does not say dark, or the stored choice itself says light. A line of
+ * script in each page's head copies that choice onto <html> as the same
+ * data-ui-theme the studio sets on its own document, so crossing between the
+ * two never flips the colours. The palette is repeated across the two blocks
+ * rather than shared through a preprocessor these pages do not have.
+ */
+:root[data-ui-theme="light"] {
+  color-scheme: light;
+  --ink: #22242c;
+  --muted: #5b6170;
+  --faint: #8b909d;
+  --border: #d4d5de;
+  --violet: #6a5ae0;
+  --shell-bg: #f1f1f5;
+  --field-bg: #ffffff;
+  --panel-bg: #ffffff;
+  --panel-2-bg: #ececf1;
+  --shell-glow: rgba(106, 90, 224, 0.1);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-ui-theme="dark"]) {
+    color-scheme: light;
+    --ink: #22242c;
+    --muted: #5b6170;
+    --faint: #8b909d;
+    --border: #d4d5de;
+    --violet: #6a5ae0;
+    --shell-bg: #f1f1f5;
+    --field-bg: #ffffff;
+    --panel-bg: #ffffff;
+    --panel-2-bg: #ececf1;
+    --shell-glow: rgba(106, 90, 224, 0.1);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  /* Phone browsers inflate text per block when they judge it wide for the
+     viewport, which leaves neighbouring paragraphs at different sizes. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  color: var(--ink);
+  background:
+    radial-gradient(120rem 40rem at 50% -12rem, var(--shell-glow), transparent 70%), var(--shell-bg);
+  /* The gradient is painted over the body box, so a page shorter than the
+     viewport would leave the tail of the window on the flat colour. */
+  min-height: 100dvh;
+  line-height: 1.7;
+}
+
+a {
+  color: inherit;
+}
+
+/*
+ * The gutter and the centring live here and nowhere else. Both are written on
+ * the inline axis alone, and every rule below sets vertical spacing with
+ * longhand properties, because a `margin` or `padding` shorthand at either end
+ * of that pair silently resets the other element's block spacing to zero —
+ * these class selectors outrank the element selectors that set it.
+ */
+.wrap {
+  width: 100%;
+  max-width: 62rem;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+/* Header */
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.site-header a {
+  text-decoration: none;
+}
+
+/* Mark and wordmark keep the studio header's own proportions and gap, so the
+   two surfaces present the same lockup rather than two near-misses. */
+.brand {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+}
+
+.brand-mark {
+  display: block;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+
+.brand-wordmark {
+  display: block;
+  width: 75px;
+  height: 26px;
+}
+
+/* Which wordmark shows is the theme's call, made here because a <picture>'s
+   media attribute can read the OS but never the stored choice. */
+.wordmark-light {
+  display: none;
+}
+
+:root[data-ui-theme="light"] .wordmark-light {
+  display: block;
+}
+
+:root[data-ui-theme="light"] .wordmark-dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-ui-theme="dark"]) .wordmark-light {
+    display: block;
+  }
+
+  :root:not([data-ui-theme="dark"]) .wordmark-dark {
+    display: none;
+  }
+}
+
+/*
+ * Header controls borrow the studio's own: a 34px row where framed pills are
+ * controls and the bare mark navigates away. The language control states the
+ * code it switches to, as the studio's toggle does. The row is pushed right
+ * whether or not a brand sits beside it, because the landing pages carry their
+ * identity in the hero and leave this row to the controls alone.
+ */
+.header-nav {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-inline-start: auto;
+}
+
+.nav-icon {
+  display: grid;
+  height: 34px;
+  place-items: center;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+/* Flex, not grid: the label and its arrow are two children, and a grid would
+   stack them into two rows instead of setting them side by side. */
+.nav-pill {
+  display: inline-flex;
+  height: 34px;
+  align-items: center;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.nav-pill {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--field-bg);
+}
+
+.nav-pill {
+  padding: 0 0.95rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/*
+ * Three roles, three shapes, because a row of identical pills said nothing
+ * about which one leaves the page. The ajar door marks the one that opens
+ * the Studio, the segmented pair reads as a state you are already in, and
+ * the bare mark is the way out to the repository.
+ */
+.nav-pill-icon {
+  margin-left: 0.45rem;
+  color: var(--faint);
+}
+
+.nav-pill:hover .nav-pill-icon {
+  color: var(--violet);
+}
+
+.nav-switch {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--field-bg);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.nav-switch span,
+.nav-switch a {
+  display: grid;
+  width: 30px;
+  height: 28px;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+/* The language you are reading is not a link — there is nowhere to go. */
+.nav-switch [aria-current="page"] {
+  color: #ffffff;
+  background: var(--violet);
+}
+
+.nav-switch a:hover {
+  color: var(--ink);
+  background: var(--chip-hover-bg, transparent);
+}
+
+.nav-icon {
+  width: 34px;
+}
+
+.nav-pill:hover {
+  border-color: var(--violet);
+  color: var(--ink);
+}
+
+.nav-icon:hover {
+  color: var(--ink);
+}
+
+/* Hero */
+
+.hero-logo {
+  display: block;
+  width: clamp(14rem, 30vw, 20rem);
+  height: auto;
+  margin-bottom: 1.75rem;
+}
+
+.hero {
+  padding-top: 3rem;
+  padding-bottom: 1rem;
+}
+
+.hero h1 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.9rem, 5vw, 2.9rem);
+  font-weight: 680;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.hero .lead {
+  margin: 0 0 1rem;
+  max-width: 44rem;
+  font-size: clamp(1rem, 2.4vw, 1.2rem);
+  color: var(--muted);
+}
+
+.hero .lead strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1.75rem 0 0.75rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.7rem 1.4rem;
+  border: 1px solid transparent;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.button-primary {
+  background: var(--violet);
+  color: #ffffff;
+}
+
+.button-primary:hover {
+  filter: brightness(1.08);
+}
+
+.button-secondary {
+  border-color: var(--border);
+  background: var(--panel-bg);
+  color: var(--ink);
+}
+
+.button-secondary:hover {
+  border-color: var(--violet);
+}
+
+.note {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--faint);
+}
+
+/* Sections */
+
+section {
+  margin-top: 3.5rem;
+}
+
+h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.section-lead {
+  margin: 0 0 1.5rem;
+  max-width: 44rem;
+  color: var(--muted);
+}
+
+/* Demo stage */
+
+.stage {
+  margin: 0;
+}
+
+/* These controls are dealt out and retired by script through the hidden
+   attribute, whose UA display: none loses to the flex the rules below set.
+   Restated here so hidden keeps meaning hidden. */
+.stage-controls[hidden],
+.stage-transport[hidden],
+.stage-caption[hidden],
+.input-controls[hidden] {
+  display: none;
+}
+
+/* Segmented pills, the studio's control vocabulary again. The pressed state
+   is the button's own aria-pressed, so the styling cannot drift from what a
+   screen reader announces. */
+.stage-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.85rem;
+}
+
+.stage-group {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--field-bg);
+}
+
+.stage-group button {
+  height: 30px;
+  padding: 0 0.85rem;
+  border: 0;
+  border-radius: 999px;
+  color: var(--muted);
+  background: transparent;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.stage-group button:hover {
+  color: var(--ink);
+}
+
+.stage-group button[aria-pressed="true"] {
+  color: #ffffff;
+  background: var(--violet);
+}
+
+/* The exported frame is 1440×900, and the box is reserved at that ratio so the
+   page does not jump when the animation finishes loading. */
+.stage-media {
+  transition: opacity 180ms ease;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1440 / 900;
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: var(--panel-bg);
+}
+
+.stage-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.9rem;
+}
+
+.stage-caption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: start;
+  /* Only the replay control remains; the toggles above say the rest. */
+  justify-content: flex-end;
+  margin-top: 1rem;
+  color: var(--muted);
+}
+
+.stage-caption div {
+  max-width: 44rem;
+}
+
+.stage-caption b {
+  display: block;
+  color: var(--ink);
+  font-weight: 620;
+}
+
+.stage-replay {
+  flex: none;
+  padding: 0 1.1rem;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--field-bg);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.stage-replay:hover {
+  border-color: var(--violet);
+  color: var(--ink);
+}
+
+/* The one link off this page closes the stage column on its right rail,
+   under the transport's own right-aligned label, rather than floating
+   loose-left a band below it. */
+.stage-more {
+  margin: 1.25rem 0 0;
+  text-align: right;
+}
+
+/* The stage's transport, the same two controls the gallery cards carry. */
+.stage-transport {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  margin-top: 0.85rem;
+}
+
+.stage-play {
+  display: grid;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--field-bg);
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.stage-play:hover {
+  border-color: var(--violet);
+  color: var(--ink);
+}
+
+.stage-source {
+  flex: none;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.stage-source:hover {
+  color: var(--violet);
+}
+
+.stage-seek {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--violet);
+  cursor: pointer;
+}
+
+/* On a phone the file link was as wide as the scrubber it sat beside,
+   leaving the one control that wants precision about 150px for a
+   half-minute piece. The link takes its own row — by full basis, because
+   the scrubber's flex: 1 would otherwise shrink and never let it wrap. */
+@media (max-width: 560px) {
+  .stage-transport {
+    flex-wrap: wrap;
+  }
+
+  .stage-source {
+    flex: 0 0 100%;
+    text-align: right;
+  }
+}
+
+/* Touch targets: the 30px rings are comfortable under a pointer and small
+   under a finger. */
+@media (hover: none) and (pointer: coarse) {
+  .stage-play,
+  .input-play {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Samples */
+
+.samples {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+}
+
+.sample {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: var(--panel-bg);
+}
+
+.sample img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sample figcaption {
+  padding: 0.85rem 1.1rem 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.sample figcaption b {
+  display: block;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Fact cards */
+
+.facts {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.facts li {
+  padding: 1.25rem 1.35rem;
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: var(--panel-2-bg);
+}
+
+.facts b {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 620;
+}
+
+.facts p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+/* Format chips */
+
+.formats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.formats li {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* Footer */
+
+.site-footer {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+  color: var(--faint);
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.site-footer p {
+  margin: 0.35rem 0 0;
+}
+
+.footer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+}
+
+/* Not found */
+
+.notfound {
+  padding-top: 5rem;
+  padding-bottom: 3rem;
+}
+
+.notfound h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  letter-spacing: -0.02em;
+}
+
+/* Inputs gallery */
+
+.input-grid {
+  display: grid;
+  gap: 1.5rem;
+  /* Each canvas has its own aspect, so a card sizes to its own content
+     rather than stretching to the tallest one in the row. */
+  align-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+}
+
+.input-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: var(--panel-bg);
+}
+
+.input-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* `object-fit` does not reach into an <object>, so the crop is the frame's
+   job: it clips, and the document inside sits at its own ratio against the
+   bottom edge. IME, completions and voice all happen in the composer down
+   there, on a canvas that is otherwise empty. */
+.input-frame {
+  position: relative;
+  overflow: hidden;
+}
+
+.input-frame.is-composer {
+  aspect-ratio: 16 / 7;
+}
+
+.input-frame.is-portrait {
+  aspect-ratio: 4 / 5;
+}
+
+.input-frame.is-full {
+  aspect-ratio: 1440 / 900;
+}
+
+/* Visible from the start: without scripting (or with reduced motion) the
+   fallback poster inside is the content. Scripting hides the object only
+   for the moment the animated document parses. */
+.input-media {
+  transition: opacity 180ms ease;
+  display: block;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  border: 0;
+}
+
+.input-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.input-card figcaption {
+  padding: 0.9rem 1.1rem 1.1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.input-card b {
+  display: block;
+  color: var(--ink);
+  font-weight: 620;
+}
+
+.input-card p {
+  margin: 0.15rem 0 0.6rem;
+}
+
+/* Marks the cards whose subject only exists while it moves. */
+.input-badge {
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  color: var(--violet);
+  background: var(--violet-soft, transparent);
+  border: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  vertical-align: 0.1em;
+}
+
+.input-card code {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+
+/* The pages of a split conversation, shown as the set they are rather than
+   one frame standing in for four. */
+.input-pages {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: 1fr 1fr;
+  padding: 6px;
+}
+
+.input-pages img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.3rem;
+}
+
+/* The moving cards' transport, borrowed in behaviour from the studio's own. */
+.input-controls {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.6rem 0.8rem 0;
+}
+
+.input-play {
+  display: grid;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  background: var(--field-bg);
+  font-size: 0.7rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.input-play:hover {
+  border-color: var(--violet);
+  color: var(--ink);
+}
+
+.input-seek {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--violet);
+  cursor: pointer;
+}
+
+/* Revealed once the document inside has painted, so the white page a loading
+   <object> shows never reaches the eye. */
+.input-media.is-ready,
+.stage-media.is-ready {
+  opacity: 1;
+}
+
+.stage-media.is-loading,
+.input-media.is-loading {
+  opacity: 0;
+}
+
+/*
+ * While the animated SVG streams in, the reserved frame holds a sketch of
+ * the window it is about to become — not the finished poster, which would
+ * rewind to an empty transcript the moment playback starts. The poster
+ * stays for the not-yet-played states (reduced motion, no scripting),
+ * where a still of the real content is the point.
+ */
+.stage-screen {
+  position: relative;
+}
+
+.stage-skeleton {
+  position: absolute;
+  inset: 0;
+  display: none;
+  padding: 6.5% 6%;
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: var(--panel-bg);
+}
+
+.stage-media.is-loading + .stage-skeleton,
+.input-media.is-loading + .stage-skeleton {
+  display: block;
+}
+
+/* Inside a gallery frame the card already draws the edge. */
+.input-frame .stage-skeleton {
+  border: 0;
+  border-radius: 0;
+}
+
+.skeleton-dots {
+  display: flex;
+  gap: 1.4%;
+  margin-bottom: 6.5%;
+}
+
+.skeleton-dots i {
+  width: 1.7%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.stage-skeleton .skeleton-row {
+  display: block;
+  height: 4.8%;
+  width: 46%;
+  margin-bottom: 4.2%;
+  border-radius: 999px;
+  background: var(--border);
+  opacity: 0.75;
+}
+
+.stage-skeleton .skeleton-row.is-user {
+  width: 32%;
+  margin-left: auto;
+}
+
+.stage-skeleton .skeleton-row.is-long {
+  width: 68%;
+}
+
+.stage-skeleton .skeleton-row.is-short {
+  width: 24%;
+}
+
+.skeleton-composer {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 7%;
+  height: 11%;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .stage-skeleton .skeleton-row {
+    background: linear-gradient(
+      90deg,
+      var(--border) 30%,
+      color-mix(in srgb, var(--border) 45%, transparent) 50%,
+      var(--border) 70%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-sheen 1.3s linear infinite;
+  }
+}
+
+@keyframes skeleton-sheen {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Viewer */
+
+.viewer {
+  padding-top: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+.viewer-media {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+}
+
+.viewer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  justify-content: space-between;
+  margin: 0.9rem 0 0;
+  color: var(--faint);
+  font-size: 0.85rem;
+}
+
+.viewer-meta a {
+  text-decoration: none;
+}
+
+.viewer-meta a:hover {
+  color: var(--violet);
+}
+
+.viewer-file code {
+  font-family: var(--mono);
+  overflow-wrap: anywhere;
+}
+
+/*
+ * Three lists of identical boxes read as one long list, and nothing in the
+ * shape said which question each answered. The boxes stay for the samples;
+ * here the sections take the shape of what they hold — statements, and terms
+ * with their meanings — separated by a rule rather than drawn as cards.
+ */
+.facts-people,
+.facts-terms {
+  display: block;
+}
+
+.facts-people li,
+.facts-terms li {
+  padding: 1rem 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  background: none;
+}
+
+.facts-people li:last-child,
+.facts-terms li:last-child {
+  border-bottom: 1px solid var(--border);
+}
+
+.facts-people b {
+  font-size: 1.05rem;
+}
+
+.facts-terms li {
+  display: grid;
+  gap: 0 1.5rem;
+  grid-template-columns: minmax(8rem, 13rem) 1fr;
+  align-items: baseline;
+}
+
+.facts-terms b {
+  margin-bottom: 0;
+}
+
+@media (max-width: 560px) {
+  .facts-terms li {
+    display: block;
+  }
+
+  .facts-terms b {
+    margin-bottom: 0.2rem;
+  }
+}
+
+/*
+ * A hue per section, taken from the mark's own four colours and used at the
+ * smallest scale that still registers: a short bar beside the heading, and the
+ * rule that opens the list. Nothing is filled or tinted — the sections stay
+ * the same weight, and only their edges differ.
+ */
+.is-people {
+  --accent: #8b7cf6;
+}
+
+.is-content {
+  --accent: #44ddd6;
+}
+
+.is-look {
+  --accent: #7b87c4;
+}
+
+.is-formats {
+  --accent: #9aa1b0;
+}
+
+:root[data-ui-theme="light"] .is-people {
+  --accent: #6a5ae0;
+}
+
+:root[data-ui-theme="light"] .is-content {
+  --accent: #148f8a;
+}
+
+:root[data-ui-theme="light"] .is-look {
+  --accent: #5b67a8;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-ui-theme="dark"]) .is-people {
+    --accent: #6a5ae0;
+  }
+
+  :root:not([data-ui-theme="dark"]) .is-content {
+    --accent: #148f8a;
+  }
+
+  :root:not([data-ui-theme="dark"]) .is-look {
+    --accent: #5b67a8;
+  }
+}
+
+.is-people h2,
+.is-content h2,
+.is-look h2,
+.is-formats h2 {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+/* The bar grew into a glyph: each section opens on the session part it
+   talks about — a user bubble, message lines, the choice box, the export
+   tray — drawn in the section's own accent. */
+.section-glyph {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  color: var(--accent);
+}
+
+/* A wash at the top edge, at the threshold of being seen: enough that the
+   sections do not read as one surface, not enough to notice as colour. */
+.is-people,
+.is-content,
+.is-look,
+.is-formats {
+  /* Radial, so it has no edge to be seen: a linear wash ended on the wrap's
+     own box and read as a tinted block. */
+  background: radial-gradient(
+    56rem 14rem at 6% 0%,
+    color-mix(in srgb, var(--accent) 8%, transparent),
+    transparent 72%
+  );
+}
+
+/*
+ * On a laptop the stack — logo, head, buttons, demo — spent the first screen
+ * on air and pushed the demo off the bottom, so the one thing worth looking at
+ * had to be hunted for. The rhythm tightens, and the stage is bounded by the
+ * height left to it: 1.6 is its own ratio, so widening stops where the frame
+ * would leave the screen.
+ */
+@media (min-width: 900px) {
+  .hero {
+    padding-top: 1.25rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .hero-logo {
+    width: clamp(10rem, 17vw, 13.5rem);
+    margin-bottom: 0.9rem;
+  }
+
+  .hero h1 {
+    margin-bottom: 0.6rem;
+  }
+
+  .hero .lead {
+    margin-bottom: 0.6rem;
+  }
+
+  .actions {
+    margin-top: 1.1rem;
+    margin-bottom: 0;
+  }
+
+  section {
+    margin-top: 2.25rem;
+  }
+
+  .stage {
+    max-width: calc((100dvh - 22rem) * 1.6);
+    margin-inline: auto;
+  }
+}
+
+/* A laptop has width to spare, and the demo is what wants it. */
+@media (min-width: 1200px) {
+  .wrap {
+    max-width: 76rem;
+  }
+}
+
+/*
+ * While the page is a stack the demo is the hero's proof, so it follows the
+ * buttons at less than a section's distance — on a phone that also brings
+ * its top edge onto the first screen.
+ */
+.stage-column {
+  margin-top: 2rem;
+}
+
+/*
+ * Wide enough, the hero stops queueing above the demo and sits beside it:
+ * headline left, stage right. Below this the stack above stays as it is.
+ */
+@media (min-width: 1000px) {
+  .hero-shell {
+    display: grid;
+    gap: 2.75rem;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: center;
+  }
+
+  .hero-shell .hero {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  /* The height cap guards the stacked layout; beside the hero the column is
+     the bound. */
+  .hero-shell .stage {
+    max-width: none;
+  }
+
+  .hero-shell .stage-column {
+    margin-top: 0;
+  }
+}
+
+/*
+ * Staged entrances (reveal.js): the page borrows the renderer's own motion
+ * vocabulary. Rows enter the way messages enter a session, the formats
+ * replay the prompt-then-output beat, and the first section thinks before
+ * it answers. All of it is gated on .has-reveal, which only scripting sets,
+ * and reveal.js leaves that flag off under prefers-reduced-motion.
+ */
+.reveal {
+  opacity: 0;
+  translate: 0 10px;
+}
+
+.is-on .reveal {
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity 260ms ease-out,
+    translate 260ms ease-out;
+  transition-delay: calc(var(--reveal-order, 0) * 64ms);
+}
+
+/* The glyph draws its strokes in as the section enters. Every path
+   carries pathLength="1", so one dash rule draws them all edge to edge. */
+.has-reveal .section-glyph :is(path, rect) {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.has-reveal .is-heading-in .section-glyph :is(path, rect) {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 340ms ease-out;
+}
+
+/* The first section keeps its beat: the glyph waits with the rows and
+   they answer together. */
+.has-reveal .is-people.is-heading-in .section-glyph :is(path, rect) {
+  transition-delay: 380ms;
+}
+
+/* The prompt line the chips answer to. Its caret blinks only while the
+   line is being typed. */
+.formats-cmd {
+  margin: 0 0 1.1rem;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--faint);
+}
+
+.is-formats.is-typing .formats-cmd code::after {
+  content: "▍";
+  margin-left: 1px;
+  color: var(--violet);
+  animation: caret-blink 900ms steps(1) infinite;
+}
+
+@keyframes caret-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+/* The section about choices answers hover the way the choice box answers a
+   selection: a check settles in at the row's head. Pointer devices only. */
+.is-look .facts-terms li {
+  position: relative;
+}
+
+.is-look .facts-terms li::after {
+  content: "✓";
+  position: absolute;
+  top: 1rem;
+  left: -1.4rem;
+  color: var(--violet);
+  font-weight: 700;
+  opacity: 0;
+  translate: -4px 0;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .is-look .facts-terms li:hover::after {
+    opacity: 1;
+    translate: 0 0;
+    transition:
+      opacity 150ms ease-out,
+      translate 150ms ease-out;
+  }
+}
+
+/* The follow camera lets go: scrolling past the hero, the stage eases back
+   a step and hands the page downward. Browsers without scroll-driven
+   animations simply keep the stage still. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 1000px) {
+    .hero-shell .stage {
+      animation: stage-release linear both;
+      animation-timeline: view();
+      animation-range: exit 5% exit 90%;
+    }
+  }
+}
+
+@keyframes stage-release {
+  to {
+    scale: 0.97;
+    opacity: 0.82;
+  }
+}
+
+/* The closing call: after the read, the two ways in. */
+.is-cta .section-lead {
+  margin-bottom: 0.25rem;
+}

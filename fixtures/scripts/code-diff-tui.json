@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "title": "Diff (TUI)",
+  "surface": "tui",
+  "modelLabel": "Bezier 4",
+  "messages": [
+    {
+      "role": "user",
+      "content": "TUIでdiff。"
+    },
+    {
+      "role": "tool",
+      "content": "git diff HEAD~1 -- src/model.ts",
+      "language": "bash"
+    },
+    {
+      "role": "assistant",
+      "content": "```diff\n-const old = 1;\n+const next = 2;\n const kept = 3;\n```"
+    }
+  ],
+  "appearance": {
+    "canvasWidth": 1600,
+    "canvasHeight": 1200,
+    "theme": "phosphor",
+    "backdrop": "abyss",
+    "terminalOpacity": 0.86
+  }
+}

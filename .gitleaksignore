@@ -1,0 +1,5 @@
+# Synthetic OpenAI-shaped key inside the publication-check test: the fixture
+# exists to prove detected secrets are reported without being echoed. The
+# current line carries an inline gitleaks:allow; this entry covers the commit
+# that introduced it at its old path.
+ac0c025b34b98b3de530de7a089b9717805b1074:tests/authoring.test.ts:generic-api-key:134

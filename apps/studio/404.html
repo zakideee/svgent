@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="/brand/svgent-mark.svg" />
+    <link rel="stylesheet" href="/src/site.css" />
+    <script>
+      // The studio remembers the theme its visitor chose and stamps it on its
+      // own document as data-ui-theme; this page honours the same choice so
+      // crossing between site and studio never flips the colours. Nothing
+      // stored leaves the operating system in charge.
+      try {
+        const uiTheme = window.localStorage.getItem("svgent-ui-theme");
+        if (uiTheme === "light" || uiTheme === "dark") {
+          document.documentElement.dataset.uiTheme = uiTheme;
+        }
+      } catch {
+        /* Storage unavailable — the operating system decides. */
+      }
+    </script>
+    <title>Page not found — SVGENT</title>
+  </head>
+  <body>
+    <header class="wrap site-header">
+      <a class="brand" href="/">
+        <img
+          class="brand-mark"
+          src="/brand/svgent-mark.svg"
+          alt=""
+          width="34"
+          height="34"
+        />
+        <!-- The wordmark is drawn rather than set, so it cannot drift from the
+             studio header in a font substitution. Both variants are real
+             elements: a <picture>'s media attribute can read the OS but not
+             the stored theme, so the stylesheet picks which one shows. -->
+        <img
+          class="brand-wordmark wordmark-light"
+          src="/brand/svgent-wordmark.svg"
+          alt="svgent"
+          width="75"
+          height="26"
+        />
+        <img
+          class="brand-wordmark wordmark-dark"
+          src="/brand/svgent-wordmark-dark.svg"
+          alt="svgent"
+          width="75"
+          height="26"
+        />
+      </a>
+    </header>
+
+    <main class="wrap notfound">
+      <h1>Page not found</h1>
+      <p class="lead">This address does not point at anything here.</p>
+      <div class="actions">
+        <a class="button button-primary" href="/">Home</a>
+        <a class="button button-secondary" href="/studio/">Open Studio</a>
+      </div>
+    </main>
+  </body>
+</html>

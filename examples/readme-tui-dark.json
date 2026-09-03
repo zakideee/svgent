@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "title": "Empty state handoff",
+  "surface": "tui",
+  "modelLabel": "Lattice 3",
+  "workspaceLabel": "fictional/daybreak-dashboard",
+  "branchLabel": "feat/empty-state",
+  "appearance": {
+    "theme": "ink",
+    "canvasWidth": 1440,
+    "canvasHeight": 900,
+    "transparentCanvas": false,
+    "terminalOpacity": 0.96,
+    "background": "#090b10",
+    "accent": "#8b7cf6",
+    "backdrop": "aurora",
+    "imageSkeleton": "sweep",
+    "shadowStrength": 0.64,
+    "fontScale": 1.12,
+    "chromeScale": 1
+  },
+  "chrome": {
+    "contextPercent": 58,
+    "clockTime": "10:24"
+  },
+  "display": {
+    "headerIcons": true,
+    "headerText": true,
+    "composer": true,
+    "footer": true,
+    "productMark": true,
+    "productVersion": true,
+    "tuiGeometry": true,
+    "tuiTitle": true,
+    "tuiClock": true
+  },
+  "timing": {
+    "userTypingCps": 25,
+    "agentTypingCps": 240,
+    "thinkingMs": 2600,
+    "toolRunMs": 1400,
+    "imageGenMs": 3600,
+    "permissionMs": 2400,
+    "transitionMs": 300,
+    "finalHoldMs": 2200
+  },
+  "pagination": {
+    "flow": "scroll",
+    "messagesPerPage": 4,
+    "scrollDistancePx": 0
+  },
+  "messages": [
+    {
+      "id": "empty-user",
+      "role": "user",
+      "content": "[[管理画面|かんりがめん]]の[[空状態|からじょうたい]]を[[改善|かいぜん]]したいです。[[初回|しょかい]]ユーザーには[[次|つぎ]]の[[操作|そうさ]]が[[伝わり|つたわり]]、[[既存|きぞん]]ユーザーにはデータがまだない[[理由|りゆう]]が[[分かる|わかる]]ようにしてください。モバイルでも[[読みやすい|よみやすい]][[文面|ぶんめん]]で[[お願い|おねがい]]します。"
+    },
+    {
+      "id": "empty-thinking",
+      "role": "thinking",
+      "content": "既存コンポーネントと空状態の分岐を確認しています"
+    },
+    {
+      "id": "empty-search",
+      "role": "tool",
+      "language": "bash",
+      "content": "rg -n \"EmptyState|reportCount\" src/dashboard tests"
+    },
+    {
+      "id": "empty-findings",
+      "role": "assistant",
+      "content": "### 確認できたこと\n\n- 初回と絞り込み結果0件が同じ表示\n- CTAは既存の `CreateReportButton` を再利用可能\n- 分岐は `reportCount` と `hasActiveFilters` で十分です\n\n```ts\nconst kind = hasActiveFilters\n  ? \"filtered\"\n  : reportCount === 0 ? \"first-run\" : \"ready\";\n```"
+    },
+    {
+      "id": "empty-choice",
+      "role": "choice",
+      "content": "初回ユーザーの主導線を選んでください",
+      "options": [
+        "最初のレポートを作る — 次の操作が明確",
+        "テンプレートを見る — 始めやすいが選択が増える",
+        "データを読み込む — 既存ユーザー向け"
+      ],
+      "chosenIndex": 0
+    },
+    {
+      "id": "empty-direction",
+      "role": "assistant",
+      "content": "「最初のレポートを作る」を主導線にします。絞り込み0件では **条件をクリア** に切り替えます。"
+    },
+    {
+      "id": "empty-permission",
+      "role": "permission",
+      "content": "EmptyState.tsx と回帰テストを編集します"
+    },
+    {
+      "id": "empty-test",
+      "role": "tool",
+      "language": "bash",
+      "content": "pnpm test -- EmptyState"
+    },
+    {
+      "id": "empty-result",
+      "role": "assistant",
+      "content": "## 実装しました\n\n```tsx\n<EmptyState\n  title=\"まだレポートがありません\"\n  action={<CreateReportButton>最初のレポートを作る</CreateReportButton>}\n/>\n```\n\n- 初回／絞り込み0件を分離\n- 360px幅で日本語の折り返しを確認\n- **6件のテストが通過**"
+    }
+  ]
+}

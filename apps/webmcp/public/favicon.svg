@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#151b35"/>
+  <!-- user input, right block, wrapped; line 1 stretched for balance -->
+  <rect x="160" y="60" width="280" height="48" rx="24" fill="#3d4663"/>
+  <rect x="160" y="124" width="156" height="48" rx="24" fill="#3d4663"/>
+  <!-- agent output: split capsule (63.5/36.5) -->
+  <rect x="72" y="212" width="320" height="48" rx="24" fill="#44ddd6"/>
+  <path d="M275 212 H96 a24 24 0 0 0 -24 24 a24 24 0 0 0 24 24 H275 Z" fill="#8b7cf6"/>
+  <!-- composer: input base with a bolder outline, caret only -->
+  <rect x="64" y="304" width="376" height="148" rx="34" fill="#232e55" stroke="#7b87c4" stroke-width="9"/>
+  <rect x="112" y="336" width="34" height="84" rx="15" fill="#e9edf7"/>
+</svg>

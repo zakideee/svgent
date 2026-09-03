@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "title": "Slowest pacing",
+  "surface": "app",
+  "modelLabel": "Adagio 1",
+  "timing": {
+    "userTypingCps": 6,
+    "agentTypingCps": 8,
+    "thinkingMs": 8000,
+    "toolRunMs": 6000,
+    "permissionMs": 6000,
+    "transitionMs": 2000,
+    "finalHoldMs": 6000
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "Use the slowest pacing."
+    },
+    {
+      "role": "thinking",
+      "content": "Thinking for eight seconds",
+      "highlight": true
+    },
+    {
+      "role": "tool",
+      "content": "sleep 6",
+      "language": "bash"
+    },
+    {
+      "role": "permission",
+      "content": "Slow approval step"
+    },
+    {
+      "role": "assistant",
+      "content": "Checks the frame-count ceiling for a long scene."
+    }
+  ],
+  "appearance": {
+    "theme": "ink",
+    "backdrop": "aurora",
+    "terminalOpacity": 1
+  }
+}

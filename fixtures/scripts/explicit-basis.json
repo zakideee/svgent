@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "title": "Explicit basis declaration",
+  "surface": "tui",
+  "basis": "fictional",
+  "modelLabel": "Lumen 2",
+  "workspaceLabel": "aster/orbit-cli",
+  "branchLabel": "fix/page-cursor",
+  "messages": [
+    {
+      "id": "basis-user",
+      "role": "user",
+      "content": "The list command repeats the last page forever when the cursor is empty. Fix it on this branch."
+    },
+    {
+      "id": "basis-thinking",
+      "role": "thinking",
+      "content": "Reproducing with a response whose cursor field is an empty string"
+    },
+    {
+      "id": "basis-tool",
+      "role": "tool",
+      "language": "bash",
+      "content": "Ran the pagination tests and reproduced the endless loop"
+    },
+    {
+      "id": "basis-permission",
+      "role": "permission",
+      "content": "Edit the pagination loop and its tests"
+    },
+    {
+      "id": "basis-result",
+      "role": "assistant",
+      "content": "An empty cursor now ends the walk instead of re-requesting page one. **All pagination tests pass.**"
+    }
+  ]
+}

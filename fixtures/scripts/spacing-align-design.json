@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "title": "spacing 1.3 / centered both axes / fontScale 3.2",
+  "surface": "app",
+  "modelLabel": "Poster 1",
+  "appearance": {
+    "canvasWidth": 1200,
+    "canvasHeight": 630,
+    "fontScale": 3.2,
+    "chromeScale": 1,
+    "spacingScale": 1.3,
+    "contentAlign": "center",
+    "theme": "ink",
+    "backdrop": "aurora",
+    "terminalOpacity": 1,
+    "windowMargin": 48,
+    "messageAlign": "center",
+    "assistantSurface": "plain",
+    "windowPaddingX": 34,
+    "windowPaddingY": 26
+  },
+  "display": {
+    "headerIcons": false,
+    "headerText": false,
+    "composer": false,
+    "footer": false
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "この[[記事|きじ]]の[[全体像|ぜんたいぞう]]を1[[枚|まい]]で。"
+    },
+    {
+      "role": "assistant",
+      "content": "余白と配置を指定した構図です。"
+    }
+  ]
+}

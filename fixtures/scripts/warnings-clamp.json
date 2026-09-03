@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "title": "Out-of-range everything",
+  "surface": "app",
+  "modelLabel": "GPT-5 Turbo",
+  "appearance": {
+    "theme": "neon",
+    "canvasWidth": 99999,
+    "canvasHeight": 1,
+    "fontScale": 99,
+    "terminalOpacity": 0,
+    "backdrop": "vaporwave",
+    "background": "not-a-color",
+    "chromeScale": 99
+  },
+  "timing": {
+    "userTypingCps": 1,
+    "agentTypingCps": 500
+  },
+  "pagination": {
+    "flow": "diagonal",
+    "messagesPerPage": 99
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "A script with every value out of range."
+    },
+    {
+      "role": "assistant",
+      "content": "Import should clamp these to defaults with warnings, and rendering must not break."
+    }
+  ]
+}

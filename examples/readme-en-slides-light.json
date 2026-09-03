@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "title": "Responsive empty state",
+  "surface": "app",
+  "modelLabel": "Lattice 3",
+  "workspaceLabel": "fictional/daybreak-dashboard",
+  "branchLabel": "feat/empty-state",
+  "appearance": {
+    "theme": "paper",
+    "canvasWidth": 1080,
+    "canvasHeight": 1350,
+    "transparentCanvas": true,
+    "terminalOpacity": 0.96,
+    "background": "#e9e7e1",
+    "accent": "#2f7d6d",
+    "backdrop": "plain",
+    "imageSkeleton": "dots",
+    "shadowStrength": 0.5,
+    "fontScale": 1.18,
+    "chromeScale": 1.04
+  },
+  "chrome": {
+    "contextPercent": 52,
+    "clockTime": "11:05"
+  },
+  "display": {
+    "headerIcons": true,
+    "headerText": true,
+    "composer": true,
+    "footer": true,
+    "productMark": true,
+    "productVersion": true,
+    "tuiGeometry": true
+  },
+  "timing": {
+    "userTypingCps": 60,
+    "agentTypingCps": 260,
+    "thinkingMs": 1900,
+    "toolRunMs": 1100,
+    "imageGenMs": 3200,
+    "permissionMs": 2100,
+    "transitionMs": 240,
+    "finalHoldMs": 1800
+  },
+  "pagination": {
+    "flow": "slides",
+    "messagesPerPage": 3,
+    "scrollDistancePx": 0
+  },
+  "messages": [
+    {
+      "id": "pricing-user-plan",
+      "role": "user",
+      "content": "Show me the empty-state proposal in three slides, for review."
+    },
+    {
+      "id": "pricing-thinking",
+      "role": "thinking",
+      "content": "Splitting it along the decisions the review has to make"
+    },
+    {
+      "id": "pricing-problem",
+      "role": "assistant",
+      "content": "## 1 / The problem\n\nFirst run and a zero-result filter look the same.\n\n- The next step is not obvious\n- The wording is hard to read on mobile\n- The CTAs have no clear priority"
+    },
+    {
+      "id": "pricing-user-frame",
+      "role": "user",
+      "content": "Let's settle the primary path.",
+      "pageBreakBefore": true
+    },
+    {
+      "id": "pricing-choice",
+      "role": "choice",
+      "content": "What should a first-run user be shown first?",
+      "options": [
+        "Create a report — the shortest path to value",
+        "Browse templates — easier to choose from",
+        "Import data — for people migrating"
+      ],
+      "chosenIndex": 0
+    },
+    {
+      "id": "pricing-direction",
+      "role": "assistant",
+      "content": "## 2 / The call\n\n**\"Create your first report\"** becomes the primary CTA.\n\nOn a zero-result filter it swaps to \"Clear filters\"."
+    },
+    {
+      "id": "pricing-user-ship",
+      "role": "user",
+      "content": "Implement it that way.",
+      "pageBreakBefore": true
+    },
+    {
+      "id": "pricing-permission",
+      "role": "permission",
+      "content": "Edit EmptyState.tsx and its tests"
+    },
+    {
+      "id": "pricing-done",
+      "role": "assistant",
+      "content": "## 3 / Done\n\n```tsx\n<EmptyState action={<CreateReportButton />} />\n```\n\n- Wrapping checked at 360px\n- Keyboard operation checked\n- **6 tests green**"
+    }
+  ]
+}

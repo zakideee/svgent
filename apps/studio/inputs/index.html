@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Samples — SVGENT" />
+    <!-- The share card is the renderer's own poster output
+         (examples/site-og-en.json). og: URLs must be absolute, so these
+         name the production origin. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SVGENT" />
+    <meta property="og:title" content="Samples — SVGENT" />
+    <meta
+      property="og:description"
+      content="Sessions drawn with svgent. Every script is in the repository."
+    />
+    <meta property="og:url" content="https://svgent.zakideee.dev/inputs/" />
+    <meta
+      property="og:image"
+      content="https://svgent.zakideee.dev/og/site-og-en.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="A fictional session with a diff and highlighted code, drawn by svgent from a script"
+    />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="ja_JP" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="alternate" hreflang="en" href="/inputs/" vite-ignore />
+    <link rel="alternate" hreflang="ja" href="/ja/inputs/" vite-ignore />
+    <link rel="alternate" hreflang="x-default" href="/inputs/" vite-ignore />
+    <link rel="icon" type="image/svg+xml" href="/brand/svgent-mark.svg" />
+    <link rel="stylesheet" href="/src/site.css" />
+    <script>
+      // The studio remembers the theme its visitor chose and stamps it on its
+      // own document as data-ui-theme; this page honours the same choice so
+      // crossing between site and studio never flips the colours. Nothing
+      // stored leaves the operating system in charge.
+      try {
+        const uiTheme = window.localStorage.getItem("svgent-ui-theme");
+        if (uiTheme === "light" || uiTheme === "dark") {
+          document.documentElement.dataset.uiTheme = uiTheme;
+        }
+      } catch {
+        /* Storage unavailable — the operating system decides. */
+      }
+    </script>
+    <title>Samples — SVGENT</title>
+  </head>
+  <body>
+    <header class="wrap site-header">
+      <!-- The studio's own header states language as the target code on a pill
+           and the repository as a bare mark; the site keeps that vocabulary so
+           the two headers read as one product. -->
+      <nav class="header-nav">
+        <a class="nav-pill" href="/studio/" aria-label="Open Studio"
+          >Studio<svg
+            class="nav-pill-icon"
+            viewBox="0 0 24 24"
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M14 4h4a1 1 0 0 1 1 1v15" />
+            <path
+              d="M14 3.8v16.4a1 1 0 0 1-1.3.95L6 19.2V6.3a2 2 0 0 1 1.5-1.94l4-1A2 2 0 0 1 14 3.8Z"
+            />
+            <path d="M11 12v.01" /></svg
+        ></a>
+        <div class="nav-switch" role="group" aria-label="Language">
+          <span aria-current="page">EN</span>
+          <a href="/ja/" hreflang="ja" lang="ja">JA</a>
+        </div>
+        <a
+          class="nav-icon"
+          href="https://github.com/zakideee/svgent"
+          aria-label="GitHub"
+          title="GitHub"
+        >
+          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8Z"
+            />
+          </svg>
+        </a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="wrap hero">
+        <h1>Samples</h1>
+        <p class="lead">
+          Sessions drawn with svgent. Every script is in the repository.
+        </p>
+      </div>
+
+      <section class="wrap">
+        <div class="input-grid">
+          <figure class="input-card">
+            <div class="input-frame is-full" style="aspect-ratio: 1200 / 720">
+              <object
+                class="input-media"
+                type="image/svg+xml"
+                data-src="/inputs/site-input-camera-01.animated.svg"
+                style="aspect-ratio: 1200 / 720"
+                title="Zooms to the width of the text, pulls back at the end."
+              >
+                <img
+                  src="/inputs/site-input-camera-01.webp"
+                  alt="Zooms to the width of the text, pulls back at the end."
+                  loading="lazy"
+                />
+              </object>
+              <div class="stage-skeleton" aria-hidden="true">
+                <div class="skeleton-dots"><i></i><i></i><i></i></div>
+                <i class="skeleton-row is-user"></i>
+                <i class="skeleton-row"></i>
+                <i class="skeleton-row is-long"></i>
+                <i class="skeleton-row is-short"></i>
+                <i class="skeleton-composer"></i>
+              </div>
+            </div>
+            <div class="input-controls" hidden>
+              <button
+                type="button"
+                class="input-play"
+                data-label-pause="Pause"
+                data-label-play="Play"
+                aria-label="Pause"
+              >
+                ❚❚
+              </button>
+              <input
+                type="range"
+                class="input-seek"
+                min="0"
+                max="1000"
+                value="0"
+                aria-label="Seek"
+              />
+            </div>
+            <figcaption>
+              <b>Follow camera<span class="input-badge">motion</span></b>
+              <p>
+                Zooms to the width of the text, pulls back at the end. The other
+                motion samples keep it on, too.
+              </p>
+              <a
+                href="https://github.com/zakideee/svgent/blob/main/examples/site-input-camera.json"
+                ><code>site-input-camera.json</code></a
+              >
+            </figcaption>
+          </figure>
+          <figure class="input-card">
+            <div class="input-frame is-full" style="aspect-ratio: 900 / 620">
+              <object
+                class="input-media"
+                type="image/svg+xml"
+                data-src="/inputs/site-input-ime-01.animated.svg"
+                style="aspect-ratio: 900 / 620"
+                title="Kana typed first, then converted."
+              >
+                <img
+                  src="/inputs/site-input-ime-01.webp"
+                  alt="Kana typed first, then converted."
+                  loading="lazy"
+                />
+              </object>
+              <div class="stage-skeleton" aria-hidden="true">
+                <div class="skeleton-dots"><i></i><i></i><i></i></div>
+                <i class="skeleton-row is-user"></i>
+                <i class="skeleton-row"></i>
+                <i class="skeleton-row is-long"></i>
+                <i class="skeleton-row is-short"></i>
+                <i class="skeleton-composer"></i>
+              </div>
+            </div>
+            <div class="input-controls" hidden>
+              <button
+                type="button"
+                class="input-play"
+                data-label-pause="Pause"
+                data-label-play="Play"
+                aria-label="Pause"
+              >
+                ❚❚
+              </button>
+              <input
+                type="range"
+                class="input-seek"
+                min="0"
+                max="1000"
+                value="0"
+                aria-label="Seek"
+              />
+            </div>
+            <figcaption>
+              <b>IME conversion<span class="input-badge">motion</span></b>
+              <p>Kana typed first, then converted.</p>
+              <a
+                href="https://github.com/zakideee/svgent/blob/main/examples/site-input-ime.json"
+                ><code>site-input-ime.json</code></a
+              >
+            </figcaption>
+          </figure>
+          <figure class="input-card">
+            <div class="input-frame is-full" style="aspect-ratio: 900 / 620">
+              <object
+                class="input-media"
+                type="image/svg+xml"
+                data-src="/inputs/site-input-completion-01.animated.svg"
+                style="aspect-ratio: 900 / 620"
+                title="Type part of it; the rest fills in."
+              >
+                <img
+                  src="/inputs/site-input-completion-01.webp"
+                  alt="Type part of it; the rest fills in."
+                  loading="lazy"
+                />
+              </object>
+              <div class="stage-skeleton" aria-hidden="true">
+                <div class="skeleton-dots"><i></i><i></i><i></i></div>
+                <i class="skeleton-row is-user"></i>
+                <i class="skeleton-row"></i>
+                <i class="skeleton-row is-long"></i>
+                <i class="skeleton-row is-short"></i>
+                <i class="skeleton-composer"></i>
+              </div>
+            </div>
+            <div class="input-controls" hidden>
+              <button
+                type="button"
+                class="input-play"
+                data-label-pause="Pause"
+                data-label-play="Play"
+                aria-label="Pause"
+              >
+                ❚❚
+              </button>
+              <input
+                type="range"
+                class="input-seek"
+                min="0"
+                max="1000"
+                value="0"
+                aria-label="Seek"
+              />
+            </div>
+            <figcaption>
+              <b>Completions<span class="input-badge">motion</span></b>
+              <p>Type part of it; the rest fills in.</p>
+              <a
+                href="https://github.com/zakideee/svgent/blob/main/examples/site-input-completion.json"
+                ><code>site-input-completion.json</code></a
+              >
+            </figcaption>
+          </figure>
+          <figure class="input-card">
+            <div class="input-frame is-full" style="aspect-ratio: 900 / 620">
+              <object
+                class="input-media"
+                type="image/svg+xml"
+                data-src="/inputs/site-input-voice-01.animated.svg"
+                style="aspect-ratio: 900 / 620"
+                title="The level display while it listens, and the draft that lands."
+              >
+                <img
+                  src="/inputs/site-input-voice-01.webp"
+                  alt="The level display while it listens, and the draft that lands."
+                  loading="lazy"
+                />
+              </object>
+              <div class="stage-skeleton" aria-hidden="true">
+                <div class="skeleton-dots"><i></i><i></i><i></i></div>
+                <i class="skeleton-row is-user"></i>
+                <i class="skeleton-row"></i>
+                <i class="skeleton-row is-long"></i>
+                <i class="skeleton-row is-short"></i>
+                <i class="skeleton-composer"></i>
+              </div>
+            </div>
+            <div class="input-controls" hidden>
+              <button
+                type="button"
+                class="input-play"
+                data-label-pause="Pause"
+                data-label-play="Play"
+                aria-label="Pause"
+              >
+                ❚❚
+              </button>
+              <input
+                type="range"
+                class="input-seek"
+                min="0"
+                max="1000"
+                value="0"
+                aria-label="Seek"
+              />
+            </div>
+            <figcaption>
+              <b>Voice input<span class="input-badge">motion</span></b>
+              <p>
+                The level display while it listens, and the draft that lands.
+              </p>
+              <a
+                href="https://github.com/zakideee/svgent/blob/main/examples/site-input-voice.json"
+                ><code>site-input-voice.json</code></a
+              >
+            </figcaption>
+          </figure>
+          <figure class="input-card">
+            <img
+              src="/inputs/markdown-kitchen-sink-app-01.transcript.png"
+              alt="Headings, lists, tables, quotes, fenced code."
+              loading="lazy"
+            />
+            <figcaption>
+              <b>Markdown</b>
+              <p>Headings, lists, tables, quotes, fenced code.</p>
+              <a
+                href="https://github.com/zakideee/svgent/blob/main/fixtures/scripts/markdown-kitchen-sink-app.json"
+                ><code>markdown-kitchen-sink-app.json</code></a
+              >
+            </figcaption>
+          </figure>
+          <figure class="input-card">
+            <img
+              src="/inputs/code-diff-tui-01.transcript.png"
+              alt="Added and removed lines coloured, and syntax highlighting per language."
+              loading="lazy"
+            />
+            <figcaption>
+              <b>Diffs and highlighting</b>
+              <p>
+                Added and removed lines coloured, and syntax highlighting per
+                language.
+              </p>
+              <a
+                href="https://github.com/zakideee/svgent/blob/main/fixtures/scripts/code-diff-tui.json"
+                ><code>code-diff-tui.json</code></a
+              >
+            </figcaption>
+          </figure>
+          <figure class="input-card">
+            <img
+              src="/inputs/tool-multi-command-01.transcript.png"
+              alt="Command rows, and what they returned."
+              loading="lazy"
+            />
+            <figcaption>
+              <b>Tool activity</b>
+              <p>Command rows, and what they returned.</p>
+              <a
+                href="https://github.com/zakideee/svgent/blob/main/fixtures/scripts/tool-multi-command.json"
+                ><code>tool-multi-command.json</code></a
+              >
+            </figcaption>
+          </figure>
+          <figure class="input-card">
+            <img
+              src="/inputs/choice-freeform-tui-01.transcript.png"
+              alt="A numbered menu, and answering in your own words instead."
+              loading="lazy"
+            />
+            <figcaption>
+              <b>Choices</b>
+              <p>A numbered menu, and answering in your own words instead.</p>
+              <a
+                href="https://github.com/zakideee/svgent/blob/main/fixtures/scripts/choice-freeform-tui.json"
+                ><code>choice-freeform-tui.json</code></a
+              >
+            </figcaption>
+          </figure>
+          <figure class="input-card">
+            <img
+              src="/inputs/permission-deny-01.transcript.png"
+              alt="The approval dialog, including a refused one."
+              loading="lazy"
+            />
+            <figcaption>
+              <b>Approvals</b>
+              <p>The approval dialog, including a refused one.</p>
+              <a
+                href="https://github.com/zakideee/svgent/blob/main/fixtures/scripts/permission-deny.json"
+                ><code>permission-deny.json</code></a
+              >
+            </figcaption>
+          </figure>
+          <figure class="input-card">
+            <img
+              src="/inputs/image-attach-01.transcript.png"
+              alt="Attached pictures set into the message."
+              loading="lazy"
+            />
+            <figcaption>
+              <b>Attached images</b>
+              <p>Attached pictures set into the message.</p>
+              <a
+                href="https://github.com/zakideee/svgent/blob/main/fixtures/scripts/image-attach.json"
+                ><code>image-attach.json</code></a
+              >
+            </figcaption>
+          </figure>
+          <figure class="input-card">
+            <img
+              src="/inputs/image-generation-01.transcript.png"
+              alt="From the generating state to the finished picture."
+              loading="lazy"
+            />
+            <figcaption>
+              <b>Image generation</b>
+              <p>From the generating state to the finished picture.</p>
+              <a
+                href="https://github.com/zakideee/svgent/blob/main/fixtures/scripts/image-generation.json"
+                ><code>image-generation.json</code></a
+              >
+            </figcaption>
+          </figure>
+          <figure class="input-card">
+            <img
+              src="/inputs/mixed-scripts-01.transcript.png"
+              alt="Japanese, English and symbols set on one line."
+              loading="lazy"
+            />
+            <figcaption>
+              <b>Mixed scripts</b>
+              <p>Japanese, English and symbols set on one line.</p>
+              <a
+                href="https://github.com/zakideee/svgent/blob/main/fixtures/scripts/mixed-scripts.json"
+                ><code>mixed-scripts.json</code></a
+              >
+            </figcaption>
+          </figure>
+          <figure class="input-card">
+            <img
+              src="/inputs/theme-light-transparent-01.transcript.png"
+              alt="A light theme, and a transparent canvas."
+              loading="lazy"
+            />
+            <figcaption>
+              <b>Themes and alpha</b>
+              <p>A light theme, and a transparent canvas.</p>
+              <a
+                href="https://github.com/zakideee/svgent/blob/main/fixtures/scripts/theme-light-transparent.json"
+                ><code>theme-light-transparent.json</code></a
+              >
+            </figcaption>
+          </figure>
+          <figure class="input-card">
+            <div class="input-pages">
+              <img
+                src="/inputs/site-input-slides-01.webp"
+                alt="One conversation split across pages — this script makes four."
+                loading="lazy"
+              />
+              <img
+                src="/inputs/site-input-slides-02.webp"
+                alt="One conversation split across pages — this script makes four."
+                loading="lazy"
+              />
+              <img
+                src="/inputs/site-input-slides-03.webp"
+                alt="One conversation split across pages — this script makes four."
+                loading="lazy"
+              />
+              <img
+                src="/inputs/site-input-slides-04.webp"
+                alt="One conversation split across pages — this script makes four."
+                loading="lazy"
+              />
+            </div>
+            <figcaption>
+              <b>Slides</b>
+              <p>
+                One conversation split across pages — this script makes four.
+              </p>
+              <a
+                href="https://github.com/zakideee/svgent/blob/main/examples/site-input-slides.json"
+                ><code>site-input-slides.json</code></a
+              >
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+    </main>
+
+    <footer class="wrap site-footer">
+      <div class="footer-links">
+        <a href="/studio/">Studio</a>
+        <a href="https://github.com/zakideee/svgent">GitHub</a>
+        <a
+          href="https://github.com/zakideee/svgent/blob/main/RESPONSIBLE-USE.md"
+          >Responsible use</a
+        >
+        <a href="/third-party-licenses.txt">Licenses</a>
+        <a href="/ja/" hreflang="ja" lang="ja">日本語</a>
+      </div>
+      <p class="footer-meta">
+        <span
+          >Powered by
+          <a href="https://github.com/zakideee/boundsvg">boundsvg</a></span
+        >
+        <span>MIT OR Apache-2.0</span>
+      </p>
+    </footer>
+    <script type="module" src="/src/gallery.ts"></script>
+  </body>
+</html>

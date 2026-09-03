@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "title": "Logo motion in SVG",
+  "surface": "app",
+  "modelLabel": "Bezier 4",
+  "workspaceLabel": "fictional/brand-kit",
+  "branchLabel": "feat/logo-motion",
+  "appearance": {
+    "theme": "ink",
+    "canvasWidth": 1920,
+    "canvasHeight": 1080,
+    "transparentCanvas": false,
+    "terminalOpacity": 1,
+    "background": "#090b10",
+    "accent": "#8b7cf6",
+    "backdrop": "sky",
+    "shadowStrength": 0.6,
+    "fontScale": 1.3
+  },
+  "chrome": {
+    "contextPercent": 64,
+    "clockTime": "14:02"
+  },
+  "fonts": {
+    "sans": {
+      "source": "bundled"
+    },
+    "mono": {
+      "source": "bundled"
+    }
+  },
+  "timing": {
+    "userTypingCps": 24,
+    "agentTypingCps": 42,
+    "thinkingMs": 1800,
+    "toolRunMs": 1250,
+    "permissionMs": 1400,
+    "transitionMs": 260,
+    "finalHoldMs": 1600
+  },
+  "pagination": {
+    "flow": "scroll",
+    "messagesPerPage": 4,
+    "scrollDistancePx": 1200
+  },
+  "messages": [
+    {
+      "id": "user-request",
+      "role": "user",
+      "content": "{{@src/assets/logo.svg|@src/as}} をふわっと[[出現|しゅつげん]]させたい。JSなしで。"
+    },
+    {
+      "id": "thinking-scan",
+      "role": "thinking",
+      "content": "既存のSVG構造とアニメーション方針を確認しています"
+    },
+    {
+      "id": "tool-search",
+      "role": "tool",
+      "language": "bash",
+      "content": "rg -n \"<svg|animate\" src/assets"
+    },
+    {
+      "id": "permission-edit",
+      "role": "permission",
+      "content": "logo.svg を編集します"
+    },
+    {
+      "id": "assistant-implementation",
+      "role": "assistant",
+      "content": "## SVGだけで実装しました\n\n- SMILの `<animate>` でJS不要\n- `r` を 0→24 に補間してふわっと出現\n- 塗りは `currentColor` でテーマ追従\n\n```svg\n<circle cx=\"24\" cy=\"24\" r=\"24\" fill=\"currentColor\">\n  <animate attributeName=\"r\" from=\"0\" to=\"24\"\n    dur=\"0.4s\" calcMode=\"spline\" />\n</circle>\n```"
+    },
+    {
+      "id": "tool-test",
+      "role": "tool",
+      "language": "bash",
+      "content": "svgo logo.svg"
+    },
+    {
+      "id": "assistant-result",
+      "role": "assistant",
+      "content": "**1.2KB → 0.8KB に軽量化。** `prefers-reduced-motion` では静止表示にフォールバックします。"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "title": "Compact TUI: no composer/footer",
+  "surface": "tui",
+  "modelLabel": "Bezier 4",
+  "workspaceLabel": "fictional/compact",
+  "branchLabel": "docs/readme",
+  "display": {
+    "headerIcons": true,
+    "headerText": false,
+    "composer": false,
+    "footer": false,
+    "tuiGeometry": false,
+    "tuiTitle": true,
+    "tuiClock": true
+  },
+  "appearance": {
+    "fontScale": 1.2,
+    "chromeScale": 0.9,
+    "theme": "ember",
+    "backdrop": "aurora",
+    "terminalOpacity": 1
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "README[[向け|むけ]]にプロンプト[[行|ぎょう]]とステータスを[[省いて|はぶいて]]。"
+    },
+    {
+      "role": "tool",
+      "language": "bash",
+      "content": "rg -n \"display\" src/scene.ts"
+    },
+    {
+      "role": "assistant",
+      "content": "信号アイコンだけ残しタイトル文字を省いたコンパクト表示です。グリッドは下端まで届きます。"
+    }
+  ]
+}

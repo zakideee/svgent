@@ -1,0 +1,3 @@
+`$expr as any` where {
+  register_diagnostic(span=$expr, message="Avoid `as any` type assertion. Use a proper type, generic, or `as unknown as T` instead.", severity="warning")
+}

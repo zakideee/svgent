@@ -1,0 +1,42 @@
+{
+  "name": "@svgent/scene",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Project schema, deterministic timeline, and declarative scene construction for svgent",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zakideee/svgent.git",
+    "directory": "packages/scene"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./internal/*": null
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE-MIT",
+    "LICENSE-APACHE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --sourcemap --clean",
+    "dev": "tsup src/index.ts --format esm --dts --sourcemap --watch",
+    "test": "vitest run --root ../.. packages/scene/tests",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@boundsvg/core": "0.4.0",
+    "prismjs": "^1.30.0",
+    "unicode-segmenter": "0.17.3"
+  },
+  "devDependencies": {
+    "@svgent/assets": "workspace:*"
+  }
+}

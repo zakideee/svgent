@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "title": "Flaky queue test triage",
+  "surface": "tui",
+  "modelLabel": "Lattice 3",
+  "workspaceLabel": "fictional/daybreak-sync",
+  "branchLabel": "fix/flaky-queue-test",
+  "appearance": {
+    "theme": "phosphor",
+    "canvasWidth": 1440,
+    "canvasHeight": 900,
+    "transparentCanvas": false,
+    "terminalOpacity": 0.9,
+    "background": "#010603",
+    "accent": "#33ff88",
+    "backdrop": "abyss",
+    "imageSkeleton": "dots",
+    "shadowStrength": 0.7,
+    "fontScale": 1.12,
+    "chromeScale": 1
+  },
+  "chrome": {
+    "contextPercent": 38,
+    "clockTime": "10:07"
+  },
+  "display": {
+    "headerIcons": true,
+    "headerText": true,
+    "composer": true,
+    "footer": true,
+    "productMark": true,
+    "productVersion": true,
+    "tuiGeometry": true,
+    "tuiTitle": true,
+    "tuiClock": true
+  },
+  "timing": {
+    "userTypingCps": 24,
+    "agentTypingCps": 240,
+    "reactionMs": 700,
+    "thinkingMs": 2400,
+    "toolRunMs": 1400,
+    "imageGenMs": 3000,
+    "permissionMs": 2400,
+    "transitionMs": 300,
+    "finalHoldMs": 2200
+  },
+  "pagination": {
+    "flow": "scroll",
+    "messagesPerPage": 4,
+    "scrollDistancePx": 0
+  },
+  "camera": {
+    "follow": true,
+    "zoom": 1.3,
+    "style": "sync"
+  },
+  "messages": [
+    {
+      "id": "flaky-user",
+      "role": "user",
+      "content": "CIで`sync-queue`のテストが[[週|しゅう]]に[[何度|なんど]]か[[落ちる|おちる]]。[[原因|げんいん]]を[[特定|とくてい]]して、[[再発|さいはつ]]しないようにして。"
+    },
+    {
+      "id": "flaky-thinking",
+      "role": "thinking",
+      "content": "失敗したジョブの共通点を洗い出しています"
+    },
+    {
+      "id": "flaky-search",
+      "role": "tool",
+      "language": "bash",
+      "content": "rg -n \"setTimeout|Date.now\" src/queue tests/sync-queue.test.ts"
+    },
+    {
+      "id": "flaky-findings",
+      "role": "assistant",
+      "content": "### 分かったこと\n\n- テストが実時間の `setTimeout` を待っている\n- 失敗するのは**遅いランナーに当たった回だけ**\n- キュー本体はすでに時計を注入できる\n\n```diff\n@@ tests/sync-queue.test.ts\n-  await new Promise((r) => setTimeout(r, 50));\n+  await clock.tickAsync(50);\n```"
+    },
+    {
+      "id": "flaky-choice",
+      "role": "choice",
+      "content": "どの方針で直す?",
+      "options": [
+        "待ち時間を伸ばす — 一番手軽、遅いランナーではまた落ちる",
+        "fake timer で時計を止める — テストが実時間から独立する",
+        "このテストを除外する — 赤は消えるが検証も消える"
+      ],
+      "chosenIndex": 1
+    },
+    {
+      "id": "flaky-deny",
+      "role": "permission",
+      "content": "CI設定を編集して、失敗したジョブ全体を自動で3回まで再実行する",
+      "decision": "deny"
+    },
+    {
+      "id": "flaky-redirect",
+      "role": "assistant",
+      "content": "了解です。**全体リトライは入れません** — 本物の不具合まで隠れてしまうので。時計を止める方だけを進めます。"
+    },
+    {
+      "id": "flaky-permission",
+      "role": "permission",
+      "content": "tests/sync-queue.test.ts と fake timer ヘルパーを編集"
+    },
+    {
+      "id": "flaky-test",
+      "role": "tool",
+      "language": "bash",
+      "content": "for i in {1..20}; do pnpm vitest run sync-queue; done"
+    },
+    {
+      "id": "flaky-result",
+      "role": "assistant",
+      "content": "## 直りました\n\n```ts\nconst clock = installFakeTimers({ now: FIXED_START });\n```\n\n- 実時間の待ちは全部 `clock.tickAsync` に置き換え\n- **20回連続で緑**、所要は 14.2s から 1.8s へ"
+    }
+  ]
+}

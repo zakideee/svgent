@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "title": "fontScale 5.0 + chrome 3.0 / 2560x1440",
+  "surface": "app",
+  "modelLabel": "Jumbo 8",
+  "appearance": {
+    "canvasWidth": 2560,
+    "canvasHeight": 1440,
+    "fontScale": 5,
+    "theme": "paper",
+    "chromeScale": 3,
+    "backdrop": "peach",
+    "terminalOpacity": 0.55
+  },
+  "chrome": {
+    "contextPercent": 100,
+    "clockTime": "23:59"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "[[最大|さいだい]]キャンバス・[[最大|さいだい]]フォント。"
+    },
+    {
+      "role": "assistant",
+      "content": "## 巨大文字\n\n`chip` も **強調** も5倍スケール。"
+    }
+  ]
+}

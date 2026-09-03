@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "title": "Mixed scripts",
+  "surface": "app",
+  "modelLabel": "Glyph 1",
+  "messages": [
+    {
+      "role": "user",
+      "content": "[[英日混在|えいにちこんざい]] mixed language に、Latin-1 の café / naïve / Grüße も[[少し|すこし]]。"
+    },
+    {
+      "role": "assistant",
+      "content": "Latin: The quick brown fox / 日本語: 素早い茶色の犬 / mixed **bold英字** と `code内日本語` / 記号: ±§¶©«»"
+    }
+  ],
+  "appearance": {
+    "backdrop": "sky",
+    "terminalOpacity": 1,
+    "fontScale": 1.9,
+    "chromeScale": 1.9,
+    "theme": "ink"
+  }
+}

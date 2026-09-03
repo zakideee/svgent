@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "title": "Choice prompt",
+  "surface": "app",
+  "modelLabel": "Quill 2",
+  "messages": [
+    {
+      "role": "user",
+      "content": "テストが[[落ちてる|おちてる]]。どうする?"
+    },
+    {
+      "role": "choice",
+      "content": "対処の方針を選んでください",
+      "options": [
+        "境界条件を直す — 原因を直接なおす。影響範囲は小さい",
+        "テストを寛容にする — 早いが再発しやすい",
+        "いったん調査を続ける — 追加のログを取る"
+      ],
+      "chosenIndex": 1,
+      "afterSelection": "keep"
+    },
+    {
+      "role": "assistant",
+      "content": "了解です。まず境界日のテストを追加します。"
+    }
+  ],
+  "appearance": {
+    "backdrop": "sky",
+    "canvasWidth": 1080,
+    "canvasHeight": 1080,
+    "theme": "paper",
+    "terminalOpacity": 0.86
+  }
+}

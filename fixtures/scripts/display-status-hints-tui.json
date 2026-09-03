@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "title": "Shortcut hint opt-in",
+  "surface": "tui",
+  "modelLabel": "Bezier 4",
+  "workspaceLabel": "fictional/retro-shell",
+  "branchLabel": "chore/status-row",
+  "display": {
+    "tuiStatusHints": true
+  },
+  "messages": [
+    {
+      "id": "hints-user",
+      "role": "user",
+      "content": "Show the classic status row with the shortcut hint turned on."
+    },
+    {
+      "id": "hints-assistant",
+      "role": "assistant",
+      "content": "The prompt's status row now reads `ctx · ? for shortcuts` — the opt-in look for scripts that want the dated terminal decoration."
+    }
+  ]
+}

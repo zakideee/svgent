@@ -1,0 +1,31 @@
+{
+  "name": "@svgent/studio-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Deployed svgent Studio application",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zakideee/svgent.git",
+    "directory": "apps/studio"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "deploy:dry-run": "wrangler deploy --dry-run",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@svgent/studio": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@svgent/assets": "workspace:*",
+    "@vitejs/plugin-react": "^4.3.0",
+    "vite": "^6.0.0",
+    "wrangler": "4.112.0"
+  }
+}

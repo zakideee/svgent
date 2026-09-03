@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "title": "Diff & long code lines",
+  "surface": "app",
+  "modelLabel": "Bezier 4",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Show me the diff."
+    },
+    {
+      "role": "tool",
+      "content": "git diff --stat src/layout.ts",
+      "language": "bash"
+    },
+    {
+      "role": "assistant",
+      "content": "## Diff\n\n```diff\n@@ -10,7 +10,9 @@ export function measure(\n-  const width = clamp(input.width, 0, MAX_WIDTH);\n+  const width = clampWithWarning(input.width, 0, MAX_WIDTH, warnings);\n+  const height = clampWithWarning(input.height, 0, MAX_HEIGHT, warnings);\n   return { width, height };\n```\n\nA very long code line, for wrapping checks:\n\n```ts\nexport const configuration = { retries: 3, timeoutMs: 30_000, endpoints: [\"https://api.example.com/v1/layout\", \"https://api.example.com/v1/rasterize\"], features: { kinsoku: true, hanging: true } };\n```"
+    }
+  ],
+  "appearance": {
+    "backdrop": "peach",
+    "terminalOpacity": 1,
+    "theme": "nordic"
+  },
+  "timing": {
+    "agentTypingCps": 220,
+    "thinkingMs": 3500,
+    "toolRunMs": 2600
+  }
+}

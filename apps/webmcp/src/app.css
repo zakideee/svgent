@@ -1,0 +1,605 @@
+/*
+ * The page around the studio, and the agent rail beside it.
+ *
+ * The rail borrows the studio's tokens by name and value so the two read as
+ * one product: Inter at 12–13px, 600-weight labels, pills at 30px, cards on
+ * --card-bg, monospace meta in --faint, amber for hints, violet for the
+ * agent. The values are copied rather than inherited because the rail is
+ * the studio's sibling, not its child.
+ */
+
+html {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: #090a0f;
+}
+
+.agent-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  min-height: 100vh;
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  color: var(--ink);
+  --ink: #e9eaf0;
+  --muted: #bcc3d0;
+  --faint: #9fa8b8;
+  --panel: #11131a;
+  --panel-3: #2a303d;
+  --border: #3b4252;
+  --violet: #8b7cf6;
+  --violet-soft: #2a2545;
+  --green: #65d7a0;
+  --amber: #f0b35a;
+  --red: #f37b83;
+  --mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --sidebar-bg: #0b0d12;
+  --card-bg: #1a1e28;
+  --field-bg: #202531;
+  --chip-hover-bg: #2c3240;
+}
+
+.agent-stage[data-ui-theme="light"] {
+  --ink: #22242c;
+  --muted: #5b6170;
+  --faint: #8b909d;
+  --panel: #f4f4f7;
+  --panel-3: #e3e3eb;
+  --border: #d4d5de;
+  --violet: #6a5ae0;
+  --violet-soft: #e6e1fb;
+  --sidebar-bg: #fafafc;
+  --card-bg: #ffffff;
+  --field-bg: #ffffff;
+  --chip-hover-bg: #ececf4;
+}
+
+.agent-stage[data-chrome="full"][data-rail="open"] {
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+
+.agent-stage[data-rail="closed"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.agent-stage-studio {
+  min-width: 0;
+}
+
+/* ————— Shared controls, in the studio's idiom ————— */
+
+.rail *,
+.rail *::before,
+.rail *::after,
+.rail-handle {
+  box-sizing: border-box;
+}
+
+.rail button,
+.rail-handle {
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.rail button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--ink);
+  background: var(--card-bg);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.pill:hover:not(:disabled) {
+  background: var(--chip-hover-bg);
+}
+
+.pill[aria-pressed="true"] {
+  border-color: var(--violet);
+  color: var(--violet);
+  background: var(--violet-soft);
+}
+
+.pill.is-primary {
+  border-color: #6f65ab;
+  color: #fff;
+  background: var(--violet);
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.rail-meta {
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+/* ————— The rail ————— */
+
+.rail[hidden],
+.rail-section[hidden] {
+  display: none;
+}
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  background: var(--sidebar-bg);
+  border-left: 1px solid var(--border);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+.rail-head {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(139, 124, 246, 0.1), transparent 70%);
+}
+
+.rail-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.rail-title h1 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.rail-title-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.rail-support {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.rail-support::before {
+  content: "●";
+  margin-right: 6px;
+  font-size: 9px;
+  vertical-align: 2px;
+  color: var(--faint);
+}
+
+.rail-support[data-state="ready"]::before {
+  color: var(--green);
+}
+
+.rail-support[data-state="shim"]::before,
+.rail-support[data-state="missing"]::before {
+  color: var(--amber);
+}
+
+.rail-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.rail-tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.rail-tabs button:hover {
+  background: var(--chip-hover-bg);
+}
+
+.rail-tabs button.is-active {
+  border-color: var(--border);
+  color: var(--ink);
+  background: var(--panel-3);
+}
+
+.rail-tab-badge {
+  min-width: 18px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--violet);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.rail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px 14px 24px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.rail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rail-section h2 {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.rail-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rail-fine,
+.rail-empty,
+.rail-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.rail-details summary {
+  cursor: pointer;
+  color: var(--faint);
+  font-size: 12px;
+}
+
+.rail-details p {
+  margin: 6px 0 0;
+}
+
+/* Prompts: the studio's card, with a quote inside. */
+.rail-prompts,
+.rail-showcases,
+.rail-log,
+.rail-words,
+.rail-diff,
+.rail-hints {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rail-prompt {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: start;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--violet);
+  border-radius: 8px;
+  background: var(--card-bg);
+  text-align: left;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.rail-prompt:hover {
+  background: var(--chip-hover-bg);
+}
+
+.rail-prompt-copy {
+  padding-top: 1px;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.rail-prompt:hover .rail-prompt-copy {
+  color: var(--violet);
+}
+
+.rail-showcase {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  text-align: left;
+}
+
+.rail-showcase:hover {
+  background: var(--chip-hover-bg);
+}
+
+.rail-showcase-label {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.rail-showcase-hint {
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.rail-direction {
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.rail-direction > .rail-meta {
+  padding-top: 8px;
+}
+
+.swatch {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+.swatch[aria-pressed="true"] {
+  box-shadow:
+    0 0 0 2px var(--sidebar-bg),
+    0 0 0 4px var(--violet);
+}
+
+/* Requests: the one card that asks for a decision. */
+.rail-request {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--violet);
+  border-radius: 10px;
+  background: var(--violet-soft);
+}
+
+.rail-request h2 {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.rail-diff li {
+  display: grid;
+  gap: 3px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--card-bg);
+  font-size: 12px;
+  word-break: break-word;
+}
+
+.rail-diff s {
+  color: var(--faint);
+}
+
+.rail-diff-text {
+  white-space: pre-wrap;
+}
+
+.rail-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* Hints: the studio's import-warnings box. */
+.rail-hints {
+  padding: 8px 10px;
+  gap: 4px;
+  border: 1px solid rgba(240, 179, 90, 0.5);
+  border-radius: 8px;
+  color: var(--amber);
+  background: rgba(240, 179, 90, 0.08);
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
+.rail-hints .rail-meta {
+  color: inherit;
+  opacity: 0.8;
+  margin-right: 6px;
+}
+
+/* Activity: one card per line, the actor as a monospace tag. */
+.rail-log li {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  overflow: hidden;
+}
+
+.rail-log li[data-ok="false"] {
+  border-left: 3px solid var(--amber);
+}
+
+.rail-log-line {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 9px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.rail-log-line:disabled {
+  opacity: 1;
+}
+
+.rail-log-line:not(:disabled):hover {
+  background: var(--chip-hover-bg);
+}
+
+.rail-log-actor {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--violet);
+}
+
+li[data-actor="you"] .rail-log-actor {
+  color: var(--green);
+}
+
+.rail-log-summary {
+  word-break: break-word;
+}
+
+.rail-log-frame {
+  display: block;
+  width: 100%;
+  border-top: 1px solid var(--border);
+}
+
+/* Every word: rows like message cards, the place as monospace meta. */
+.rail-words {
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  overflow: hidden;
+}
+
+.rail-words li {
+  display: grid;
+  gap: 2px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.rail-words li:last-child {
+  border-bottom: 0;
+}
+
+.rail-words li[data-new="true"] {
+  box-shadow: inset 3px 0 0 var(--violet);
+}
+
+.rail-words .rail-meta em {
+  font-style: normal;
+  color: var(--amber);
+}
+
+.rail-words-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Folded away, the handle stays attached to the edge the rail came from. */
+.rail-handle {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  z-index: 1000;
+  border-right: 0;
+  border-radius: 999px 0 0 999px;
+  transform: translateY(-50%);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
+}
+
+.rail-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--violet);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+@media (max-width: 960px) {
+  .agent-stage,
+  .agent-stage[data-chrome="full"][data-rail="open"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rail {
+    position: static;
+    height: auto;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  /* The rail stacks below the studio here, so its folded handle is centered
+     instead of pretending the drawer still leaves from the right edge. */
+  .rail-handle {
+    top: auto;
+    right: 50%;
+    bottom: 12px;
+    border-right: 1px solid var(--border);
+    border-radius: 999px;
+    transform: translateX(50%);
+  }
+}

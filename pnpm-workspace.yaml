@@ -1,0 +1,19 @@
+packages:
+  - "."
+  - "apps/*"
+  - "packages/*"
+
+minimumReleaseAge: 10080
+
+# Same-author engine releases: consumed the day they publish, so the 7-day
+# quarantine above does not apply to them.
+minimumReleaseAgeExclude:
+  - "@boundsvg/browser"
+  - "@boundsvg/core"
+  - "@boundsvg/shape"
+  - "@boundsvg/video"
+  - "@boundsvg/worker"
+
+onlyBuiltDependencies:
+  - "@j178/prek"
+  - esbuild

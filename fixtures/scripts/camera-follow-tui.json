@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "title": "Camera follow (TUI)",
+  "surface": "tui",
+  "modelLabel": "Pixel 3",
+  "camera": {
+    "follow": true,
+    "zoom": 1.8
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "テストが[[落ちた|おちた]][[原因|げんいん]]を[[調べて|しらべて]]。"
+    },
+    {
+      "role": "thinking",
+      "content": "落ちたテストの断定箇所を特定中。直前に変わった依存と設定の差分を突き合わせ、再現条件を絞り込んでいます"
+    },
+    {
+      "role": "tool",
+      "content": "pnpm test --filter camera"
+    },
+    {
+      "role": "assistant",
+      "content": "原因は境界値でした。修正して再実行します。"
+    }
+  ]
+}

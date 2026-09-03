@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "title": "fontScale 0.8 / 640x480",
+  "surface": "tui",
+  "modelLabel": "Dense 6",
+  "appearance": {
+    "canvasWidth": 640,
+    "canvasHeight": 480,
+    "fontScale": 0.8,
+    "theme": "nordic",
+    "backdrop": "abyss",
+    "terminalOpacity": 1
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "[[最小|さいしょう]]キャンバス・[[最小|さいしょう]]フォントで。"
+    },
+    {
+      "role": "assistant",
+      "content": "- 細部`密度`確認\n- 640x480でも崩れない"
+    }
+  ]
+}

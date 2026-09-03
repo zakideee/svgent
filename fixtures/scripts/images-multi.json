@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "title": "Multiple attached images",
+  "surface": "app",
+  "modelLabel": "Pixel 3",
+  "messages": [
+    {
+      "role": "user",
+      "content": "[[参考|さんこう]]に3[[枚|まい]][[添付|てんぷ]]します。1[[枚目|まいめ]]は[[上|うえ]]を[[残して|のこして]]トリム、2[[枚目|まいめ]]は[[大きく|おおきく]]、3[[枚目|まいめ]]は[[全体表示|ぜんたいひょうじ]]で。",
+      "images": [
+        {
+          "dataUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+          "mediaType": "image/png",
+          "width": 640,
+          "height": 960,
+          "alt": "image",
+          "fit": "cover",
+          "focus": "top",
+          "size": "small"
+        },
+        {
+          "dataUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+          "mediaType": "image/png",
+          "width": 800,
+          "height": 450,
+          "alt": "image",
+          "fit": "cover",
+          "focus": "bottom",
+          "size": "large"
+        },
+        {
+          "dataUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+          "mediaType": "image/png",
+          "width": 400,
+          "height": 400,
+          "alt": "image",
+          "fit": "contain"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": "3枚とも確認しました。**トリム位置とサイズ**は1枚ずつ独立に指定できます。",
+      "images": [
+        {
+          "dataUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+          "mediaType": "image/png",
+          "width": 1024,
+          "height": 512,
+          "alt": "image",
+          "fit": "cover",
+          "size": "standard"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="/brand/svgent-mark.svg" />
+    <link rel="stylesheet" href="/src/site.css" />
+    <script>
+      // The studio remembers the theme its visitor chose and stamps it on its
+      // own document as data-ui-theme; this page honours the same choice so
+      // crossing between site and studio never flips the colours. Nothing
+      // stored leaves the operating system in charge.
+      try {
+        const uiTheme = window.localStorage.getItem("svgent-ui-theme");
+        if (uiTheme === "light" || uiTheme === "dark") {
+          document.documentElement.dataset.uiTheme = uiTheme;
+        }
+      } catch {
+        /* Storage unavailable — the operating system decides. */
+      }
+    </script>
+    <title>SVG — SVGENT</title>
+  </head>
+  <body>
+    <main class="wrap viewer">
+      <!-- Opened straight from a tab, an exported SVG carries its own width and
+           height, so a phone shows the top-left corner of it. Here it is a
+           document element the stylesheet can fit to the screen. -->
+      <img class="viewer-media" alt="" />
+      <p class="viewer-meta">
+        <a class="viewer-file" href="/"><code>animated SVG</code></a>
+        <a class="viewer-back" href="/">← svgent</a>
+      </p>
+    </main>
+    <script type="module" src="/src/view.ts"></script>
+  </body>
+</html>

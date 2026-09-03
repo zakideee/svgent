@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "title": "weather-mcp in action",
+  "surface": "app",
+  "modelLabel": "Bezier 4",
+  "workspaceLabel": "fictional/weather-mcp",
+  "branchLabel": "",
+  "appearance": {
+    "theme": "nordic",
+    "canvasWidth": 1200,
+    "canvasHeight": 630,
+    "backdrop": "sky",
+    "fontScale": 1.2
+  },
+  "camera": {
+    "follow": false,
+    "zoom": 1.3,
+    "style": "sync",
+    "minShotMs": 0
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "Plan tomorrow's ride with {{@weather-mcp|@wea}}. Kyoto, leaving at seven."
+    },
+    {
+      "role": "thinking",
+      "content": "Calling the forecast tool for the first twelve hours"
+    },
+    {
+      "role": "tool",
+      "language": "bash",
+      "content": "weather-mcp forecast --city Kyoto --from 07:00 --hours 12"
+    },
+    {
+      "role": "assistant",
+      "content": "Dry until noon, then a 60% chance of showers from one.\n\n- **07:00** 21°C, wind 8 km/h from the north\n- **10:00** 26°C, clear\n- **13:00** 28°C, showers likely\n\nLeave at seven and turn back by eleven to stay dry. Want the route as a map card?"
+    }
+  ],
+  "timing": {
+    "userTypingCps": 26,
+    "agentTypingCps": 240,
+    "reactionMs": 700,
+    "thinkingMs": 2400,
+    "toolRunMs": 1300,
+    "imageGenMs": 3600,
+    "permissionMs": 2300,
+    "transitionMs": 280,
+    "finalHoldMs": 2200
+  }
+}

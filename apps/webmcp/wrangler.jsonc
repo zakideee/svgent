@@ -1,0 +1,14 @@
+{
+  "name": "svgent-agent-stage",
+  "compatibility_date": "2026-08-06",
+  // Its own hostname beside the studio's, so this page deploys and retires
+  // on its own schedule; Cloudflare creates the DNS record and the
+  // certificate for it on deploy, as it does for svgent.zakideee.dev.
+  "routes": [{ "pattern": "agent.svgent.zakideee.dev", "custom_domain": true }],
+  "assets": {
+    "directory": "./dist",
+    // One static page; a miss is a miss.
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  }
+}

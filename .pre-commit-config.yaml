@@ -1,0 +1,41 @@
+repos:
+  - repo: local
+    hooks:
+      # ── Biome: TS / JS / JSON / CSS ──────────────────────────────
+      - id: biome
+        name: biome check
+        language: system
+        entry: pnpm exec biome check --write --no-errors-on-unmatched
+        files: \.(ts|tsx|js|jsx|mjs|cjs|json|css)$
+
+      # ── Prettier: Markdown / YAML / HTML ────────────────────────
+      - id: prettier
+        name: prettier
+        language: system
+        entry: pnpm exec prettier --write --ignore-unknown
+        files: \.(md|yml|yaml|html)$
+
+      # ── TypeScript ──────────────────────────────────────────────
+      - id: typecheck
+        name: TypeScript typecheck
+        language: system
+        entry: pnpm typecheck
+        files: \.(ts|tsx)$|^(package\.json|pnpm-lock\.yaml|tsconfig\.json|vite\.config\.ts)$
+        pass_filenames: false
+
+      # ── Knip: unused exports / dependencies ────────────────────
+      - id: knip
+        name: knip
+        language: system
+        entry: pnpm knip
+        files: \.(ts|tsx)$|^(package\.json|pnpm-lock\.yaml|knip\.json)$
+        pass_filenames: false
+
+      # ── Tests: full suite before push ───────────────────────────
+      - id: test
+        name: vitest
+        language: system
+        entry: pnpm test
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]

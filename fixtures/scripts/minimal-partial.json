@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "surface": "app",
+  "messages": [
+    {
+      "role": "user",
+      "content": "[[最小構成|さいしょうこうせい]]の[[台本|だいほん]]。[[他|ほか]]の[[設定|せってい]]はすべて[[既定値|きていち]]。"
+    }
+  ],
+  "timing": {
+    "agentTypingCps": 280,
+    "thinkingMs": 700,
+    "toolRunMs": 500,
+    "permissionMs": 700
+  },
+  "appearance": {
+    "theme": "ink",
+    "backdrop": "abyss",
+    "terminalOpacity": 0.7
+  }
+}

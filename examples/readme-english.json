@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "title": "Empty state review",
+  "surface": "app",
+  "modelLabel": "Lattice 3",
+  "workspaceLabel": "fictional/daybreak-dashboard",
+  "branchLabel": "feat/empty-state",
+  "appearance": {
+    "theme": "nordic",
+    "canvasWidth": 1440,
+    "canvasHeight": 900,
+    "transparentCanvas": false,
+    "terminalOpacity": 0.97,
+    "background": "#111827",
+    "accent": "#5d74d6",
+    "backdrop": "dawn",
+    "imageSkeleton": "dots",
+    "shadowStrength": 0.58,
+    "fontScale": 1.02,
+    "chromeScale": 1
+  },
+  "chrome": {
+    "contextPercent": 46,
+    "clockTime": "09:42"
+  },
+  "display": {
+    "headerIcons": true,
+    "headerText": true,
+    "composer": true,
+    "footer": true,
+    "productMark": true,
+    "productVersion": true,
+    "tuiGeometry": false
+  },
+  "timing": {
+    "userTypingCps": 36,
+    "agentTypingCps": 220,
+    "thinkingMs": 1800,
+    "toolRunMs": 1100,
+    "imageGenMs": 3200,
+    "permissionMs": 1800,
+    "transitionMs": 220,
+    "finalHoldMs": 1800
+  },
+  "pagination": {
+    "flow": "scroll",
+    "messagesPerPage": 4,
+    "scrollDistancePx": 0
+  },
+  "messages": [
+    {
+      "id": "english-user",
+      "role": "user",
+      "content": "Improve the dashboard empty state. New users should see a clear next step, while filtered results should explain why no data is visible. Keep the copy concise on mobile."
+    },
+    {
+      "id": "english-thinking",
+      "role": "thinking",
+      "content": "Reviewing the existing states and responsive behavior"
+    },
+    {
+      "id": "english-tool-review",
+      "role": "tool",
+      "language": "bash",
+      "content": "Review empty-state branches and regression coverage"
+    },
+    {
+      "id": "english-findings",
+      "role": "assistant",
+      "content": "### Findings\n\n- First-run and filtered-empty views share the same copy\n- The existing `CreateReportButton` can be reused\n- `reportCount` and `hasActiveFilters` cover both branches"
+    },
+    {
+      "id": "english-permission",
+      "role": "permission",
+      "content": "Update the empty-state component and its regression tests"
+    },
+    {
+      "id": "english-result",
+      "role": "assistant",
+      "content": "## Implemented\n\n```ts\nconst kind = hasActiveFilters ? \"filtered\" : \"first-run\";\n```\n\n- Added a focused CTA for each state\n- Verified wrapping at 360 px\n- **All 6 regression tests pass**"
+    }
+  ]
+}

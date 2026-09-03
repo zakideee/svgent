@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "title": "Multi-line composer draft",
+  "surface": "app",
+  "modelLabel": "Quill 2",
+  "timing": {
+    "userTypingCps": 10
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "First line typed\nSecond line as well\nAnd a third."
+    },
+    {
+      "role": "assistant",
+      "content": "The composer should grow with each newline and shrink again on send."
+    }
+  ],
+  "appearance": {
+    "canvasWidth": 1080,
+    "canvasHeight": 1080,
+    "theme": "paper",
+    "backdrop": "aurora",
+    "terminalOpacity": 0.55
+  }
+}

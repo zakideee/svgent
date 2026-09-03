@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "title": "Responsive empty state",
+  "surface": "app",
+  "modelLabel": "Lattice 3",
+  "workspaceLabel": "fictional/daybreak-dashboard",
+  "branchLabel": "feat/empty-state",
+  "appearance": {
+    "theme": "paper",
+    "canvasWidth": 1080,
+    "canvasHeight": 1350,
+    "transparentCanvas": true,
+    "terminalOpacity": 0.96,
+    "background": "#e9e7e1",
+    "accent": "#6a5ae0",
+    "backdrop": "plain",
+    "imageSkeleton": "dots",
+    "shadowStrength": 0.5,
+    "fontScale": 1.18,
+    "chromeScale": 1.04
+  },
+  "chrome": {
+    "contextPercent": 58,
+    "clockTime": "10:24"
+  },
+  "display": {
+    "headerIcons": true,
+    "headerText": true,
+    "composer": true,
+    "footer": true,
+    "productMark": true,
+    "productVersion": true,
+    "tuiGeometry": true
+  },
+  "timing": {
+    "userTypingCps": 60,
+    "agentTypingCps": 260,
+    "thinkingMs": 1900,
+    "toolRunMs": 1100,
+    "imageGenMs": 3200,
+    "permissionMs": 2100,
+    "transitionMs": 240,
+    "finalHoldMs": 1800
+  },
+  "pagination": {
+    "flow": "slides",
+    "messagesPerPage": 3,
+    "scrollDistancePx": 0
+  },
+  "messages": [
+    {
+      "id": "slides-user-plan",
+      "role": "user",
+      "content": "[[空状態|からじょうたい]]の[[改善案|かいぜんあん]]を、レビュー[[用|よう]]に3[[枚|まい]]で[[見せて|みせて]]。"
+    },
+    {
+      "id": "slides-thinking",
+      "role": "thinking",
+      "content": "レビューの判断単位に合わせて分割しています"
+    },
+    {
+      "id": "slides-plan",
+      "role": "assistant",
+      "content": "## 1 / 課題\n\n初回と絞り込み0件が同じ表示です。\n\n- 次の操作が分からない\n- 文面がモバイルで読みにくい\n- CTAの優先順位が曖昧"
+    },
+    {
+      "id": "slides-user-choice",
+      "role": "user",
+      "content": "[[主導線|しゅどうせん]]を[[決めよう|きめよう]]。",
+      "pageBreakBefore": true
+    },
+    {
+      "id": "slides-choice",
+      "role": "choice",
+      "content": "初回ユーザーに最初に見せる操作は?",
+      "options": [
+        "レポートを作る — 最短で価値に届く",
+        "テンプレートを見る — 選びやすい",
+        "データを読み込む — 移行向け"
+      ],
+      "chosenIndex": 0
+    },
+    {
+      "id": "slides-decision",
+      "role": "assistant",
+      "content": "## 2 / 方針\n\n**「最初のレポートを作る」** を主CTAにします。\n\n絞り込み0件では「条件をクリア」へ差し替えます。"
+    },
+    {
+      "id": "slides-user-ship",
+      "role": "user",
+      "content": "その[[方針|ほうしん]]で[[実装|じっそう]]して。",
+      "pageBreakBefore": true
+    },
+    {
+      "id": "slides-permission",
+      "role": "permission",
+      "content": "EmptyState.tsx とテストを編集します"
+    },
+    {
+      "id": "slides-done",
+      "role": "assistant",
+      "content": "## 3 / 完了\n\n```tsx\n<EmptyState action={<CreateReportButton />} />\n```\n\n- 360px幅で折り返し確認\n- キーボード操作を確認\n- **6件のテストが通過**"
+    }
+  ]
+}

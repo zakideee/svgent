@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "title": "Denied permission",
+  "surface": "tui",
+  "modelLabel": "Quill 2",
+  "workspaceLabel": "fictional/payments",
+  "branchLabel": "fix/refund-rounding",
+  "messages": [
+    {
+      "role": "user",
+      "content": "[[端数|はすう]]の[[丸め|まるめ]]がずれてる。[[直して|なおして]]おいて。"
+    },
+    {
+      "role": "tool",
+      "content": "rg -n \"roundHalfUp\" src/",
+      "language": "bash"
+    },
+    {
+      "role": "permission",
+      "content": "本番の料金テーブルを書き換えます",
+      "decision": "deny"
+    },
+    {
+      "role": "assistant",
+      "content": "了解です、テーブルには触れません。差分だけ出します。"
+    },
+    {
+      "role": "choice",
+      "content": "どこから直しますか?",
+      "options": [
+        "丸め関数を差し替える — 影響は関数内に閉じる",
+        "呼び出し側で吸収する — 変更は小さいが散らばる",
+        "いったん再現テストを足す — 直す前に固定する"
+      ],
+      "chosenIndex": 2
+    },
+    {
+      "role": "assistant",
+      "content": "境界値の回帰テストを先に追加します。"
+    }
+  ],
+  "appearance": {
+    "theme": "nordic",
+    "backdrop": "dawn",
+    "terminalOpacity": 1
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "title": "音声入力",
+  "surface": "app",
+  "basis": "fictional",
+  "modelLabel": "Kiln 3",
+  "workspaceLabel": "fictional/atlas-console",
+  "branchLabel": "feat/empty-state",
+  "appearance": {
+    "theme": "ink",
+    "backdrop": "peach",
+    "canvasWidth": 900,
+    "canvasHeight": 620,
+    "fontScale": 1.15
+  },
+  "chrome": { "contextPercent": 22, "clockTime": "9:20" },
+  "camera": { "follow": true, "zoom": 2.1, "style": "sync" },
+  "timing": { "agentTypingCps": 160, "thinkingMs": 900, "finalHoldMs": 1600 },
+  "messages": [
+    {
+      "role": "user",
+      "inputMode": "voice",
+      "content": "テストが落ちた原因、まず調べて。"
+    },
+    { "role": "thinking", "content": "失敗したテストを確認中…" },
+    {
+      "role": "assistant",
+      "content": "境界値の1件だけが落ちています。原因を見てから直しますか。"
+    }
+  ]
+}

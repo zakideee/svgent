@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "title": "Escaping <>&\"'",
+  "surface": "app",
+  "modelLabel": "Escape 5",
+  "workspaceLabel": "fictional/<escape> & \"quotes\"",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Render <script>alert(\"x\")</script> and a&b<c>d verbatim."
+    },
+    {
+      "role": "assistant",
+      "content": "Escaping check: `<div class=\"a\">&amp;</div>`\n\n```html\n<svg width=\"10\" height=\"10\"><rect fill='#f00'/></svg>\n```\n\n> Inside a quote: <tag> and & and 'single' \"double\""
+    }
+  ],
+  "timing": {
+    "userTypingCps": 60
+  },
+  "appearance": {
+    "theme": "paper",
+    "backdrop": "dawn",
+    "terminalOpacity": 0.86
+  }
+}

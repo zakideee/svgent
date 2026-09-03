@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "title": "Empty state handoff",
+  "surface": "tui",
+  "modelLabel": "Lattice 3",
+  "workspaceLabel": "fictional/daybreak-dashboard",
+  "branchLabel": "feat/empty-state",
+  "appearance": {
+    "theme": "ink",
+    "canvasWidth": 1440,
+    "canvasHeight": 900,
+    "transparentCanvas": false,
+    "terminalOpacity": 0.96,
+    "background": "#090b10",
+    "accent": "#5fc8d7",
+    "backdrop": "aurora",
+    "imageSkeleton": "sweep",
+    "shadowStrength": 0.64,
+    "fontScale": 1.12,
+    "chromeScale": 1
+  },
+  "chrome": {
+    "contextPercent": 47,
+    "clockTime": "15:42"
+  },
+  "display": {
+    "headerIcons": true,
+    "headerText": true,
+    "composer": true,
+    "footer": true,
+    "productMark": true,
+    "productVersion": true,
+    "tuiGeometry": true,
+    "tuiTitle": true,
+    "tuiClock": true
+  },
+  "timing": {
+    "userTypingCps": 25,
+    "agentTypingCps": 240,
+    "thinkingMs": 2600,
+    "toolRunMs": 1400,
+    "imageGenMs": 3600,
+    "permissionMs": 2400,
+    "transitionMs": 300,
+    "finalHoldMs": 2200
+  },
+  "pagination": {
+    "flow": "scroll",
+    "messagesPerPage": 4,
+    "scrollDistancePx": 0
+  },
+  "messages": [
+    {
+      "id": "retry-user",
+      "role": "user",
+      "content": "I want to improve the dashboard's empty state. A first-run user should see what to do next, and an existing user should see why there is no data yet. Keep the wording readable on mobile, please."
+    },
+    {
+      "id": "retry-thinking",
+      "role": "thinking",
+      "content": "Checking the existing components and how the empty state branches"
+    },
+    {
+      "id": "retry-search",
+      "role": "tool",
+      "language": "bash",
+      "content": "rg -n \"EmptyState|reportCount\" src/dashboard tests"
+    },
+    {
+      "id": "retry-findings",
+      "role": "assistant",
+      "content": "### What I found\n\n- First run and a zero-result filter render the same\n- The CTA can reuse the existing `CreateReportButton`\n- `reportCount` and `hasActiveFilters` are enough to branch on\n\n```ts\nconst kind = hasActiveFilters\n  ? \"filtered\"\n  : reportCount === 0 ? \"first-run\" : \"ready\";\n```"
+    },
+    {
+      "id": "retry-choice",
+      "role": "choice",
+      "content": "Pick the primary path for a first-run user",
+      "options": [
+        "Create your first report — the next step is clear",
+        "Browse templates — easy to start, more to choose from",
+        "Import data — for existing users"
+      ],
+      "chosenIndex": 0
+    },
+    {
+      "id": "retry-direction",
+      "role": "assistant",
+      "content": "\"Create your first report\" becomes the primary path. On a zero-result filter it switches to **Clear filters**."
+    },
+    {
+      "id": "retry-permission",
+      "role": "permission",
+      "content": "Edit EmptyState.tsx and the regression tests"
+    },
+    {
+      "id": "retry-test",
+      "role": "tool",
+      "language": "bash",
+      "content": "pnpm test -- EmptyState"
+    },
+    {
+      "id": "retry-result",
+      "role": "assistant",
+      "content": "## Implemented\n\n```tsx\n<EmptyState\n  title=\"No reports yet\"\n  action={<CreateReportButton>Create your first report</CreateReportButton>}\n/>\n```\n\n- First run and zero-result filter separated\n- Wrapping checked at 360px\n- **6 tests green**"
+    }
+  ]
+}

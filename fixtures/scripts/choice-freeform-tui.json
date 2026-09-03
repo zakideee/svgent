@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "title": "Choice answered freely",
+  "surface": "tui",
+  "modelLabel": "Quill 2",
+  "messages": [
+    {
+      "role": "user",
+      "content": "デプロイ[[前|まえ]]に[[何|なに]]を[[確認|かくにん]]する?"
+    },
+    {
+      "role": "choice",
+      "content": "確認したい範囲を選んでください",
+      "options": ["ユニットテストだけ — 速い", "E2Eも回す — 遅いが確実"],
+      "freeform": "まず[[変更点|へんこうてん]]の[[差分|さぶん]]だけ[[見|み]]せて",
+      "afterSelection": "keep"
+    },
+    {
+      "role": "assistant",
+      "content": "差分を出します。"
+    }
+  ],
+  "appearance": {
+    "fontScale": 1.65,
+    "chromeScale": 1.5,
+    "theme": "ink",
+    "backdrop": "plain",
+    "terminalOpacity": 1
+  }
+}

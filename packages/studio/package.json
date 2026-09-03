@@ -1,0 +1,54 @@
+{
+  "name": "@svgent/studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Composable React Studio UI for authoring svgent scenes",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zakideee/svgent.git",
+    "directory": "packages/studio"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./dist/index.css",
+    "./internal/*": null
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE-MIT",
+    "LICENSE-APACHE"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --sourcemap --clean --external react --external react-dom",
+    "dev": "tsup src/index.ts --format esm --dts --sourcemap --watch --external react --external react-dom",
+    "test": "vitest run --root ../.. packages/studio/tests",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@boundsvg/browser": "0.4.0",
+    "@boundsvg/core": "0.4.0",
+    "@boundsvg/video": "0.4.0",
+    "@boundsvg/worker": "0.4.0",
+    "@svgent/assets": "workspace:*",
+    "@svgent/render": "workspace:*",
+    "@svgent/scene": "workspace:*",
+    "prismjs": "^1.30.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "happy-dom": "^20.11.6"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "title": "Unbreakable tokens",
+  "surface": "tui",
+  "modelLabel": "Wrap 3",
+  "messages": [
+    {
+      "role": "user",
+      "content": "https://example.com/very/long/path/segments/that/never/end/abcdefghijklmnopqrstuvwxyz0123456789/abcdefghijklmnopqrstuvwxyz0123456789?query=abcdefghijklmnopqrstuvwxyz0123456789"
+    },
+    {
+      "role": "assistant",
+      "content": "Unbreakable token: `Supercalifragilisticexpialidocious_Pneumonoultramicroscopicsilicovolcanoconiosis_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ`"
+    }
+  ],
+  "appearance": {
+    "theme": "phosphor",
+    "backdrop": "dawn",
+    "terminalOpacity": 0.86
+  }
+}

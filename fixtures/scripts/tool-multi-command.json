@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "title": "one tool invocation spanning several lines",
+  "surface": "app",
+  "modelLabel": "Lattice Coder 3",
+  "workspaceLabel": "studio/vector-kit",
+  "branchLabel": "feat/normalize-icons",
+  "messages": [
+    {
+      "role": "user",
+      "content": "このSVG[[群|ぐん]]、[[線|せん]]の[[太さ|ふとさ]]と[[角丸|かどまる]]がばらばら。[[見た目|みため]]をそろえる[[処理|しょり]]を[[追加|ついか]]して。"
+    },
+    {
+      "role": "thinking",
+      "content": "既存のSVG変換処理を確認して、形を壊さない正規化手順を足す。"
+    },
+    {
+      "role": "tool",
+      "language": "bash",
+      "content": "rg \"stroke-width|stroke-linecap|stroke-linejoin|viewBox\" src tests\nsed -n '1,240p' src/normalize-svg.ts\nsed -n '1,220p' tests/normalize-svg.test.ts"
+    },
+    {
+      "role": "assistant",
+      "content": "既存処理は属性の整理だけで、線の見た目は変更していません。"
+    }
+  ]
+}

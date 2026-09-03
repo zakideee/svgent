@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="SVGENTは、創作のcoding-agent sessionを台本から演出して、SVG・画像・動画に書き出すシミュレータです"
+    />
+    <!-- The share card is the renderer's own poster output
+         (examples/site-og.json). og: URLs must be absolute, so these name
+         the production origin. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SVGENT" />
+    <meta
+      property="og:title"
+      content="SVGENT — 創作のコーディングエージェントセッションを描く"
+    />
+    <meta
+      property="og:description"
+      content="SVGENTは、創作のcoding-agent sessionを台本から演出して、SVG・画像・動画に書き出すシミュレータです"
+    />
+    <meta property="og:url" content="https://svgent.zakideee.dev/ja/" />
+    <meta
+      property="og:image"
+      content="https://svgent.zakideee.dev/og/site-og-ja.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="diffとsyntax highlightを含む創作セッション。svgentが台本から描画"
+    />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- Language variants are separate static URLs (not Accept-Language
+         negotiation); these become absolute once the production origin is
+         fixed. -->
+    <link rel="alternate" hreflang="en" href="/" vite-ignore />
+    <link rel="alternate" hreflang="ja" href="/ja/" vite-ignore />
+    <link rel="alternate" hreflang="x-default" href="/" vite-ignore />
+    <link rel="icon" type="image/svg+xml" href="/brand/svgent-mark.svg" />
+    <link rel="stylesheet" href="/src/site.css" />
+    <script>
+      // The studio remembers the theme its visitor chose and stamps it on its
+      // own document as data-ui-theme; this page honours the same choice so
+      // crossing between site and studio never flips the colours. Nothing
+      // stored leaves the operating system in charge.
+      try {
+        const uiTheme = window.localStorage.getItem("svgent-ui-theme");
+        if (uiTheme === "light" || uiTheme === "dark") {
+          document.documentElement.dataset.uiTheme = uiTheme;
+        }
+      } catch {
+        /* Storage unavailable — the operating system decides. */
+      }
+    </script>
+    <title>SVGENT — 創作のコーディングエージェントセッションを描く</title>
+    <script>
+      // Arriving under /ja/ seeds the UI language once; a language the visitor
+      // has already chosen in the studio always wins.
+      try {
+        if (window.localStorage.getItem("svgent-lang") === null) {
+          window.localStorage.setItem("svgent-lang", "ja");
+        }
+      } catch {
+        /* Storage unavailable — the studio falls back to navigator.language. */
+      }
+    </script>
+  </head>
+  <body>
+    <header class="wrap site-header">
+      <a class="brand" href="/ja/">
+        <img
+          class="brand-mark"
+          src="/brand/svgent-mark.svg"
+          alt=""
+          width="34"
+          height="34"
+        />
+        <!-- The wordmark is drawn rather than set, so it cannot drift from the
+             studio header in a font substitution. Both variants are real
+             elements: a <picture>'s media attribute can read the OS but not
+             the stored theme, so the stylesheet picks which one shows. -->
+        <img
+          class="brand-wordmark wordmark-light"
+          src="/brand/svgent-wordmark.svg"
+          alt="svgent"
+          width="75"
+          height="26"
+        />
+        <img
+          class="brand-wordmark wordmark-dark"
+          src="/brand/svgent-wordmark-dark.svg"
+          alt="svgent"
+          width="75"
+          height="26"
+        />
+      </a>
+      <!-- The studio's own header states language as the target code on a pill
+           and the repository as a bare mark; the site keeps that vocabulary so
+           the two headers read as one product. -->
+      <nav class="header-nav">
+        <a class="nav-pill" href="/ja/studio/" aria-label="Studio を開く"
+          >Studio<svg
+            class="nav-pill-icon"
+            viewBox="0 0 24 24"
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M14 4h4a1 1 0 0 1 1 1v15" />
+            <path
+              d="M14 3.8v16.4a1 1 0 0 1-1.3.95L6 19.2V6.3a2 2 0 0 1 1.5-1.94l4-1A2 2 0 0 1 14 3.8Z"
+            />
+            <path d="M11 12v.01" /></svg
+        ></a>
+        <div class="nav-switch" role="group" aria-label="言語">
+          <span aria-current="page">JA</span>
+          <a href="/" hreflang="en" lang="en">EN</a>
+        </div>
+        <a
+          class="nav-icon"
+          href="https://github.com/zakideee/svgent"
+          aria-label="GitHub"
+          title="GitHub"
+        >
+          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8Z"
+            />
+          </svg>
+        </a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="wrap hero-shell">
+        <div class="hero">
+          <h1>エージェントとの会話を創作。画像/動画に残す</h1>
+          <p class="lead">
+            ユーザーの入力とエージェントの動きを台本にして、セッション画面を
+            animated SVG
+            で組み立てます。動画、静止画、ページ分割でも書き出せます。
+          </p>
+          <div class="actions">
+            <a class="button button-primary" href="/ja/studio/">Studioを開く</a>
+            <a
+              class="button button-secondary"
+              href="https://github.com/zakideee/svgent"
+              >GitHubで見る</a
+            >
+          </div>
+        </div>
+
+        <div class="stage-column">
+          <figure class="stage" data-hero="/hero/site-hero">
+            <!-- Four renderings of one script: two surfaces, camera on and off.
+               Without scripting the poster the object falls back to stands in,
+               since an animation that cannot be restarted is worse than a
+               still. -->
+            <div class="stage-controls" hidden>
+              <div class="stage-group" role="group" aria-label="画面">
+                <button type="button" data-surface="app" aria-pressed="true">
+                  アプリ
+                </button>
+                <button type="button" data-surface="tui" aria-pressed="false">
+                  ターミナル
+                </button>
+              </div>
+              <div class="stage-group" role="group" aria-label="追従ズーム">
+                <button type="button" data-zoom="on" aria-pressed="true">
+                  ズームあり
+                </button>
+                <button type="button" data-zoom="off" aria-pressed="false">
+                  なし
+                </button>
+              </div>
+            </div>
+            <div class="stage-screen">
+              <object
+                class="stage-media"
+                type="image/svg+xml"
+                title="セッションを README に載せる形へ組み立てる創作セッション。音声で依頼し、補完とIMEで指示を足して、svgent の台本が書かれるまで"
+              >
+                <img
+                  src="/hero/site-hero-app-01.webp"
+                  alt="README 用のセッションを組み立て、svgent の台本 JSON が書かれるまで進む創作セッション"
+                  width="1440"
+                  height="900"
+                />
+              </object>
+              <div class="stage-skeleton" aria-hidden="true">
+                <div class="skeleton-dots"><i></i><i></i><i></i></div>
+                <i class="skeleton-row is-user"></i>
+                <i class="skeleton-row"></i>
+                <i class="skeleton-row is-long"></i>
+                <i class="skeleton-row is-short"></i>
+                <i class="skeleton-composer"></i>
+              </div>
+            </div>
+            <div class="stage-transport" hidden>
+              <button
+                type="button"
+                class="stage-play"
+                data-label-pause="一時停止"
+                data-label-play="再生"
+                aria-label="一時停止"
+              >
+                ❚❚
+              </button>
+              <input
+                type="range"
+                class="stage-seek"
+                min="0"
+                max="1000"
+                value="0"
+                aria-label="再生位置"
+              />
+              <a class="stage-source" target="_blank" rel="noreferrer" href="/"
+                >animated SVG を開く ↗</a
+              >
+            </div>
+            <figcaption class="stage-caption">
+              <button
+                class="stage-replay"
+                type="button"
+                data-label-play="再生"
+                hidden
+              >
+                頭から再生
+              </button>
+            </figcaption>
+          </figure>
+          <p class="stage-more">
+            <a class="button button-secondary" href="/ja/inputs/"
+              >サンプルを見る →</a
+            >
+          </p>
+        </div>
+      </div>
+
+      <section class="wrap is-people">
+        <h2>
+          <svg
+            class="section-glyph"
+            viewBox="0 0 16 16"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linecap="round"
+          >
+            <rect
+              x="1.7"
+              y="3"
+              width="12.6"
+              height="10"
+              rx="2.6"
+              pathLength="1"
+            />
+            <path d="M4.6 6.9h6.8" pathLength="1" />
+            <path d="M4.6 9.9h4.2" pathLength="1" /></svg
+          >こんな人に
+        </h2>
+        <ul class="facts facts-people">
+          <li>
+            <b>開発する人</b>
+            <p>
+              実装やレビューの流れを、README や PR
+              に貼れる形で。実際のセッションも、秘匿情報を外した要約として出せる。
+            </p>
+          </li>
+          <li>
+            <b>発信する人</b>
+            <p>
+              告知や自作物の紹介を、投稿に収まるサイズで。目を引く一枚にも、短い動画にも。
+            </p>
+          </li>
+          <li>
+            <b>教える人</b>
+            <p>
+              手順の見本を、スライドや教材に。画面収録が難しい場面でも、同じ流れを描ける。
+            </p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="wrap is-content">
+        <h2>
+          <svg
+            class="section-glyph"
+            viewBox="0 0 16 16"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+          >
+            <path d="M2.2 3.6h11.6" pathLength="1" />
+            <path d="M2.2 8h8.4" pathLength="1" />
+            <path d="M2.2 12.4h5.2" pathLength="1" /></svg
+          >会話に書けるもの
+        </h2>
+        <ul class="facts facts-terms">
+          <li>
+            <b>Markdown</b>
+            <p>見出し、リスト、表、syntax highlight付きのコード、diff。</p>
+          </li>
+          <li>
+            <b>画像埋め込み</b>
+            <p>添付した画像と、生成された結果。</p>
+          </li>
+          <li>
+            <b>エージェントの動き</b>
+            <p>tool の実行、選択肢、承認。</p>
+          </li>
+          <li>
+            <b>ユーザー入力</b>
+            <p>音声入力、IME 変換、補完。</p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="wrap is-look">
+        <h2>
+          <svg
+            class="section-glyph"
+            viewBox="0 0 16 16"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect
+              x="1.4"
+              y="2"
+              width="13.2"
+              height="6.4"
+              rx="2"
+              pathLength="1"
+            />
+            <path d="M3.9 5.2l1.2 1.2 2-2.4" pathLength="1" />
+            <path d="M9 5.2h3.4" pathLength="1" />
+            <path d="M3.9 12.6h7.2" pathLength="1" /></svg
+          >見せ方で選べるもの
+        </h2>
+        <ul class="facts facts-terms">
+          <li>
+            <b>アプリとターミナル</b>
+            <p>作り手が慣れ親しんだインターフェイスを選べる。</p>
+          </li>
+          <li>
+            <b>配色と大きさ</b>
+            <p>テーマ、背景、文字サイズ、余白。</p>
+          </li>
+          <li>
+            <b>アニメーション</b>
+            <p>ユーザーが打つ速さ、エージェントが返す速さ、間の取り方。</p>
+          </li>
+          <li>
+            <b>カメラ</b>
+            <p>タイムラインから自動計算される追従ズーム。</p>
+          </li>
+          <li>
+            <b>ページ</b>
+            <p>通しで1本にするか、スライドに分割するか。</p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="wrap is-formats">
+        <h2>
+          <svg
+            class="section-glyph"
+            viewBox="0 0 16 16"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M8 2.2v7.2" pathLength="1" />
+            <path d="M5.2 6.6L8 9.4l2.8-2.8" pathLength="1" />
+            <path
+              d="M2.2 10.6v1a2.2 2.2 0 0 0 2.2 2.2h7.2a2.2 2.2 0 0 0 2.2-2.2v-1"
+              pathLength="1"
+            /></svg
+          >書き出し形式
+        </h2>
+        <p class="section-lead">SVG・PNG・WebP・GIF・MP4</p>
+        <p class="formats-cmd" aria-hidden="true">
+          <code>❯ pnpm render session.json --strict</code>
+        </p>
+        <ul class="formats">
+          <li>poster-svg</li>
+          <li>animated-svg</li>
+          <li>poster-png</li>
+          <li>poster-webp</li>
+          <li>animated-webp</li>
+          <li>gif</li>
+          <li>mp4</li>
+          <li>transcript-svg</li>
+          <li>transcript-png</li>
+        </ul>
+      </section>
+
+      <section class="wrap is-cta">
+        <p class="section-lead">
+          台本ひとつから。Studio はブラウザだけで動きます。
+        </p>
+        <div class="actions">
+          <a class="button button-primary" href="/ja/studio/">Studioを開く</a>
+          <a class="button button-secondary" href="/ja/inputs/"
+            >サンプルを見る</a
+          >
+        </div>
+      </section>
+    </main>
+
+    <footer class="wrap site-footer">
+      <div class="footer-links">
+        <a href="/ja/studio/">Studio</a>
+        <a href="https://github.com/zakideee/svgent">GitHub</a>
+        <a
+          href="https://github.com/zakideee/svgent/blob/main/RESPONSIBLE-USE.ja.md"
+          >責任ある利用</a
+        >
+        <a href="/third-party-licenses.txt">ライセンス</a>
+        <a href="/" hreflang="en" lang="en">English</a>
+      </div>
+      <p class="footer-meta">
+        <span
+          >Powered by
+          <a href="https://github.com/zakideee/boundsvg">boundsvg</a></span
+        >
+        <span>MIT OR Apache-2.0</span>
+      </p>
+    </footer>
+
+    <script type="module" src="/src/stage.ts"></script>
+    <script type="module" src="/src/reveal.ts"></script>
+  </body>
+</html>

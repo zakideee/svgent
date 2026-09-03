@@ -1,0 +1,43 @@
+{
+  "title": "タブ補完",
+  "surface": "tui",
+  "basis": "fictional",
+  "modelLabel": "Kiln 3",
+  "workspaceLabel": "fictional/atlas-console",
+  "branchLabel": "feat/retry",
+  "appearance": {
+    "theme": "ink",
+    "backdrop": "peach",
+    "canvasWidth": 900,
+    "canvasHeight": 620,
+    "fontScale": 1.15
+  },
+  "chrome": {
+    "contextPercent": 22,
+    "clockTime": "9:20"
+  },
+  "camera": {
+    "follow": true,
+    "zoom": 2.1,
+    "style": "sync"
+  },
+  "timing": {
+    "agentTypingCps": 160,
+    "thinkingMs": 900,
+    "finalHoldMs": 1600
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "{{@src/retry/backoff.ts|@src/ret}} の[[待ち時間|まちじかん]]を[[見て|みて]]。"
+    },
+    {
+      "role": "thinking",
+      "content": "待ち時間の計算を確認中…"
+    },
+    {
+      "role": "assistant",
+      "content": "指数バックオフですが、上限が入っていません。上限を足しますか。"
+    }
+  ]
+}

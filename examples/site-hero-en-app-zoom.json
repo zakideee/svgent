@@ -1,0 +1,72 @@
+{
+  "title": "Into the README",
+  "surface": "app",
+  "basis": "fictional",
+  "modelLabel": "Kiln 3",
+  "workspaceLabel": "svgent/studio",
+  "branchLabel": "feat/readme-demo",
+  "appearance": {
+    "theme": "ink",
+    "backdrop": "peach",
+    "canvasWidth": 1440,
+    "canvasHeight": 900,
+    "imageSkeleton": "sweep"
+  },
+  "chrome": {
+    "contextPercent": 38,
+    "clockTime": "9:20"
+  },
+  "timing": {
+    "userTypingCps": 12,
+    "agentTypingCps": 180,
+    "thinkingMs": 1400,
+    "toolRunMs": 1100,
+    "permissionMs": 1600,
+    "finalHoldMs": 2200
+  },
+  "messages": [
+    {
+      "role": "user",
+      "inputMode": "voice",
+      "content": "Turn this session into something the README can hold."
+    },
+    {
+      "role": "thinking",
+      "content": "Reading the session's beats. Measuring the pause after each reply.",
+      "highlight": true
+    },
+    {
+      "role": "tool",
+      "content": "rg \"animated-svg\" README.md",
+      "language": "bash"
+    },
+    {
+      "role": "assistant",
+      "content": "The README can carry a session three ways.\n\n- **One animated SVG** — it plays right in the page\n- **A poster that links out** — a still that loads anywhere\n- **Slides** — one page per beat, laid in a row\n\nThe first keeps the motion, and the camera work survives with it."
+    },
+    {
+      "role": "choice",
+      "content": "How should it read?",
+      "options": ["One animated SVG", "A poster that links out", "Slides — one page per beat"],
+      "chosenIndex": 0
+    },
+    {
+      "role": "user",
+      "content": "Write the script to {{@examples/readme-demo.json|@exa}}. I will tune the pacing in the studio."
+    },
+    {
+      "role": "permission",
+      "content": "Create examples/readme-demo.json",
+      "decision": "allow"
+    },
+    {
+      "role": "assistant",
+      "content": "Scripted — the studio retimes it, and `pnpm render` writes the SVG.\n\n```json\n{\n  \"title\": \"Readme demo\",\n  \"surface\": \"app\",\n  \"basis\": \"fictional\",\n  \"camera\": { \"follow\": true, \"zoom\": 1.6 },\n  \"messages\": [\n    { \"role\": \"user\", \"content\": \"Open on the summary, please.\" },\n    { \"role\": \"assistant\", \"content\": \"Rolling. Camera is yours.\" }\n  ]\n}\n```\n\nEvery exchange above is just a line in this shape — retype one and the render follows."
+    }
+  ],
+  "camera": {
+    "follow": true,
+    "zoom": 1.7,
+    "style": "sync"
+  }
+}

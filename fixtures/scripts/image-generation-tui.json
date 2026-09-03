@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "title": "Image generation in TUI",
+  "surface": "tui",
+  "modelLabel": "Quill 2",
+  "messages": [
+    {
+      "role": "user",
+      "content": "generate a watercolor beach scene."
+    },
+    {
+      "role": "image",
+      "content": "watercolor beach scene at dusk, warm gradient"
+    },
+    {
+      "role": "assistant",
+      "content": "Saved. Ask for recolors or crops anytime."
+    }
+  ],
+  "appearance": {
+    "imageSkeleton": "tiles",
+    "theme": "synth",
+    "backdrop": "plain",
+    "terminalOpacity": 0.55
+  }
+}

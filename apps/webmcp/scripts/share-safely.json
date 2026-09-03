@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "title": "Webhook retries, shared safely",
+  "surface": "app",
+  "modelLabel": "Bezier 4",
+  "workspaceLabel": "fictional/payments-service",
+  "branchLabel": "fix/webhook-backoff",
+  "appearance": {
+    "theme": "paper",
+    "canvasWidth": 1440,
+    "canvasHeight": 900,
+    "backdrop": "peach"
+  },
+  "camera": {
+    "follow": true,
+    "zoom": 1.3,
+    "style": "sync",
+    "minShotMs": 1200
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "Payment webhook retries have been piling up since last night. Start from {{@src/webhooks/backoff.ts|@src/webh}} and find out why before I page anyone."
+    },
+    {
+      "role": "thinking",
+      "content": "Reading the retry path and the last deploy's diff"
+    },
+    {
+      "role": "tool",
+      "language": "bash",
+      "content": "rg -n \"backoff|retry\" src/webhooks"
+    },
+    {
+      "role": "assistant",
+      "content": "The backoff timer lives in module scope, so every cold start resets it to zero and the first retry fires immediately.\n\n```ts\n// src/webhooks/backoff.ts\nlet attempt = 0; // reset on every cold start\n```\n\nMoving it onto the job record keeps the count across restarts."
+    },
+    {
+      "role": "permission",
+      "content": "Edit src/webhooks/backoff.ts and run the webhook tests",
+      "decision": "allow"
+    },
+    {
+      "role": "tool",
+      "language": "bash",
+      "content": "pnpm test webhooks"
+    },
+    {
+      "role": "assistant",
+      "content": "**14 of 14 passed.** Retries now back off from the stored attempt count, so a restart no longer restarts the storm."
+    }
+  ],
+  "timing": {
+    "userTypingCps": 26,
+    "agentTypingCps": 240,
+    "reactionMs": 700,
+    "thinkingMs": 2400,
+    "toolRunMs": 1300,
+    "imageGenMs": 3600,
+    "permissionMs": 2300,
+    "transitionMs": 280,
+    "finalHoldMs": 2200
+  }
+}

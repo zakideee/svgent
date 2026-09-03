@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "title": "Camera follow",
+  "surface": "app",
+  "modelLabel": "Pixel 3",
+  "camera": {
+    "follow": true,
+    "zoom": 1.8
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "カメラ[[追従|ついじゅう]]のデモをして。"
+    },
+    {
+      "role": "thinking",
+      "content": "対象メッセージの位置と追従タイミングを計画し、ズーム対象の位置が確定するまで再照準を保留しています"
+    },
+    {
+      "role": "tool",
+      "content": "rg -n \"planCameraTrack\" src/scene"
+    },
+    {
+      "role": "assistant",
+      "content": "## カメラ追従\n\n- アクティブな行に**自動で寄り**ます\n- ベクターなので拡大しても文字が鮮明\n- 終端で全景に引きます"
+    },
+    {
+      "role": "choice",
+      "content": "どの被写体に寄りますか?",
+      "options": ["選択肢ブロック — 決定の瞬間に寄る", "画像 — バナー着地後に寄る"],
+      "chosenIndex": 0
+    },
+    {
+      "role": "user",
+      "content": "[[画像|がぞう]]も[[見せて|みせて]]。",
+      "images": [
+        {
+          "dataUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+          "mediaType": "image/png",
+          "width": 800,
+          "height": 500,
+          "alt": "image",
+          "fit": "cover",
+          "size": "small"
+        }
+      ]
+    },
+    {
+      "role": "image",
+      "content": "夕暮れのスカイラインを描いて"
+    },
+    {
+      "role": "assistant",
+      "content": "スクロールとカメラは同じタイムラインから計画されるので、プレビューと書き出しが常に一致します。"
+    }
+  ]
+}

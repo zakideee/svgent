@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "title": "IME conversion typing",
+  "surface": "app",
+  "modelLabel": "Quill 2",
+  "timing": {
+    "userTypingCps": 8
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "{{@src/theme/palette.ts|@src/th}} の[[配色|はいしょく]]、もう[[少し|すこし]][[落ち着かせて|おちつかせて]]。"
+    },
+    {
+      "role": "assistant",
+      "content": "彩度を一段下げた案を3つ出します。"
+    }
+  ],
+  "appearance": {
+    "canvasWidth": 1080,
+    "canvasHeight": 1920,
+    "theme": "paper",
+    "backdrop": "abyss",
+    "terminalOpacity": 0.86
+  }
+}

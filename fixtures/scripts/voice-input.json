@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "title": "Voice-input request",
+  "surface": "app",
+  "modelLabel": "Bezier 4",
+  "workspaceLabel": "fictional/notes-app",
+  "branchLabel": "feat/quick-capture",
+  "messages": [
+    {
+      "id": "voice-user",
+      "role": "user",
+      "content": "Add a quick-capture shortcut that saves the clipboard into today's note.",
+      "inputMode": "voice"
+    },
+    {
+      "id": "voice-thinking",
+      "role": "thinking",
+      "content": "Checking how notes are created today"
+    },
+    {
+      "id": "voice-result",
+      "role": "assistant",
+      "content": "Wired **Ctrl+Shift+V** to append the clipboard under a timestamp heading in today's note."
+    },
+    {
+      "id": "voice-followup",
+      "role": "user",
+      "content": "Nice — typed follow-ups still work like before?"
+    }
+  ]
+}

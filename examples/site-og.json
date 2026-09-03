@@ -1,0 +1,53 @@
+{
+  "title": "構成の見直し",
+  "surface": "app",
+  "basis": "fictional",
+  "modelLabel": "Kiln 3",
+  "workspaceLabel": "svgent/studio",
+  "branchLabel": "feat/follow-camera",
+  "appearance": {
+    "theme": "ink",
+    "backdrop": "peach",
+    "canvasWidth": 900,
+    "canvasHeight": 720,
+    "fontScale": 0.8,
+    "chromeScale": 1,
+    "spacingScale": 0.8,
+    "windowMargin": 12,
+    "terminalOpacity": 0.85,
+    "transparentCanvas": true
+  },
+  "display": {
+    "headerIcons": true,
+    "headerText": true,
+    "composer": true,
+    "footer": true,
+    "tuiGeometry": true,
+    "tuiTitle": true,
+    "tuiClock": false,
+    "tuiStatusHints": false,
+    "productMark": true,
+    "productVersion": true
+  },
+  "chrome": {
+    "contextPercent": 38,
+    "clockTime": "9:20"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "セッションの見せ方、部品にまとめて。\n\n投稿にも README にも貼りたい"
+    },
+    {
+      "role": "choice",
+      "content": "どの単位で部品にする？",
+      "options": ["Stage ごとに1つ", "scene ごとに Take を切り出す"],
+      "chosenIndex": 1,
+      "afterSelection": "keep"
+    },
+    {
+      "role": "assistant",
+      "content": "scene ごとに `<Take>` を切り出します。\n\n```tsx\nexport function AgentSession({ script }: { script: Screenplay }) {\n  return (\n    <Stage backdrop=\"peach\" camera=\"follow\">\n      {script.scenes.map((scene) => <Take key={scene.cut}\n```"
+    }
+  ]
+}

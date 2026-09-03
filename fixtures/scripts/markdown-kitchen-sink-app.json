@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "title": "Markdown kitchen sink",
+  "surface": "app",
+  "modelLabel": "Quill 2",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Explain it using every Markdown element."
+    },
+    {
+      "role": "thinking",
+      "content": "Combining headings, lists, quotes, and code"
+    },
+    {
+      "role": "assistant",
+      "content": "# H1 heading\n## H2 heading\n### H3 heading\n\nBody text mixing **bold**, *italic*, `inline code`, and a [link label](https://example.com).\n\n- Bullet with `code` mixed in\n- Second line with **bold** mixed in\n\n1. First numbered item\n2. Next numbered item\n\n> Quote block. A slightly longer sentence so typesetting can be checked.\n\n```ts\nconst label: string = \"chip\";\nexport function reveal(at: number): number { return at * 2; }\n```"
+    }
+  ],
+  "appearance": {
+    "theme": "ember",
+    "canvasWidth": 1600,
+    "canvasHeight": 1200,
+    "backdrop": "plain",
+    "terminalOpacity": 1
+  }
+}

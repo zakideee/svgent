@@ -1,0 +1,17 @@
+{
+  "name": "svgent",
+  "compatibility_date": "2026-08-06",
+  // The site answers on its own hostname; Cloudflare creates the DNS record
+  // and the certificate for it on deploy.
+  "routes": [{ "pattern": "svgent.zakideee.dev", "custom_domain": true }],
+  "assets": {
+    "directory": "./dist",
+    // Each app is a real directory of static pages, so a miss is a miss:
+    // the SPA fallback would answer /studio/typo with the landing page and a
+    // 200. Nothing here routes on the client, so nothing needs the rewrite.
+    "not_found_handling": "404-page",
+    // /studio and /studio/ resolve to the same page, with the trailing-slash
+    // form canonical.
+    "html_handling": "auto-trailing-slash"
+  }
+}

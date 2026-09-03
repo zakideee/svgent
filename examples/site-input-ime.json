@@ -1,0 +1,29 @@
+{
+  "title": "IME変換",
+  "surface": "app",
+  "basis": "fictional",
+  "modelLabel": "Kiln 3",
+  "workspaceLabel": "fictional/atlas-console",
+  "branchLabel": "feat/empty-state",
+  "appearance": {
+    "theme": "ink",
+    "backdrop": "peach",
+    "canvasWidth": 900,
+    "canvasHeight": 620,
+    "fontScale": 1.15
+  },
+  "chrome": { "contextPercent": 22, "clockTime": "9:20" },
+  "camera": { "follow": true, "zoom": 2.1, "style": "sync" },
+  "timing": { "userTypingCps": 11, "agentTypingCps": 160, "thinkingMs": 900, "finalHoldMs": 1600 },
+  "messages": [
+    {
+      "role": "user",
+      "content": "[[空状態|からじょうたい]]の[[文言|もんごん]]を[[直して|なおして]]。"
+    },
+    { "role": "thinking", "content": "今の文言を確認中…" },
+    {
+      "role": "assistant",
+      "content": "「まだ項目がありません」に変えました。props で差し替えられます。"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+<!doctype html>
+<!-- The share card: two of the renderer's own posters — the terminal
+     behind-left, the app in front-right — on a gradient sampled from the
+     renderer's backdrop, with the copy on a solid band whose right end is
+     cut on a slant. Captured at exactly 1200x630 — see README.md. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        margin: 0;
+        box-sizing: border-box;
+      }
+      body {
+        position: relative;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        font-family: Inter, "Noto Sans CJK JP", ui-sans-serif, sans-serif;
+        color: #e9eaf0;
+        background: linear-gradient(
+          180deg,
+          #f9dabb 0%,
+          #f5c6c0 25%,
+          #f2b2c5 50%,
+          #d7aed8 75%,
+          #bdaaeb 100%
+        );
+      }
+      /* Both surfaces from one script, overlapped for depth. The app's canvas is
+     taller than the card, so its composer sinks behind the band and the
+     streaming code reads as cut mid-line. */
+      .tui {
+        position: absolute;
+        left: 14px;
+        top: 64px;
+        width: 600px;
+        opacity: 0.92;
+      }
+      .app {
+        position: absolute;
+        right: 16px;
+        top: 14px;
+        width: 710px;
+        filter: drop-shadow(-26px 18px 48px rgba(9, 10, 15, 0.72));
+      }
+      .band {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 158px;
+        background: rgba(9, 10, 15, 0.96);
+        clip-path: polygon(0 0, 78% 0, 84% 100%, 0 100%);
+      }
+      .fg {
+        position: absolute;
+        left: 56px;
+        right: 60px;
+        bottom: 28px;
+        display: flex;
+        align-items: center;
+        gap: 26px;
+      }
+      .fg img.mark {
+        width: 72px;
+        height: 72px;
+        border-radius: 19px;
+        flex: none;
+      }
+      .text h1 {
+        font-size: 42px;
+        line-height: 1.25;
+        letter-spacing: -0.02em;
+        font-weight: 680;
+        margin-bottom: 8px;
+      }
+      .text .formats {
+        font-family: ui-monospace, monospace;
+        font-size: 19px;
+        color: #9aa1b0;
+        letter-spacing: 0.04em;
+      }
+      .text .formats img {
+        width: 104px;
+        height: 36px;
+        vertical-align: -9px;
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <img class="tui" src="bg-tui-en.png" alt="" />
+    <img class="app" src="bg-en.png" alt="" />
+    <div class="band"></div>
+    <div class="fg">
+      <img class="mark" src="../public/brand/svgent-mark.svg" alt="" />
+      <div class="text">
+        <h1>Staged agent sessions, rendered.</h1>
+        <div class="formats">
+          <img src="../public/brand/svgent-wordmark-dark.svg" alt="svgent" />·
+          SVG · PNG · WebP · GIF · MP4
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

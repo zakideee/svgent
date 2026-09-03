@@ -1,0 +1,104 @@
+<!doctype html>
+<!-- The Agent Stage share card: two of the renderer's own posters from the
+     showcase scripts — the terminal behind-left, the app in front-right —
+     on a gradient sampled from the app poster's backdrop, with the copy on
+     a solid band cut on a slant. Captured at exactly 1200x630 — see
+     README.md. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        margin: 0;
+        box-sizing: border-box;
+      }
+      body {
+        position: relative;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        font-family: Inter, "Noto Sans CJK JP", ui-sans-serif, sans-serif;
+        color: #e9eaf0;
+        background: linear-gradient(
+          180deg,
+          #f9dfc4 0%,
+          #f5c8c6 30%,
+          #ebb7d2 60%,
+          #c9b3ea 100%
+        );
+      }
+      .tui {
+        position: absolute;
+        left: 14px;
+        top: 58px;
+        width: 620px;
+        opacity: 0.94;
+      }
+      .app {
+        position: absolute;
+        right: 16px;
+        top: 14px;
+        width: 720px;
+        filter: drop-shadow(-26px 18px 48px rgba(9, 10, 15, 0.7));
+      }
+      .band {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 158px;
+        background: rgba(9, 10, 15, 0.96);
+        clip-path: polygon(0 0, 80% 0, 86% 100%, 0 100%);
+      }
+      .fg {
+        position: absolute;
+        left: 56px;
+        right: 60px;
+        bottom: 28px;
+        display: flex;
+        align-items: center;
+        gap: 26px;
+      }
+      .fg img.mark {
+        width: 72px;
+        height: 72px;
+        border-radius: 19px;
+        flex: none;
+      }
+      .text h1 {
+        font-size: 40px;
+        line-height: 1.25;
+        letter-spacing: -0.02em;
+        font-weight: 680;
+        margin-bottom: 8px;
+      }
+      .text .line {
+        font-family: ui-monospace, monospace;
+        font-size: 19px;
+        color: #9aa1b0;
+        letter-spacing: 0.04em;
+      }
+      .text .line img {
+        width: 104px;
+        height: 36px;
+        vertical-align: -9px;
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <img class="tui" src="bg-tui.png" alt="" />
+    <img class="app" src="bg-app.png" alt="" />
+    <div class="band"></div>
+    <div class="fg">
+      <img class="mark" src="../public/brand/svgent-mark.svg" alt="" />
+      <div class="text">
+        <h1>An agent on the stage, you at the controls.</h1>
+        <div class="line">
+          <img src="../public/brand/svgent-wordmark-dark.svg" alt="svgent" />·
+          Agent Stage · WebMCP site tools
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "title": "Slides",
+  "surface": "tui",
+  "modelLabel": "Quill 2",
+  "workspaceLabel": "fictional/brand-kit",
+  "branchLabel": "feat/slide-deck",
+  "appearance": {
+    "canvasWidth": 1080,
+    "canvasHeight": 1350,
+    "theme": "synth",
+    "backdrop": "peach",
+    "imageSkeleton": "sweep",
+    "terminalOpacity": 0.55
+  },
+  "pagination": {
+    "flow": "slides",
+    "messagesPerPage": 3
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "slide 1: [[縦長|たてなが]]SNS[[向け|むけ]]にまとめて。"
+    },
+    {
+      "role": "thinking",
+      "content": "slide 1: 分割の境目を検討"
+    },
+    {
+      "role": "assistant",
+      "content": "slide 1: **結論から** 3枚に分けます。"
+    },
+    {
+      "role": "user",
+      "content": "slide 2: [[続けて|つづけて]]。",
+      "pageBreakBefore": true
+    },
+    {
+      "role": "tool",
+      "content": "make bench",
+      "language": "bash"
+    },
+    {
+      "role": "permission",
+      "content": "config.toml を編集します"
+    },
+    {
+      "role": "assistant",
+      "content": "slide 2: ベンチ結果\n\n- p50 12ms\n- p99 48ms"
+    },
+    {
+      "role": "user",
+      "content": "slide 3: まとめて。"
+    },
+    {
+      "role": "image",
+      "content": "夜明けの色でまとめたキービジュアル"
+    },
+    {
+      "role": "assistant",
+      "content": "slide 3: **完了**。`main` へマージ可能です。"
+    }
+  ],
+  "timing": {
+    "transitionMs": 420,
+    "finalHoldMs": 2400
+  }
+}

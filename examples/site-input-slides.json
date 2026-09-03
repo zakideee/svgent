@@ -1,0 +1,46 @@
+{
+  "title": "ページ分割",
+  "surface": "tui",
+  "basis": "fictional",
+  "modelLabel": "Kiln 3",
+  "workspaceLabel": "fictional/atlas-console",
+  "branchLabel": "feat/retry",
+  "appearance": {
+    "theme": "ink",
+    "backdrop": "peach",
+    "canvasWidth": 1000,
+    "canvasHeight": 480
+  },
+  "chrome": {
+    "contextPercent": 22,
+    "clockTime": "9:20"
+  },
+  "pagination": {
+    "flow": "slides",
+    "messagesPerPage": 1
+  },
+  "timing": {
+    "agentTypingCps": 160,
+    "thinkingMs": 800,
+    "finalHoldMs": 1200
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "リトライの待ち時間に上限を入れて。"
+    },
+    {
+      "role": "tool",
+      "content": "rg \"backoff\" src",
+      "language": "bash"
+    },
+    {
+      "role": "assistant",
+      "content": "上限を30秒にしました。指数で伸びた後はそこで止まります。"
+    },
+    {
+      "role": "user",
+      "content": "テストも足しておいて。"
+    }
+  ]
+}

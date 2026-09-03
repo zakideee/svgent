@@ -1,0 +1,22 @@
+# Biome handles these
+*.ts
+*.tsx
+*.js
+*.jsx
+*.mjs
+*.cjs
+*.json
+*.jsonc
+*.css
+
+# Build outputs
+dist/
+
+# Dependencies
+node_modules/
+
+# Lock files
+pnpm-lock.yaml
+
+# Generated
+*.tsbuildinfo

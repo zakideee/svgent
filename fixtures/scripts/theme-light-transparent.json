@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "title": "Paper / transparent / low opacity",
+  "surface": "app",
+  "modelLabel": "Fresco 4",
+  "appearance": {
+    "theme": "paper",
+    "transparentCanvas": true,
+    "terminalOpacity": 0.45,
+    "backdrop": "plain",
+    "shadowStrength": 1,
+    "background": "#e9e7e1",
+    "accent": "#6a5ae0"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "Light theme with a transparent canvas."
+    },
+    {
+      "role": "assistant",
+      "content": "`chip` and **emphasis** must stay readable on a transparent canvas."
+    }
+  ]
+}

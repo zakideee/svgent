@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "title": "long status rows at fontScale 2.4 / tui",
+  "surface": "tui",
+  "modelLabel": "Verbose 3",
+  "appearance": {
+    "canvasWidth": 1200,
+    "canvasHeight": 800,
+    "fontScale": 2.4,
+    "theme": "nordic",
+    "backdrop": "abyss",
+    "terminalOpacity": 1
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "[[長い|ながい]] thinking / tool / permission が[[折り返される|おりかえされる]]か[[確認|かくにん]]して。"
+    },
+    {
+      "role": "thinking",
+      "content": "関連する実装と制約を一通り確認してから、折り返し幅の決まる場所を特定しています"
+    },
+    {
+      "role": "tool",
+      "language": "bash",
+      "content": "rg -n \"measureTextBlock|wrap\" src/scene/ --glob '*.ts' --no-heading --color never | sort"
+    },
+    {
+      "role": "permission",
+      "content": "Edit src/scene/messages.ts and src/scene/measure.ts then run the full test suite to confirm nothing regressed"
+    },
+    {
+      "role": "assistant",
+      "content": "状態行も本文と同じ折り返し幅を受け取るようになりました。"
+    }
+  ]
+}
