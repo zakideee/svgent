@@ -132,7 +132,9 @@
       0% { transform: translate(0px, 0px) translate(600px, 408px) rotate(0deg) scale(1, 1) translate(-600px, -408px); animation-timing-function: steps(1, end); }
       41.40127388535032% { transform: translate(0px, 0px) translate(600px, 408px) rotate(0deg) scale(1, 1) translate(-600px, -408px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
       45.85987261146497% { transform: translate(0px, -83px) translate(600px, 408px) rotate(0deg) scale(1, 1) translate(-600px, -408px); animation-timing-function: steps(1, end); }
-      71.76220806794055% { transform: translate(0px, -83px) translate(600px, 408px) rotate(0deg) scale(1, 1) translate(-600px, -408px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
+      70.06369426751591% { transform: translate(0px, -83px) translate(600px, 408px) rotate(0deg) scale(1, 1) translate(-600px, -408px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
+      71.76220806794055% { transform: translate(0px, -142px) translate(600px, 408px) rotate(0deg) scale(1, 1) translate(-600px, -408px); animation-timing-function: steps(1, end); }
+      76.43312101910828% { transform: translate(0px, -142px) translate(600px, 408px) rotate(0deg) scale(1, 1) translate(-600px, -408px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
       78.13163481953292% { transform: translate(0px, -155px) translate(600px, 408px) rotate(0deg) scale(1, 1) translate(-600px, -408px); animation-timing-function: steps(1, end); }
       100% { transform: translate(0px, -155px) translate(600px, 408px) rotate(0deg) scale(1, 1) translate(-600px, -408px); }
     }
@@ -1197,7 +1199,9 @@
       0% { transform: translate(0px, 0px) translate(1129.5px, 277.5px) rotate(0deg) scale(1, 1) translate(-1129.5px, -277.5px); animation-timing-function: steps(1, end); }
       41.40127388535032% { transform: translate(0px, 0px) translate(1129.5px, 277.5px) rotate(0deg) scale(1, 1) translate(-1129.5px, -277.5px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
       45.85987261146497% { transform: translate(0px, 56.76129px) translate(1129.5px, 277.5px) rotate(0deg) scale(1, 1) translate(-1129.5px, -277.5px); animation-timing-function: steps(1, end); }
-      71.76220806794055% { transform: translate(0px, 56.76129px) translate(1129.5px, 277.5px) rotate(0deg) scale(1, 1) translate(-1129.5px, -277.5px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
+      70.06369426751591% { transform: translate(0px, 56.76129px) translate(1129.5px, 277.5px) rotate(0deg) scale(1, 1) translate(-1129.5px, -277.5px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
+      71.76220806794055% { transform: translate(0px, 97.109677px) translate(1129.5px, 277.5px) rotate(0deg) scale(1, 1) translate(-1129.5px, -277.5px); animation-timing-function: steps(1, end); }
+      76.43312101910828% { transform: translate(0px, 97.109677px) translate(1129.5px, 277.5px) rotate(0deg) scale(1, 1) translate(-1129.5px, -277.5px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
       78.13163481953292% { transform: translate(0px, 106px) translate(1129.5px, 277.5px) rotate(0deg) scale(1, 1) translate(-1129.5px, -277.5px); animation-timing-function: steps(1, end); }
       100% { transform: translate(0px, 106px) translate(1129.5px, 277.5px) rotate(0deg) scale(1, 1) translate(-1129.5px, -277.5px); }
     }

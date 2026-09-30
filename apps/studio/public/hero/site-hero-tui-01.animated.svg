@@ -113,29 +113,28 @@
   <style>
     @keyframes svgent-tui-01-animation_anim-auto\:0\.15\.0-keyframes {
       0% { transform: translate(0px, 0px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
-      81.04594047963018% { transform: translate(0px, 0px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
-      81.65243886422736% { transform: translate(0px, 0px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
-      81.79979511964487% { transform: translate(0px, -31px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
-      82.40629350424207% { transform: translate(0px, -31px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
-      82.55364975965959% { transform: translate(0px, -62px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
-      83.16014814425678% { transform: translate(0px, -62px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
-      83.30750439967429% { transform: translate(0px, -93px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
-      83.9140027842715% { transform: translate(0px, -93px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
-      84.06135903968901% { transform: translate(0px, -124px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
-      84.6678574242862% { transform: translate(0px, -124px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
-      84.8152136797037% { transform: translate(0px, -155px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
-      85.42171206430092% { transform: translate(0px, -155px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
-      85.56906831971843% { transform: translate(0px, -186px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
-      86.17556670431561% { transform: translate(0px, -186px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
-      86.32292295973313% { transform: translate(0px, -217px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
-      86.92942134433034% { transform: translate(0px, -217px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
-      87.07677759974784% { transform: translate(0px, -248px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
-      87.68327598434504% { transform: translate(0px, -248px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
-      87.83063223976255% { transform: translate(0px, -279px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
-      88.43713062435977% { transform: translate(0px, -279px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
-      88.58448687977727% { transform: translate(0px, -310px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
-      89.19098526437446% { transform: translate(0px, -310px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
-      89.33834151979197% { transform: translate(0px, -341px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
+      82.05431956082057% { transform: translate(0px, 0px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
+      82.2016758162381% { transform: translate(0px, -31px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
+      82.24167581623809% { transform: translate(0px, -31px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
+      82.28167581623809% { transform: translate(0px, -62px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
+      82.68034286814986% { transform: translate(0px, -62px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
+      82.82769912356737% { transform: translate(0px, -93px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
+      83.16189925840317% { transform: translate(0px, -93px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
+      83.30925551382067% { transform: translate(0px, -124px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
+      83.73976692670712% { transform: translate(0px, -124px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
+      83.88712318212463% { transform: translate(0px, -155px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
+      84.82326880477704% { transform: translate(0px, -155px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
+      84.97062506019455% { transform: translate(0px, -186px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
+      85.20851391697968% { transform: translate(0px, -186px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
+      85.3558701723972% { transform: translate(0px, -217px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
+      86.31609361456228% { transform: translate(0px, -217px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
+      86.46344986997978% { transform: translate(0px, -248px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
+      87.68852932678418% { transform: translate(0px, -248px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
+      87.83588558220168% { transform: translate(0px, -279px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
+      87.87588558220169% { transform: translate(0px, -279px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
+      87.93219686025235% { transform: translate(0px, -310px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
+      87.97219686025235% { transform: translate(0px, -310px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: linear; }
+      88.01219686025232% { transform: translate(0px, -341px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); animation-timing-function: steps(1, end); }
       100% { transform: translate(0px, -341px) translate(720px, 581.5px) rotate(0deg) scale(1, 1) translate(-720px, -581.5px); }
     }
     .bsvg-svgent-tui-01-animation_anim-auto\:0\.15\.0 {

@@ -84,7 +84,16 @@ export type { AppHighlightBeat } from "./highlight.js";
 export { beatLiftPx, planAppHighlights, planBeatLift } from "./highlight.js";
 export type { SceneAction } from "./interaction.js";
 export { sceneActionMeta } from "./interaction.js";
-export type { HighlightRun, InlineRun, InlineStyle, MarkdownBlock } from "./markdown.js";
+export type {
+  HighlightRun,
+  InlineRun,
+  MarkdownBlock,
+  MarkdownInline,
+  MarkdownListItem,
+  MarkdownTableAlignment,
+  MarkdownTableCell,
+  MarkdownTaskState,
+} from "./markdown.js";
 export {
   highlightCode,
   markdownPlainText,

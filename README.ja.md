@@ -26,7 +26,7 @@ SVGENT は、**エージェントとの会話を創作して画像と動画に�
 
 内容: IME入力(`[[空状態|からじょうたい]]`)、日本語の折り返し、thinking、tool実行、Markdown、TypeScriptのsyntax highlight、choice、承認UI
 
-表示形式: animated SVG (2.65 MB) · [animated WebP (1.74 MB)](assets/readme/demo/readme-tui-dark-01.animated.webp) · [MP4 (26.8秒、0.25 MB)](assets/readme/demo/readme-tui-dark-01.mp4) · [台本](examples/readme-tui-dark.json)
+表示形式: animated SVG (2.65 MB) · [animated WebP (1.74 MB)](assets/readme/demo/readme-tui-dark-01.animated.webp) · [MP4 (26.8秒、0.23 MB)](assets/readme/demo/readme-tui-dark-01.mp4) · [台本](examples/readme-tui-dark.json)
 
 ### アプリ — choiceから画像生成へ
 
@@ -36,7 +36,7 @@ SVGENT は、**エージェントとの会話を創作して画像と動画に�
 
 選択のあと tiles skeleton で間を取り、完成画像へ切り替わります。生成中は状態文も更新されます。
 
-表示形式: animated SVG (1.81 MB) · [animated WebP (2.46 MB)](assets/readme/demo/readme-app-image-01.animated.webp) · [MP4 (20.4秒、0.19 MB)](assets/readme/demo/readme-app-image-01.mp4) · [台本](examples/readme-app-image.json) · [生成画像](packages/studio/assets/presets/watercolor-traveler-dusk.webp)
+表示形式: animated SVG (1.81 MB) · [animated WebP (2.46 MB)](assets/readme/demo/readme-app-image-01.animated.webp) · [MP4 (20.4秒、0.20 MB)](assets/readme/demo/readme-app-image-01.mp4) · [台本](examples/readme-app-image.json) · [生成画像](packages/studio/assets/presets/watercolor-traveler-dusk.webp)
 
 ### ターミナル — 追従カメラで拒否から承認へ
 
@@ -88,7 +88,7 @@ svgent は利用者が用意した台本だけを描画し、実セッション�
 - **アプリ / ターミナルの2画面** — 台本は共通で、切り替えるだけで両方書き出せます
 - **書き出し** — 静止画は SVG / PNG / WebP、動画は SVG / WebP / GIF / MP4。長い会話はページに分けられます
 - **間の設計** — 入力、thinking、ツール実行、承認、余韻をそれぞれ調整。メッセージ単位で上書きすれば、全体のテンポを崩さず一箇所だけ変えられます
-- **Markdown** — リスト、引用、コードブロックの syntax highlight
+- **Markdown** — 表、タスクリスト、取り消し線、入れ子のリストと引用、コードブロックの syntax highlight。表は幅が足りなければ1列に並べ替えます
 - **見た目** — テーマ6種、背景とアクセント色の指定、文字とUIの拡大縮小、透過キャンバス
 - **SVG source editor** — 生成された SVG をその場で編集して、プレビューに反映
 

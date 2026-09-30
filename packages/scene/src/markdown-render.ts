@@ -1,10 +1,5 @@
-import { type AnyVNode, Box, Flex, Inline, Text } from "@boundsvg/core";
-import {
-  chipRevealAnimation,
-  revealUnitsFor,
-  structureRevealAnimation,
-  visibilityWindow,
-} from "./animations.js";
+import { type AnyVNode, Box, Flex, Inline, Path, Text } from "@boundsvg/core";
+import { revealUnitsFor, structureRevealAnimation, visibilityWindow } from "./animations.js";
 import {
   estimateTextWidthPx,
   hexToRgb,
@@ -12,19 +7,29 @@ import {
   MONO_FALLBACK,
   MONO_FONT,
   type RenderedBlock,
-  SANS_FALLBACK,
-  SANS_FONT,
   type SceneEnv,
   type ScenePalette,
   sizeLeft,
   TUI_CHAR_RATIO,
 } from "./env.js";
+import { type HighlightRun, highlightCode, parseMarkdown } from "./markdown.js";
 import {
-  type HighlightRun,
-  type InlineRun,
-  type MarkdownBlock,
-  parseMarkdown,
-} from "./markdown.js";
+  blockTypography,
+  type LineTextOptions,
+  lineText,
+  type RevealAt,
+  wholeCells,
+} from "./markdown-inline-render.js";
+import type { MarkdownBlock } from "./markdown-model.js";
+import { layoutMarkdownTable, renderMarkdownTable } from "./markdown-table.js";
+import {
+  codePointLength,
+  type DisplayLine,
+  displayLineLength,
+  markdownBlockRevealLength,
+  markdownDisplayLines,
+  markdownListItemRevealLength,
+} from "./markdown-traversal.js";
 import { measureLineWidthPx } from "./measure.js";
 import type { MessageTiming } from "./timeline.js";
 
@@ -43,55 +48,40 @@ type RenderedMarkdown = {
   estimatedHeight: number;
 };
 
-// ————————————————————————————————————————————————————————————————————————————
-// Markdown rendering
-// ————————————————————————————————————————————————————————————————————————————
+/** Heading levels past this one share its size; smaller type would read as body. */
+const SMALLEST_SIZED_HEADING = 4;
+/** Space between a list marker and its item. */
+const LIST_MARKER_GAP = 8;
+/** An app list's marker column, as short lists have always had it. */
+const APP_LIST_MARKER_MIN_PX = 22;
+/** A terminal list's marker column, in cells. */
+const TUI_LIST_MARKER_MIN_CELLS = 2;
+/** Space between the items of a tight app list. */
+const APP_TIGHT_ITEM_GAP_PX = 4;
+/** Space between the items of a loose app list. */
+const APP_LOOSE_ITEM_GAP_PX = 10;
+/** The app quote's bar and the gap after it. */
+const APP_QUOTE_COLUMN_PX = 15;
+/** An app task box against the body font size. */
+const TASK_BOX_FONT_RATIO = 0.95;
+/** Room beside an app task box in the marker column. */
+const TASK_BOX_MARGIN_PX = 4;
+/** Corner radius of the app task box. */
+const TASK_BOX_RADIUS_PX = 3;
+/** The task box outline, and the least a check mark's stroke may be. */
+const TASK_BOX_BORDER_PX = 1.5;
+/** A check mark's stroke against the box size. */
+const CHECK_MARK_STROKE_RATIO = 1 / 8;
+/** The check mark's corners, as fractions of the task box. */
+const CHECK_MARK_POINTS: ReadonlyArray<readonly [number, number]> = [
+  [0.22, 0.52],
+  [0.42, 0.72],
+  [0.78, 0.3],
+];
 
-function inlineNodes(
-  runs: InlineRun[],
-  context: MarkdownRenderContext,
-  offsetCharacters: number,
-): Array<ReturnType<typeof Inline>> {
-  const { env, surface } = context;
-  const { palette, metrics } = env;
-  let runOffset = 0;
-  return runs.map((run) => {
-    const chipOffset = offsetCharacters + runOffset;
-    runOffset += Array.from(run.text).length;
-    switch (run.style) {
-      case "strong":
-        return Inline(
-          {
-            color: palette.text,
-            textStrokes: [{ color: palette.text, widthPx: surface === "tui" ? 0.4 : 0.45 }],
-          },
-          run.text,
-        );
-      case "emphasis":
-        return Inline({ color: palette.text, fontStyle: "italic" }, run.text);
-      case "code": {
-        const animate = chipRevealAnimation(context, chipOffset);
-        return Inline(
-          {
-            font: MONO_FONT,
-            fallback: MONO_FALLBACK,
-            color: palette.codeText,
-            background: surface === "tui" ? palette.panelStrong : palette.code,
-            paddingInline: [4, 4],
-            borderRadius: surface === "tui" ? [2, 2, 2, 2] : [4, 4, 4, 4],
-            ...(surface === "app" ? { fontSizePx: metrics.codePx } : {}),
-            ...(animate ? { animate } : {}),
-          },
-          run.text,
-        );
-      }
-      case "link":
-        return Inline({ color: palette.accent }, run.text);
-      default:
-        return Inline({ color: palette.text }, run.text);
-    }
-  });
-}
+// ————————————————————————————————————————————————————————————————————————————
+// Code blocks
+// ————————————————————————————————————————————————————————————————————————————
 
 /** Pastel hues for dark code panels, saturated ones for light panels. */
 const CODE_HUES = {
@@ -161,25 +151,6 @@ function codeLineNodes(
   return line.map((run) => Inline({ color: codeTokenColor(run.token, palette) }, run.text));
 }
 
-function blockCharacterCount(block: MarkdownBlock): number {
-  if (block.type === "rule") {
-    return 1;
-  }
-  if (block.type === "code") {
-    return block.lines.reduce(
-      (sum, line) => sum + line.reduce((run, part) => run + Array.from(part.text).length, 0) + 1,
-      0,
-    );
-  }
-  if (block.type === "list") {
-    return block.items.reduce(
-      (sum, item) => sum + item.reduce((run, part) => run + Array.from(part.text).length, 0) + 1,
-      0,
-    );
-  }
-  return block.runs.reduce((sum, run) => sum + Array.from(run.text).length, 0);
-}
-
 function renderCodeBlock(
   block: Extract<MarkdownBlock, { type: "code" }>,
   context: MarkdownRenderContext,
@@ -187,6 +158,7 @@ function renderCodeBlock(
 ): RenderedBlock {
   const { width, surface, env } = context;
   const { palette, metrics } = env;
+  const lines = highlightCode(block.text, block.language);
   const lineHeight = surface === "tui" ? metrics.tuiLinePx : metrics.codeLinePx;
   const codeFontPx = surface === "tui" ? metrics.tuiFontPx : metrics.codePx;
   const gutterFontPx = Math.max(9, metrics.codePx - 3);
@@ -197,7 +169,7 @@ function renderCodeBlock(
       ? 0
       : Math.ceil(
           measureLineWidthPx(env.engine, {
-            text: String(block.lines.length),
+            text: String(lines.length),
             font: MONO_FONT,
             fontSizePx: gutterFontPx,
             fallbackRatio: TUI_CHAR_RATIO,
@@ -220,10 +192,8 @@ function renderCodeBlock(
     }
     return "ctx";
   };
-  const addedCount = isDiff ? block.lines.filter((line) => diffLineKind(line) === "add").length : 0;
-  const removedCount = isDiff
-    ? block.lines.filter((line) => diffLineKind(line) === "del").length
-    : 0;
+  const addedCount = isDiff ? lines.filter((line) => diffLineKind(line) === "add").length : 0;
+  const removedCount = isDiff ? lines.filter((line) => diffLineKind(line) === "del").length : 0;
 
   const { timing: projectTiming } = context.env.project;
   const revealCps =
@@ -237,24 +207,20 @@ function renderCodeBlock(
       ? null
       : context.messageTiming.startMs + (offsetCharacters / revealCps) * 1_000;
 
-  const codeLines = block.lines.map((line, lineIndex) => {
-    // One tick per line break, not per syntax-highlight run: counting runs
-    // stretched a highlighted panel far past the time budgeted for it.
-    const previousCharacters = block.lines
-      .slice(0, lineIndex)
-      .reduce(
-        (sum, line) => sum + line.reduce((run, part) => run + Array.from(part.text).length, 0) + 1,
-        0,
-      );
-    const units = revealUnitsFor(context, offsetCharacters + previousCharacters);
+  // One tick per line break, not per syntax-highlight run: counting runs
+  // stretched a highlighted panel far past the time budgeted for it.
+  let previousCharacters = 0;
+  const codeLines = lines.map((line, lineIndex) => {
+    const lineStart = previousCharacters;
+    previousCharacters += line.reduce((sum, part) => sum + codePointLength(part.text), 0) + 1;
+    const units = revealUnitsFor(context, offsetCharacters + lineStart);
     // Reveal moment of this line's first character: the row's background
     // slab, gutter number, and decorations all land with the text, so the
     // panel visibly grows line by line instead of standing at full height.
     const lineRevealMs =
       context.reveal === "instant"
         ? null
-        : context.messageTiming.startMs +
-          ((offsetCharacters + previousCharacters) / revealCps) * 1_000;
+        : context.messageTiming.startMs + ((offsetCharacters + lineStart) / revealCps) * 1_000;
     const lineText = Text(
       {
         width: codeWidth,
@@ -347,7 +313,7 @@ function renderCodeBlock(
           rowSlab(entry, lineIndex, { radius: 3, bottomPad: 8 }),
         ),
       ),
-      estimatedHeight: 18 + block.lines.length * lineHeight,
+      estimatedHeight: 18 + lines.length * lineHeight,
     };
   }
 
@@ -411,26 +377,17 @@ function renderCodeBlock(
         rowSlab(entry, lineIndex, { radius: 10, bottomPad: 10 }),
       ),
     ),
-    estimatedHeight: 24 + metrics.metaPx + 10 + block.lines.length * lineHeight,
+    estimatedHeight: 24 + metrics.metaPx + 10 + lines.length * lineHeight,
   };
 }
 
-/** Font, line height, and family for one markdown block on the active surface. */
-function blockTypography(context: MarkdownRenderContext): {
-  fontSizePx: number;
-  lineHeightPx: number;
-  family: { font: string; fallback: string[] };
-} {
-  const { surface, env } = context;
-  const { metrics } = env;
-  return {
-    fontSizePx: surface === "tui" ? metrics.tuiFontPx : metrics.prosePx,
-    lineHeightPx: surface === "tui" ? metrics.tuiLinePx : metrics.proseLinePx,
-    family:
-      surface === "tui"
-        ? { font: MONO_FONT, fallback: MONO_FALLBACK }
-        : { font: SANS_FONT, fallback: SANS_FALLBACK },
-  };
+// ————————————————————————————————————————————————————————————————————————————
+// Prose, rules, literal text
+// ————————————————————————————————————————————————————————————————————————————
+
+/** Space between sibling blocks inside a list item or a quote. */
+function blockGap(context: MarkdownRenderContext): number {
+  return context.surface === "tui" ? 6 : 8;
 }
 
 function renderRuleBlock(context: MarkdownRenderContext, offsetCharacters: number): RenderedBlock {
@@ -449,132 +406,39 @@ function renderRuleBlock(context: MarkdownRenderContext, offsetCharacters: numbe
   };
 }
 
-function renderListBlock(
-  block: Extract<MarkdownBlock, { type: "list" }>,
-  context: MarkdownRenderContext,
-  offsetCharacters: number,
-): RenderedBlock {
-  const { width, surface, env } = context;
-  const { palette, metrics } = env;
-  const { fontSizePx, lineHeightPx, family } = blockTypography(context);
-  const itemHeight = lineHeightPx + (surface === "tui" ? 0 : 4);
-  const bulletWidth = surface === "tui" ? Math.ceil(metrics.tuiCharPx * 2) : 22;
-  const listGap = surface === "tui" ? 0 : 4;
-  const itemTextWidth = sizeLeft(width, bulletWidth, 8);
-  // Wrap-aware: long items span multiple lines, especially at large scales.
-  const estimatedListHeight = block.items.reduce((sum, item) => {
-    const text = item.map((run) => run.text).join("");
-    const lines = Math.max(
-      1,
-      Math.ceil(estimateTextWidthPx(text, fontSizePx) / Math.max(40, itemTextWidth)),
-    );
-    return sum + (itemHeight + (lines - 1) * lineHeightPx);
-  }, 0);
+function estimatedLines(line: DisplayLine, fontSizePx: number, width: number): number {
+  const text = line.map((run) => run.text).join("");
+  // Width-based wrap estimate: the old chars-per-line heuristic assumed
+  // 0.72em glyphs, which undercounts lines for CJK (~1em) and clipped the
+  // transcript tail once the auto-scroll target fell short.
+  return Math.max(1, Math.ceil(estimateTextWidthPx(text, fontSizePx) / Math.max(40, width)));
+}
+
+/** Lines of one text block; a single line stays a bare Text node. */
+function stackLines(lines: DisplayLine[], at: RevealAt, options: LineTextOptions): RenderedBlock {
+  const { context } = at;
+  let lineOffset = at.offset;
+  let estimatedHeight = 0;
+  const nodes = lines.map((line) => {
+    const node = lineText(line, { context, offset: lineOffset }, options);
+    lineOffset += displayLineLength(line) + 1;
+    estimatedHeight +=
+      estimatedLines(line, options.fontSizePx, options.width) * options.lineHeightPx;
+    return node;
+  });
+  const [only] = nodes;
   return {
-    node: Flex(
-      { direction: "column", width, gap: listGap },
-      ...block.items.map((item, index) => {
-        const itemOffset =
-          offsetCharacters +
-          block.items
-            .slice(0, index)
-            .reduce(
-              (sum, previous) =>
-                sum + previous.reduce((run, part) => run + Array.from(part.text).length, 0) + 1,
-              0,
-            );
-        const markerAnimate = structureRevealAnimation(context, itemOffset);
-        return Flex(
-          { direction: "row", width, gap: 8 },
-          Text(
-            {
-              width: bulletWidth,
-              font: MONO_FONT,
-              fallback: MONO_FALLBACK,
-              fontSizePx,
-              lineHeightPx,
-              color: surface === "tui" ? palette.muted : palette.accent,
-              wrap: "none",
-              ...(markerAnimate ? { animate: markerAnimate } : {}),
-            },
-            block.ordered ? `${index + 1}.` : surface === "tui" ? "-" : "•",
-          ),
-          (() => {
-            const units = revealUnitsFor(context, itemOffset);
-            return Text(
-              {
-                width: sizeLeft(width, bulletWidth, 8),
-                font: family.font,
-                fallback: family.fallback,
-                fontSizePx,
-                lineHeightPx,
-                color: palette.text,
-                wrap: "char",
-                ...(units ? { animateUnits: units } : {}),
-              },
-              ...inlineNodes(item, context, itemOffset),
-            );
-          })(),
-        );
-      }),
-    ),
-    estimatedHeight: estimatedListHeight,
+    node:
+      nodes.length === 1 && only !== undefined
+        ? only
+        : Flex({ direction: "column", width: options.width, gap: 0 }, ...nodes),
+    estimatedHeight,
   };
 }
 
-/**
- * Wraps quoted text in its leading rule. A terminal draws the "|" gutter as a
- * real cell the way CLI markdown renderers do; the app draws a rounded bar.
- */
-function quoteGutter(
-  textNode: AnyVNode,
-  options: {
-    context: MarkdownRenderContext;
-    offsetCharacters: number;
-    quoteBarWidth: number;
-    fontSizePx: number;
-  },
-): AnyVNode {
-  const { context, offsetCharacters, quoteBarWidth, fontSizePx } = options;
-  const { width, surface, env } = context;
-  const { palette } = env;
-  const { lineHeightPx } = blockTypography(context);
-  const animate = structureRevealAnimation(context, offsetCharacters);
-  if (surface === "tui") {
-    return Flex(
-      { direction: "row", width, gap: 0 },
-      Text(
-        {
-          width: quoteBarWidth,
-          font: MONO_FONT,
-          fallback: MONO_FALLBACK,
-          fontSizePx,
-          lineHeightPx,
-          color: palette.faint,
-          wrap: "none",
-          ...(animate ? { animate } : {}),
-        },
-        "\u2502",
-      ),
-      textNode,
-    );
-  }
-  return Flex(
-    { direction: "row", width, gap: 12 },
-    Box({
-      width: 3,
-      minHeight: lineHeightPx,
-      borderRadius: 2,
-      background: palette.accent,
-      ...(animate ? { animate } : {}),
-    }),
-    textNode,
-  );
-}
-
-/** Headings, quotes, and paragraphs share one text node and differ only in trim. */
+/** Headings and paragraphs: one text line per hard break. */
 function renderProseBlock(
-  block: Exclude<MarkdownBlock, { type: "code" } | { type: "rule" } | { type: "list" }>,
+  block: Extract<MarkdownBlock, { type: "heading" | "paragraph" }>,
   context: MarkdownRenderContext,
   offsetCharacters: number,
 ): RenderedBlock {
@@ -582,37 +446,23 @@ function renderProseBlock(
   const { palette, metrics } = env;
   const { fontSizePx, lineHeightPx, family } = blockTypography(context);
   const isHeading = block.type === "heading";
-  const isQuote = block.type === "quote";
-  const quoteBarWidth = surface === "tui" ? Math.ceil(metrics.tuiCharPx * 1.5) : 15;
-  const textWidth = isQuote ? width - quoteBarWidth : width;
   // A terminal cannot change its cell size: TUI headings keep the grid font
   // and stand out through color and synthetic bold instead.
   const size =
     isHeading && surface === "app"
-      ? fontSizePx + Math.max(2, Math.round((6 - block.level) * metrics.scale))
+      ? fontSizePx +
+        Math.max(2, Math.round((6 - Math.min(block.level, SMALLEST_SIZED_HEADING)) * metrics.scale))
       : fontSizePx;
   const headingLineHeight = surface === "app" ? lineHeightPx + 5 : lineHeightPx;
-  const blockText = block.runs.map((run) => run.text).join("");
-  // Width-based wrap estimate: the old chars-per-line heuristic assumed
-  // 0.72em glyphs, which undercounts lines for CJK (~1em) and clipped the
-  // transcript tail once the auto-scroll target fell short.
-  const estimatedLineCount = Math.max(
-    1,
-    Math.ceil(estimateTextWidthPx(blockText, size) / Math.max(40, textWidth)),
-  );
-  const units = revealUnitsFor(context, offsetCharacters);
-  const textNode = Text(
+  return stackLines(
+    markdownDisplayLines(block.children),
+    { context, offset: offsetCharacters },
     {
-      width: textWidth,
-      font: family.font,
-      fallback: family.fallback,
+      width,
       fontSizePx: size,
       lineHeightPx: isHeading ? headingLineHeight : lineHeightPx,
-      color: isQuote
-        ? palette.muted
-        : isHeading && surface === "tui"
-          ? palette.accent
-          : palette.text,
+      family,
+      color: isHeading && surface === "tui" ? palette.accent : palette.text,
       ...(isHeading
         ? {
             textStrokes: [
@@ -623,22 +473,365 @@ function renderProseBlock(
             ],
           }
         : {}),
-      wrap: "char",
-      ...(units ? { animateUnits: units } : {}),
     },
-    ...inlineNodes(block.runs, context, offsetCharacters),
   );
-  if (isQuote) {
-    return {
-      node: quoteGutter(textNode, { context, offsetCharacters, quoteBarWidth, fontSizePx }),
-      estimatedHeight: estimatedLineCount * lineHeightPx,
-    };
-  }
+}
+
+/** Raw HTML and unsupported syntax, shown as written with its line breaks. */
+function renderLiteralBlock(
+  block: Extract<MarkdownBlock, { type: "literal" }>,
+  context: MarkdownRenderContext,
+  offsetCharacters: number,
+): RenderedBlock {
+  const { fontSizePx, lineHeightPx, family } = blockTypography(context);
+  const lines = block.text.split("\n").map(
+    (text): DisplayLine =>
+      text.length === 0
+        ? []
+        : [
+            {
+              text,
+              kind: "literal",
+              strong: false,
+              emphasis: false,
+              strikethrough: false,
+              link: false,
+            },
+          ],
+  );
+  return stackLines(
+    lines,
+    { context, offset: offsetCharacters },
+    {
+      width: context.width,
+      fontSizePx,
+      lineHeightPx,
+      family,
+      color: context.env.palette.text,
+      whiteSpace: "pre-wrap",
+    },
+  );
+}
+
+// ————————————————————————————————————————————————————————————————————————————
+// Containers: lists and quotes hold blocks of their own
+// ————————————————————————————————————————————————————————————————————————————
+
+/** Blocks stacked in a column, each starting at its own tick. */
+function renderBlockStack(blocks: MarkdownBlock[], at: RevealAt, gap: number): RenderedBlock {
+  const { context } = at;
+  let offset = at.offset;
+  let estimatedHeight = 0;
+  const nodes = blocks.map((block, index) => {
+    const rendered = renderMarkdownBlock(block, context, offset);
+    offset += markdownBlockRevealLength(block);
+    estimatedHeight += rendered.estimatedHeight + (index > 0 ? gap : 0);
+    return rendered.node;
+  });
+  const [only] = nodes;
   return {
-    node: textNode,
-    estimatedHeight: estimatedLineCount * (isHeading ? headingLineHeight : lineHeightPx),
+    node:
+      nodes.length === 1 && only !== undefined
+        ? only
+        : Flex({ direction: "column", width: context.width, gap }, ...nodes),
+    estimatedHeight,
   };
 }
+
+/** An empty list item or quote still takes one line. */
+function emptyLine(context: MarkdownRenderContext): RenderedBlock {
+  const { fontSizePx, lineHeightPx, family } = blockTypography(context);
+  return {
+    node: Text(
+      {
+        width: context.width,
+        font: family.font,
+        fallback: family.fallback,
+        fontSizePx,
+        lineHeightPx,
+        color: context.env.palette.text,
+        wrap: "none",
+      },
+      Inline({ color: context.env.palette.text }, ""),
+    ),
+    estimatedHeight: lineHeightPx,
+  };
+}
+
+function listMarkerText(
+  block: Extract<MarkdownBlock, { type: "list" }>,
+  index: number,
+  surface: "app" | "tui",
+): string {
+  const task = block.items[index]?.task ?? null;
+  const bullet = block.ordered ? `${block.start + index}.` : surface === "tui" ? "-" : "•";
+  if (surface === "tui" && task !== null) {
+    const box = task === "checked" ? "[x]" : "[ ]";
+    return block.ordered ? `${bullet} ${box}` : box;
+  }
+  return bullet;
+}
+
+/** App task box, drawn from boxes and a stroke rather than a font glyph. */
+function taskBox(
+  state: "checked" | "unchecked",
+  context: MarkdownRenderContext,
+  sizePx: number,
+): AnyVNode {
+  const { palette } = context.env;
+  const checked = state === "checked";
+  return Box(
+    {
+      width: sizePx,
+      height: sizePx,
+      borderRadius: TASK_BOX_RADIUS_PX,
+      borderWidth: TASK_BOX_BORDER_PX,
+      borderColor: checked ? palette.accent : palette.muted,
+      ...(checked ? { background: palette.accent } : {}),
+    },
+    ...(checked
+      ? [
+          Path({
+            d: CHECK_MARK_POINTS.map(
+              ([x, y], index) => `${index === 0 ? "M" : "L"}${sizePx * x} ${sizePx * y}`,
+            ).join(" "),
+            width: sizePx,
+            height: sizePx,
+            stroke: palette.canvas,
+            strokeWidth: Math.max(TASK_BOX_BORDER_PX, sizePx * CHECK_MARK_STROKE_RATIO),
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            fill: "none",
+          }),
+        ]
+      : []),
+  );
+}
+
+/** Side of the app task box, matched to the text beside it. */
+function taskBoxSize(context: { env: SceneEnv; surface: "app" | "tui" }): number {
+  const { fontSizePx } = blockTypography(context);
+  return Math.round(fontSizePx * TASK_BOX_FONT_RATIO);
+}
+
+/**
+ * The marker column of a list. The widest marker decides it, measured in the
+ * marker's own font, so a list that starts at 98 lines its text up past 100.
+ */
+function listMarkerWidth(
+  block: Extract<MarkdownBlock, { type: "list" }>,
+  context: { env: SceneEnv; surface: "app" | "tui" },
+): number {
+  const { env, surface } = context;
+  const { metrics } = env;
+  const { fontSizePx } = blockTypography(context);
+  const widestMarker = block.items.reduce(
+    (widest, _item, index) =>
+      Math.max(
+        widest,
+        measureLineWidthPx(env.engine, {
+          text: listMarkerText(block, index, surface),
+          font: MONO_FONT,
+          fontSizePx,
+          fallbackRatio: TUI_CHAR_RATIO,
+        }),
+      ),
+    0,
+  );
+  // The column only widens once a marker outgrows the one short lists have
+  // always had. On the app a marker may hang into half the gap after it, as
+  // "1." always has.
+  if (surface === "tui") {
+    return Math.ceil(
+      metrics.tuiCharPx *
+        Math.max(TUI_LIST_MARKER_MIN_CELLS, wholeCells(widestMarker, metrics.tuiCharPx)),
+    );
+  }
+  const hasTask = block.items.some((item) => item.task !== null);
+  return Math.max(
+    APP_LIST_MARKER_MIN_PX,
+    Math.ceil(widestMarker) - LIST_MARKER_GAP / 2,
+    hasTask ? taskBoxSize(context) + TASK_BOX_MARGIN_PX : 0,
+  );
+}
+
+/** An item's marker: its bullet or number, or on the app a drawn task box. */
+function listMarkerNode(
+  marker: {
+    block: Extract<MarkdownBlock, { type: "list" }>;
+    index: number;
+    text: string;
+    width: number;
+  },
+  at: RevealAt,
+): AnyVNode {
+  const { context, offset } = at;
+  const { surface, env } = context;
+  const { palette } = env;
+  const { fontSizePx, lineHeightPx } = blockTypography(context);
+  const animate = structureRevealAnimation(context, offset);
+  const task = marker.block.items[marker.index]?.task ?? null;
+  const markerText = (width?: number) =>
+    Text(
+      {
+        ...(width !== undefined ? { width } : {}),
+        font: MONO_FONT,
+        fallback: MONO_FALLBACK,
+        fontSizePx,
+        lineHeightPx,
+        color: surface === "tui" ? palette.muted : palette.accent,
+        wrap: "none",
+        ...(width !== undefined && animate ? { animate } : {}),
+      },
+      marker.text,
+    );
+  if (surface === "tui" || task === null) {
+    return markerText(marker.width);
+  }
+  return Flex(
+    {
+      direction: "row",
+      width: marker.width,
+      height: lineHeightPx,
+      alignItems: "center",
+      gap: 6,
+      ...(animate ? { animate } : {}),
+    },
+    ...(marker.block.ordered ? [markerText()] : []),
+    taskBox(task, context, taskBoxSize(context)),
+  );
+}
+
+function renderListBlock(
+  block: Extract<MarkdownBlock, { type: "list" }>,
+  context: MarkdownRenderContext,
+  offsetCharacters: number,
+): RenderedBlock {
+  const { width, surface, env } = context;
+  const { lineHeightPx } = blockTypography(context);
+  const markers = block.items.map((_item, index) => listMarkerText(block, index, surface));
+  const markerWidth = listMarkerWidth(block, { env, surface });
+  const itemWidth = sizeLeft(width, markerWidth, LIST_MARKER_GAP);
+  const itemContext = { ...context, width: itemWidth };
+  // A loose list leaves a blank line between items on the terminal and
+  // wider spacing in the app; a tight one keeps the spacing lists always had.
+  const tightGap = surface === "tui" ? 0 : APP_TIGHT_ITEM_GAP_PX;
+  const itemGap = block.loose
+    ? surface === "tui"
+      ? lineHeightPx
+      : APP_LOOSE_ITEM_GAP_PX
+    : tightGap;
+  const innerGap = block.loose ? blockGap(context) : tightGap;
+  let itemOffset = offsetCharacters;
+  let estimatedHeight = 0;
+  const rows = block.items.map((item, index) => {
+    const content =
+      item.children.length > 0
+        ? renderBlockStack(item.children, { context: itemContext, offset: itemOffset }, innerGap)
+        : emptyLine(itemContext);
+    const marker = listMarkerNode(
+      { block, index, text: markers[index] ?? "", width: markerWidth },
+      { context, offset: itemOffset },
+    );
+    itemOffset += markdownListItemRevealLength(item);
+    estimatedHeight +=
+      Math.max(lineHeightPx, content.estimatedHeight) +
+      (surface === "tui" ? 0 : 4) +
+      (index > 0 ? itemGap : 0);
+    return Flex({ direction: "row", width, gap: LIST_MARKER_GAP }, marker, content.node);
+  });
+  return {
+    node: Flex({ direction: "column", width, gap: itemGap }, ...rows),
+    estimatedHeight,
+  };
+}
+
+/**
+ * The rule beside quoted blocks: a rounded accent bar in the app, a thin
+ * terminal-colored line centred in its cell on the TUI. It stretches with
+ * whatever it sits beside and appears with that block's first character.
+ */
+function quoteBar(
+  context: MarkdownRenderContext,
+  offsetCharacters: number,
+  barWidth: number,
+): AnyVNode {
+  const { surface, env } = context;
+  const { palette, metrics } = env;
+  const { lineHeightPx } = blockTypography(context);
+  const animate = structureRevealAnimation(context, offsetCharacters);
+  return Flex(
+    {
+      direction: "row",
+      width: barWidth,
+      alignItems: "stretch",
+      ...(surface === "tui" ? { padding: [0, 0, 0, Math.floor(metrics.tuiCharPx / 2)] } : {}),
+      ...(animate ? { animate } : {}),
+    },
+    Box({
+      width: surface === "tui" ? Math.max(1, Math.round(metrics.tuiFontPx / 12)) : 3,
+      minHeight: lineHeightPx,
+      background: surface === "tui" ? palette.faint : palette.accent,
+      ...(surface === "app" ? { borderRadius: 2 } : {}),
+    }),
+  );
+}
+
+/** The column a quote's bar takes: one and a half cells, or the app's bar and gap. */
+function quoteBarWidth(env: SceneEnv, surface: "app" | "tui"): number {
+  return surface === "tui" ? Math.ceil(env.metrics.tuiCharPx * 1.5) : APP_QUOTE_COLUMN_PX;
+}
+
+function renderQuoteBlock(
+  block: Extract<MarkdownBlock, { type: "quote" }>,
+  context: MarkdownRenderContext,
+  offsetCharacters: number,
+): RenderedBlock {
+  const { width, surface, env } = context;
+  const barWidth = quoteBarWidth(env, surface);
+  const innerWidth = sizeLeft(width, barWidth);
+  const inner = { ...context, width: innerWidth };
+  const gap = blockGap(context);
+  if (block.children.length === 0) {
+    const empty = emptyLine(inner);
+    return {
+      node: Flex(
+        { direction: "row", width, alignItems: "stretch", gap: 0 },
+        quoteBar(context, offsetCharacters, barWidth),
+        empty.node,
+      ),
+      estimatedHeight: empty.estimatedHeight,
+    };
+  }
+  // One row per quoted block, so each stretch of the bar arrives with the
+  // block beside it. The gap between blocks sits inside the row, where the
+  // bar spans it, and the bar reads as one line.
+  let offset = offsetCharacters;
+  let estimatedHeight = 0;
+  const rows = block.children.map((child, index) => {
+    const rendered = renderMarkdownBlock(child, inner, offset);
+    const bar = quoteBar(context, offset, barWidth);
+    offset += markdownBlockRevealLength(child);
+    estimatedHeight += rendered.estimatedHeight + (index > 0 ? gap : 0);
+    const body =
+      index === 0
+        ? rendered.node
+        : Flex(
+            { direction: "column", width: innerWidth, gap: 0 },
+            Box({ width: innerWidth, height: gap }),
+            rendered.node,
+          );
+    return Flex({ direction: "row", width, alignItems: "stretch", gap: 0 }, bar, body);
+  });
+  return {
+    node: Flex({ direction: "column", width, gap: 0 }, ...rows),
+    estimatedHeight,
+  };
+}
+
+// ————————————————————————————————————————————————————————————————————————————
+// Dispatch
+// ————————————————————————————————————————————————————————————————————————————
 
 function renderMarkdownBlock(
   block: MarkdownBlock,
@@ -646,27 +839,76 @@ function renderMarkdownBlock(
   offsetCharacters: number,
 ): RenderedBlock {
   switch (block.type) {
+    case "heading":
+    case "paragraph":
+      return renderProseBlock(block, context, offsetCharacters);
     case "rule":
       return renderRuleBlock(context, offsetCharacters);
     case "code":
       return renderCodeBlock(block, context, offsetCharacters);
     case "list":
       return renderListBlock(block, context, offsetCharacters);
-    default:
-      return renderProseBlock(block, context, offsetCharacters);
+    case "quote":
+      return renderQuoteBlock(block, context, offsetCharacters);
+    case "table":
+      return renderMarkdownTable(block, context, offsetCharacters);
+    case "literal":
+      return renderLiteralBlock(block, context, offsetCharacters);
   }
 }
 
-export function renderMarkdown(source: string, context: MarkdownRenderContext): RenderedMarkdown {
-  const blocks = parseMarkdown(source);
-  const blockGap = context.surface === "tui" ? 6 : 8;
+/** Render parsed blocks as sibling nodes; the caller spaces them. */
+export function renderMarkdownBlocks(
+  blocks: MarkdownBlock[],
+  context: MarkdownRenderContext,
+): RenderedMarkdown {
+  const gap = blockGap(context);
   let characterOffset = 0;
   let estimatedHeight = 0;
   const nodes = blocks.map((block) => {
     const rendered = renderMarkdownBlock(block, context, characterOffset);
-    characterOffset += blockCharacterCount(block);
-    estimatedHeight += rendered.estimatedHeight + blockGap;
+    characterOffset += markdownBlockRevealLength(block);
+    estimatedHeight += rendered.estimatedHeight + gap;
     return rendered.node;
   });
   return { nodes, estimatedHeight };
+}
+
+export function renderMarkdown(source: string, context: MarkdownRenderContext): RenderedMarkdown {
+  return renderMarkdownBlocks(parseMarkdown(source), context);
+}
+
+/**
+ * The widest table the blocks draw at this width, with the list markers and
+ * quote bars in front of it, or 0 if there is none. A bubble sized from the
+ * raw source would take its width from the pipes; this is what it draws.
+ */
+export function markdownTableInkWidthPx(
+  blocks: MarkdownBlock[],
+  options: { env: SceneEnv; surface: "app" | "tui"; width: number },
+): number {
+  const { env, surface, width } = options;
+  let widest = 0;
+  for (const block of blocks) {
+    if (block.type === "table") {
+      widest = Math.max(widest, layoutMarkdownTable(block, { env, surface, width }).width);
+    } else if (block.type === "quote") {
+      const barWidth = quoteBarWidth(env, surface);
+      const inner = markdownTableInkWidthPx(block.children, {
+        ...options,
+        width: sizeLeft(width, barWidth),
+      });
+      widest = Math.max(widest, inner > 0 ? inner + barWidth : 0);
+    } else if (block.type === "list") {
+      const markerWidth = listMarkerWidth(block, { env, surface }) + LIST_MARKER_GAP;
+      for (const item of block.items) {
+        const inner = markdownTableInkWidthPx(item.children, {
+          ...options,
+          width: sizeLeft(width, markerWidth),
+        });
+        widest = Math.max(widest, inner > 0 ? inner + markerWidth : 0);
+      }
+    }
+  }
+  return widest;
 }

@@ -27,11 +27,19 @@ describe("markdown parser", () => {
   });
 
   it("retains inline style roles while dropping link destinations from the scene", () => {
-    const runs = parseInlineMarkdown("See **result**, `code`, and [docs](https://example.test). ");
-    expect(runs.map((run) => run.style)).toContain("strong");
-    expect(runs.map((run) => run.style)).toContain("code");
-    expect(runs.map((run) => run.style)).toContain("link");
-    expect(runs.map((run) => run.text).join("")).not.toContain("example.test");
+    const inlines = parseInlineMarkdown(
+      "See **result**, `code`, and [docs](https://example.test). ",
+    );
+    const types = inlines.map((inline) => inline.type);
+    expect(types).toContain("strong");
+    expect(types).toContain("code");
+    expect(types).toContain("link");
+    expect(JSON.stringify(inlines)).not.toContain("example.test");
+  });
+
+  it("counts code lines apart in plain text", () => {
+    const blocks = parseMarkdown(["```ts", "const one = 1;", "const two = 2;", "```"].join("\n"));
+    expect(markdownPlainText(blocks)).toBe("const one = 1;\nconst two = 2;");
   });
 
   it("assigns syntax token roles through Prism", () => {

@@ -129,29 +129,22 @@
       71.93884189632969% { transform: translate(0px, -46px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
       81.4316397453394% { transform: translate(0px, -46px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
       81.4716397453394% { transform: translate(0px, -115px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
-      87.43377172434552% { transform: translate(0px, -115px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
-      87.65368941209681% { transform: translate(0px, -115px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
-      87.77373205167693% { transform: translate(0px, -138px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
-      87.99364973942822% { transform: translate(0px, -138px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
-      88.11369237900834% { transform: translate(0px, -161px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
-      88.33361006675962% { transform: translate(0px, -161px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
-      88.45365270633975% { transform: translate(0px, -184px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
-      88.67357039409103% { transform: translate(0px, -184px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
-      88.79361303367115% { transform: translate(0px, -207px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
-      89.01353072142244% { transform: translate(0px, -207px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
-      89.13357336100256% { transform: translate(0px, -230px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
-      89.35349104875384% { transform: translate(0px, -230px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
-      89.47353368833396% { transform: translate(0px, -253px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
-      89.69345137608525% { transform: translate(0px, -253px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
-      89.81349401566537% { transform: translate(0px, -276px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
-      90.03341170341666% { transform: translate(0px, -276px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
-      90.15345434299678% { transform: translate(0px, -299px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
-      90.37337203074807% { transform: translate(0px, -299px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
-      90.49341467032819% { transform: translate(0px, -322px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
-      90.71333235807947% { transform: translate(0px, -322px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
-      90.83337499765959% { transform: translate(0px, -345px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
-      91.05329268541088% { transform: translate(0px, -345px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
-      91.173335324991% { transform: translate(0px, -368px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
+      87.3137290847654% { transform: translate(0px, -115px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
+      87.43377172434552% { transform: translate(0px, -161px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
+      87.4755512704739% { transform: translate(0px, -161px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
+      87.59559391005402% { transform: translate(0px, -207px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
+      87.65208456397407% { transform: translate(0px, -207px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
+      87.77212720355419% { transform: translate(0px, -230px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
+      88.01986225876612% { transform: translate(0px, -230px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
+      88.13990489834624% { transform: translate(0px, -253px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
+      89.1526175587256% { transform: translate(0px, -253px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
+      89.27266019830573% { transform: translate(0px, -276px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
+      89.31266019830572% { transform: translate(0px, -276px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
+      89.35266019830573% { transform: translate(0px, -322px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
+      89.82932851714295% { transform: translate(0px, -322px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
+      89.94937115672309% { transform: translate(0px, -345px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
+      90.21181731972668% { transform: translate(0px, -345px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: linear; }
+      90.3318599593068% { transform: translate(0px, -368px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); animation-timing-function: steps(1, end); }
       100% { transform: translate(0px, -368px) translate(720px, 603.5px) rotate(0deg) scale(1, 1) translate(-720px, -603.5px); }
     }
     .bsvg-svgent-tui-01-animation_anim-auto\:0\.15\.0\.0\.0 {

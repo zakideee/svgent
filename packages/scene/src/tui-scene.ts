@@ -55,6 +55,7 @@ import {
   type SessionMessage,
   type SvgentProject,
 } from "./model.js";
+import { revealStepsForMessages } from "./reveal-rows.js";
 import { planAutoFollowScroll } from "./scroll.js";
 import {
   buildTimeline,
@@ -814,6 +815,13 @@ export function tuiScene(
         viewportHeight: transcriptViewport,
         durationMs: timeline.durationMs,
         surface: "tui",
+        revealSteps: revealStepsForMessages(engine, {
+          timings: timeline.messages,
+          nodes: renderedMessages.map((rendered) => rendered.node),
+          width: contentWidth,
+          keyFor: (timing) =>
+            messageHeightCacheKey({ contextKey: heightContextKey, message: timing.message }),
+        }),
       });
   const terminalBackground = hexToRgba(palette.panelSoft, project.appearance.terminalOpacity);
   const columns = Math.floor(contentWidth / metrics.tuiCharPx);

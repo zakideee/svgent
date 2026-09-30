@@ -36,7 +36,7 @@ Displayed format: transcript SVG (0.66 MB) · [Script](examples/readme-english.j
 
 Contents: user input, thinking, tool execution, Markdown, TypeScript syntax highlighting, a choice, and an approval UI
 
-Displayed format: animated SVG (1.77 MB) · [Animated WebP (3.43 MB)](assets/readme/demo/readme-en-tui-dark-01.animated.webp) · [MP4 (28.4 seconds, 0.26 MB)](assets/readme/demo/readme-en-tui-dark-01.mp4) · [Script](examples/readme-en-tui-dark.json)
+Displayed format: animated SVG (1.77 MB) · [Animated WebP (3.42 MB)](assets/readme/demo/readme-en-tui-dark-01.animated.webp) · [MP4 (28.4 seconds, 0.23 MB)](assets/readme/demo/readme-en-tui-dark-01.mp4) · [Script](examples/readme-en-tui-dark.json)
 
 ### App — From a choice to image generation
 
@@ -46,7 +46,7 @@ Displayed format: animated SVG (1.77 MB) · [Animated WebP (3.43 MB)](assets/rea
 
 Generation starts after the selection, holds on a tiles skeleton, then resolves to the finished image. The status copy updates as it goes.
 
-Displayed format: animated SVG (1.46 MB) · [Animated WebP (5.00 MB)](assets/readme/demo/readme-en-app-image-01.animated.webp) · [MP4 (20.1 seconds, 0.18 MB)](assets/readme/demo/readme-en-app-image-01.mp4) · [Script](examples/readme-en-app-image.json) · [Generated image](packages/studio/assets/presets/watercolor-traveler-dusk.webp)
+Displayed format: animated SVG (1.46 MB) · [Animated WebP (5.00 MB)](assets/readme/demo/readme-en-app-image-01.animated.webp) · [MP4 (20.1 seconds, 0.19 MB)](assets/readme/demo/readme-en-app-image-01.mp4) · [Script](examples/readme-en-app-image.json) · [Generated image](packages/studio/assets/presets/watercolor-traveler-dusk.webp)
 
 ### App — A follow camera over a generated cover
 
@@ -98,7 +98,7 @@ svgent renders only scripts you provide; it does not collect live sessions or co
 - **Two surfaces, App and TUI** — one script; switch the surface and export both
 - **Exports** — stills as SVG, PNG, or WebP; animation as SVG, WebP, GIF, or MP4; long sessions split across pages
 - **Timing you author** — set the pace of typing, thinking, tool runs, approvals, and holds, and override one message without disturbing the rest
-- **Markdown** — lists, quotes, and fenced code with syntax highlighting
+- **Markdown** — tables, task lists, strikethrough, nested lists and quotes, and fenced code with syntax highlighting. A table too wide for its space is rearranged into one column
 - **Appearance** — six themes, custom background and accent, font and chrome scaling, transparent canvas
 - **SVG source editor** — edit the generated SVG and watch the preview follow
 

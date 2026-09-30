@@ -92,6 +92,7 @@ import {
   type SessionMessage,
   type SvgentProject,
 } from "./model.js";
+import { revealStepsForMessages } from "./reveal-rows.js";
 import { appScrollbarThumb, planAutoFollowScroll } from "./scroll.js";
 import {
   buildTimeline,
@@ -1815,6 +1816,13 @@ export function appScene(
         viewportHeight: transcriptViewport,
         durationMs: timeline.durationMs,
         surface: "app",
+        revealSteps: revealStepsForMessages(engine, {
+          timings: timeline.messages,
+          nodes: renderedMessages.map((rendered) => rendered.node),
+          width: winW,
+          keyFor: (timing) =>
+            messageHeightCacheKey({ contextKey: heightContextKey, message: timing.message }),
+        }),
       });
   const scrollThumb = fullHeight
     ? undefined

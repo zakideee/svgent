@@ -1,6 +1,7 @@
 import { Canvas, type Engine, Flex, type LayoutNode, Text } from "@boundsvg/core";
 import { wasmUax14LineBreaks } from "@boundsvg/core/wasm";
 import { draftGraphemeCount, draftGraphemes } from "./graphemes.js";
+import { PROBE_CANVAS_HEIGHT_PX, PROBE_CANVAS_MIN_WIDTH_PX } from "./measure.js";
 
 /** Contextual shaping is disabled so prefix line counts are monotone. */
 export const DRAFT_FONT_FEATURES = '"liga" 0, "clig" 0, "calt" 0, "kern" 0';
@@ -104,7 +105,10 @@ function measureDraftWrapBatch(
   }
   try {
     const probe = Canvas(
-      { width: Math.max(60, Math.ceil(wrap.widthPx)), height: 32_000 },
+      {
+        width: Math.max(PROBE_CANVAS_MIN_WIDTH_PX, Math.ceil(wrap.widthPx)),
+        height: PROBE_CANVAS_HEIGHT_PX,
+      },
       ...pending.map((entry, textIndex) =>
         Flex(
           {
@@ -304,7 +308,10 @@ export function measuredClusterWidths(
   );
   try {
     const probe = Canvas(
-      { width: Math.max(60, Math.ceil(wrap.widthPx)), height: 32_000 },
+      {
+        width: Math.max(PROBE_CANVAS_MIN_WIDTH_PX, Math.ceil(wrap.widthPx)),
+        height: PROBE_CANVAS_HEIGHT_PX,
+      },
       Text(
         {
           width: wrap.widthPx,

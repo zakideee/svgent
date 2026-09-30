@@ -1113,7 +1113,7 @@ Topic: ${topic || "(pick an interesting, realistic coding task)"}
 
 Rules:
 - Output ONLY the JSON, as a single code block, no commentary
-- roles: "user" (request), "thinking" (one short line), "tool" (a shell command), "permission" (the action being approved), "assistant" (Markdown allowed: headings, bullet lists, fenced code), "image" (an image-generation step; content = the generation prompt), "choice" (an option menu)
+- roles: "user" (request), "thinking" (one short line), "tool" (a shell command), "permission" (the action being approved), "assistant" (Markdown allowed: headings, lists, task lists, quotes, tables, strikethrough, fenced code), "image" (an image-generation step; content = the generation prompt), "choice" (an option menu)
 - One tool message is one invocation: its spinner, exit code and duration cover the whole of it. Use several lines ("\\n") only when they run as one script; to show commands finishing one after another, use several tool messages
 - Per-message extras: "language" on a tool message names the code-fence language; "decision" on a permission message is "allow", "allow-always", or "deny"; "options" (up to 5, each "label — hint") plus "chosenIndex" or "freeform" on a choice message; "inputMode": "voice" on a user message stages it as dictated rather than typed; "highlight": true on a thinking message re-opens its status line as a held note below the row, then folds it back — one beat on the step the render is about, at most one or two per script
 - Commands in a script are read and retyped by whoever sees the artifact, so never show one that fetches or runs code from a package registry: no \`npm i\`, \`npx\`, \`pnpm dlx\`, \`pip install\`, \`cargo install\`, \`brew install\`, or \`curl ... | sh\`, not even for a real and well-known package. Popularity is not safety — a compromised release arrives under the correct name. Local commands are fine (\`pnpm test\`, \`rg\`, \`git\`, project scripts). Use only reserved example domains (\`example.com\`), and no e-mail addresses, IP addresses or token-shaped strings
@@ -1142,7 +1142,7 @@ Format:
 
 ルール:
 - 出力はJSONのみ。コードブロック1つで、前後の説明文は不要
-- roles: "user"(依頼) / "thinking"(短い思考1行) / "tool"(シェルコマンド) / "permission"(承認する操作の説明) / "assistant"(Markdown可: 見出し・箇条書き・\`\`\`コード) / "image"(画像生成ステップ: contentは生成プロンプト) / "choice"(選択肢の提示)
+- roles: "user"(依頼) / "thinking"(短い思考1行) / "tool"(シェルコマンド) / "permission"(承認する操作の説明) / "assistant"(Markdown可: 見出し・箇条書き・タスクリスト・引用・表・取り消し線・\`\`\`コード) / "image"(画像生成ステップ: contentは生成プロンプト) / "choice"(選択肢の提示)
 - tool 1件 = 実行1回。スピナー・終了コード・所要時間はその全体に対して1組つく。複数行("\\n")は1つのスクリプトとしてまとめて走る場合だけにして、順に実行される様子を見せたいときは tool を複数件に分ける
 - メッセージ単位の任意項目: toolには "language"(コードフェンス言語)、permissionには "decision"("allow" / "allow-always" / "deny")、choiceには "options"(「選択肢 — 補足」を最大5件)と "chosenIndex" または "freeform"、userには "inputMode": "voice"(音声入力として演出)、thinkingには "highlight": true(行の下に思考の一行をメモとして開いて保持し、畳んで戻す。見せ場の1手にだけ付け、台本あたり1〜2箇所まで)
 - 台本のコマンドは、成果物を見た人が読んで打ち直す。**パッケージレジストリから取得・実行するコマンドは書かないこと** — \`npm i\` / \`npx\` / \`pnpm dlx\` / \`pip install\` / \`cargo install\` / \`brew install\` / \`curl ... | sh\` は、実在の著名パッケージであっても不可。有名であることは安全の保証にならず、侵害されたリリースは正しい名前で届く。ローカルで完結するコマンド(\`pnpm test\`、\`rg\`、\`git\`、リポジトリのスクリプト)は可。URLは予約ドメイン(\`example.com\`)のみ。メールアドレス・IPアドレス・トークン様の文字列も書かない

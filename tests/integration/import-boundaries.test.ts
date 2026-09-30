@@ -59,3 +59,59 @@ describe("workspace import boundaries", () => {
     });
   }
 });
+
+/** Packages only the Markdown parser adapter may name, in any import form. */
+const PARSER_ADAPTER_ONLY: Record<string, string> = {
+  marked: "packages/scene/src/markdown-marked-adapter.ts",
+  "character-entities": "packages/scene/src/markdown-marked-adapter.ts",
+};
+
+function importedSpecifiers(source: string): string[] {
+  const specifiers: string[] = [];
+  const patterns = [
+    /(?:^|[\s;])(?:import|export)\s+(?:type\s+)?(?:[^"'`;]*?\sfrom\s+)?["']([^"']+)["']/gu,
+    /import\(\s*["']([^"']+)["']\s*\)/gu,
+    /require\(\s*["']([^"']+)["']\s*\)/gu,
+    /import\(\s*["']([^"']+)["']\s*\)\./gu,
+  ];
+  for (const pattern of patterns) {
+    for (const match of source.matchAll(pattern)) {
+      specifiers.push(match[1] ?? "");
+    }
+  }
+  return specifiers;
+}
+
+describe("markdown parser boundary", () => {
+  it("keeps the parser library inside its adapter", () => {
+    for (const workspace of Object.keys(ALLOWED_WORKSPACE_DEPS)) {
+      for (const file of sourceFiles(path.join(workspace, "src"))) {
+        for (const specifier of importedSpecifiers(readFileSync(file, "utf8"))) {
+          const owner = PARSER_ADAPTER_ONLY[specifier.split("/")[0] ?? ""];
+          if (owner !== undefined) {
+            expect(`${file} -> ${specifier}`).toBe(`${owner} -> ${specifier}`);
+          }
+        }
+      }
+    }
+  });
+
+  it("recognises every import form it guards against", () => {
+    const forms = [
+      'import { Marked } from "marked";',
+      'import type { Token } from "marked";',
+      'export { Lexer } from "marked";',
+      'const lazy = await import("marked");',
+      'type Lazy = typeof import("marked").Lexer;',
+    ];
+    for (const form of forms) {
+      expect(importedSpecifiers(form), form).toContain("marked");
+    }
+  });
+
+  it("leaves the parser out of the published scene types", () => {
+    const declarations = readFileSync("packages/scene/dist/index.d.ts", "utf8");
+    expect(declarations).not.toMatch(/["']marked["']|["']character-entities["']/u);
+    expect(declarations).not.toMatch(/\b(?:Tokens|TokenizerExtension|MarkedOptions)\b/u);
+  });
+});

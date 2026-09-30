@@ -93,6 +93,7 @@ const JOBS: Job[] = [
   { script: "site-input-ime", formats: "animated-svg,poster-webp", target: "inputs" },
   { script: "site-input-slides", formats: "poster-webp", target: "inputs" },
   { script: "site-input-voice", formats: "animated-svg,poster-webp", target: "inputs" },
+  { script: "site-input-tables-tui", formats: "transcript-png", target: "inputs" },
 
   {
     script: "choice-freeform-tui",
