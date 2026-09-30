@@ -377,6 +377,8 @@ describe("layout invariants", () => {
     });
   });
 
+  // Every fixture is laid out on the engine in turn; on a two-core runner that
+  // takes longer than Vitest's default, like the other corpus-wide checks.
   it("holds for every fixture in the corpus", async () => {
     const dir = new URL("../../../fixtures/scripts/", import.meta.url);
     const names = (await readdir(dir)).filter((name) => name.endsWith(".json")).sort();
@@ -386,7 +388,7 @@ describe("layout invariants", () => {
       const { project } = deserializeProject(source);
       expectSoundLayout(project, name);
     }
-  });
+  }, 90_000);
 });
 
 describe("composer draft wrap planning", () => {
