@@ -136,7 +136,15 @@
       0% { transform: translate(0px, 0px) translate(720px, 687px) rotate(0deg) scale(1, 1) translate(-720px, -687px); animation-timing-function: steps(1, end); }
       67.25545347960346% { transform: translate(0px, 0px) translate(720px, 687px) rotate(0deg) scale(1, 1) translate(-720px, -687px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
       68.75815338547831% { transform: translate(0px, -379.84px) translate(720px, 687px) rotate(0deg) scale(1, 1) translate(-720px, -687px); animation-timing-function: steps(1, end); }
-      86.86210939435139% { transform: translate(0px, -379.84px) translate(720px, 687px) rotate(0deg) scale(1, 1) translate(-720px, -687px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
+      86.28965228735144% { transform: translate(0px, -379.84px) translate(720px, 687px) rotate(0deg) scale(1, 1) translate(-720px, -687px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
+      86.86210939435139% { transform: translate(0px, -429.84px) translate(720px, 687px) rotate(0deg) scale(1, 1) translate(-720px, -687px); animation-timing-function: steps(1, end); }
+      87.32007507995134% { transform: translate(0px, -429.84px) translate(720px, 687px) rotate(0deg) scale(1, 1) translate(-720px, -687px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
+      87.89253218695127% { transform: translate(0px, -460.84px) translate(720px, 687px) rotate(0deg) scale(1, 1) translate(-720px, -687px); animation-timing-function: steps(1, end); }
+      88.12151502975125% { transform: translate(0px, -460.84px) translate(720px, 687px) rotate(0deg) scale(1, 1) translate(-720px, -687px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
+      88.6939721367512% { transform: translate(0px, -488.84px) translate(720px, 687px) rotate(0deg) scale(1, 1) translate(-720px, -687px); animation-timing-function: steps(1, end); }
+      88.79415213047619% { transform: translate(0px, -488.84px) translate(720px, 687px) rotate(0deg) scale(1, 1) translate(-720px, -687px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
+      89.36660923747613% { transform: translate(0px, -516.84px) translate(720px, 687px) rotate(0deg) scale(1, 1) translate(-720px, -687px); animation-timing-function: steps(1, end); }
+      89.83888635075108% { transform: translate(0px, -516.84px) translate(720px, 687px) rotate(0deg) scale(1, 1) translate(-720px, -687px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
       90.41134345775102% { transform: translate(0px, -529.84px) translate(720px, 687px) rotate(0deg) scale(1, 1) translate(-720px, -687px); animation-timing-function: steps(1, end); }
       100% { transform: translate(0px, -529.84px) translate(720px, 687px) rotate(0deg) scale(1, 1) translate(-720px, -687px); }
     }
@@ -5463,7 +5471,15 @@
       0% { transform: translate(0px, 0px) translate(1369.5px, 289px) rotate(0deg) scale(1, 1) translate(-1369.5px, -289px); animation-timing-function: steps(1, end); }
       67.25545347960346% { transform: translate(0px, 0px) translate(1369.5px, 289px) rotate(0deg) scale(1, 1) translate(-1369.5px, -289px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
       68.75815338547831% { transform: translate(0px, 190.808951px) translate(1369.5px, 289px) rotate(0deg) scale(1, 1) translate(-1369.5px, -289px); animation-timing-function: steps(1, end); }
-      86.86210939435139% { transform: translate(0px, 190.808951px) translate(1369.5px, 289px) rotate(0deg) scale(1, 1) translate(-1369.5px, -289px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
+      86.28965228735144% { transform: translate(0px, 190.808951px) translate(1369.5px, 289px) rotate(0deg) scale(1, 1) translate(-1369.5px, -289px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
+      86.86210939435139% { transform: translate(0px, 215.925967px) translate(1369.5px, 289px) rotate(0deg) scale(1, 1) translate(-1369.5px, -289px); animation-timing-function: steps(1, end); }
+      87.32007507995134% { transform: translate(0px, 215.925967px) translate(1369.5px, 289px) rotate(0deg) scale(1, 1) translate(-1369.5px, -289px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
+      87.89253218695127% { transform: translate(0px, 231.498517px) translate(1369.5px, 289px) rotate(0deg) scale(1, 1) translate(-1369.5px, -289px); animation-timing-function: steps(1, end); }
+      88.12151502975125% { transform: translate(0px, 231.498517px) translate(1369.5px, 289px) rotate(0deg) scale(1, 1) translate(-1369.5px, -289px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
+      88.6939721367512% { transform: translate(0px, 245.564047px) translate(1369.5px, 289px) rotate(0deg) scale(1, 1) translate(-1369.5px, -289px); animation-timing-function: steps(1, end); }
+      88.79415213047619% { transform: translate(0px, 245.564047px) translate(1369.5px, 289px) rotate(0deg) scale(1, 1) translate(-1369.5px, -289px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
+      89.36660923747613% { transform: translate(0px, 259.629576px) translate(1369.5px, 289px) rotate(0deg) scale(1, 1) translate(-1369.5px, -289px); animation-timing-function: steps(1, end); }
+      89.83888635075108% { transform: translate(0px, 259.629576px) translate(1369.5px, 289px) rotate(0deg) scale(1, 1) translate(-1369.5px, -289px); animation-timing-function: cubic-bezier(0.4000000000000001, 0, 0.19999999999999984, 1); }
       90.41134345775102% { transform: translate(0px, 266.16px) translate(1369.5px, 289px) rotate(0deg) scale(1, 1) translate(-1369.5px, -289px); animation-timing-function: steps(1, end); }
       100% { transform: translate(0px, 266.16px) translate(1369.5px, 289px) rotate(0deg) scale(1, 1) translate(-1369.5px, -289px); }
     }

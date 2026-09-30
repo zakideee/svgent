@@ -2,6 +2,7 @@ import { type AnimationSpec, type AnyVNode, Box } from "@boundsvg/core";
 import { APP_SCROLL_EASE } from "./animations.js";
 import type { SceneEnv, ScenePalette } from "./env.js";
 import { sizeLeft } from "./env.js";
+import type { RevealStep } from "./reveal-rows.js";
 import type { MessageTiming } from "./timeline.js";
 
 // ————————————————————————————————————————————————————————————————————————————
@@ -23,7 +24,20 @@ type ScrollMove = {
    * streamed text does; everything else lands in one repaint.
    */
   streamed: boolean;
+  /**
+   * For streamed text whose lines are known: the offset to reach as each
+   * line appears, so the line being written is always in view. Without them
+   * the move is spread evenly over the reveal.
+   */
+  steps?: Array<{ atMs: number; toY: number }>;
 };
+
+/** A move shorter than this is layout rounding, not a line to follow. */
+const SUBPIXEL_PX = 0.5;
+/** How long a terminal's one-row scroll takes to paint. */
+const TUI_ROW_REPAINT_MS = 34;
+/** How long the app takes to bring a newly streamed line into view. */
+const APP_LINE_FOLLOW_MS = 160;
 
 type ScrollPlan = {
   track: AnimationSpec;
@@ -46,6 +60,11 @@ export function planAutoFollowScroll(options: {
   viewportHeight: number;
   durationMs: number;
   surface: "app" | "tui";
+  /**
+   * Per message, when each of its lines appears and how far down it reaches
+   * (from `measureRevealSteps`), or `null` where that is not known.
+   */
+  revealSteps?: Array<RevealStep[] | null> | undefined;
 }): ScrollPlan {
   const { env, timings, heights, gap, leadingHeight, viewportHeight, durationMs, surface } =
     options;
@@ -65,19 +84,20 @@ export function planAutoFollowScroll(options: {
   // of the space it had.
   let cumulative = leadingHeight;
   let currentY = 0;
+  // A terminal scrolls in whole rows — quantize so clipped lines never
+  // straddle the viewport edge. The app scrolls to arbitrary pixels.
+  const offsetFor = (bottom: number): number => {
+    const raw = Math.min(capPx, Math.max(0, bottom - viewportHeight));
+    return surface === "tui" ? Math.ceil(raw / env.metrics.tuiLinePx) * env.metrics.tuiLinePx : raw;
+  };
   timings.forEach((timing, index) => {
     offsets.push(currentY);
     if (index > 0 || leadingHeight > 0) {
       cumulative += gap;
     }
+    const messageTop = cumulative;
     cumulative += heights[index] ?? 0;
-    const rawTarget = Math.min(capPx, Math.max(0, cumulative - viewportHeight));
-    // A terminal scrolls in whole rows — quantize so clipped lines never
-    // straddle the viewport edge. The app scrolls to arbitrary pixels.
-    const target =
-      surface === "tui"
-        ? Math.ceil(rawTarget / env.metrics.tuiLinePx) * env.metrics.tuiLinePx
-        : rawTarget;
+    const target = offsetFor(cumulative);
     if (target <= currentY + 1) {
       return;
     }
@@ -91,17 +111,49 @@ export function planAutoFollowScroll(options: {
     const streamed = timing.message.role === "assistant";
     const followMs =
       timing.message.role === "user" ? 360 : streamed ? revealSpanMs : Math.min(revealSpanMs, 420);
+    const endMs = Math.min(anchorMs + followMs, durationMs - 40);
+    const lines = streamed ? options.revealSteps?.[index] : null;
     moves.push({
       startMs: anchorMs,
-      endMs: Math.min(anchorMs + followMs, durationMs - 40),
+      endMs,
       fromY: currentY,
       toY: target,
       streamed,
+      ...(lines
+        ? { steps: followLines({ lines, from: currentY, target, messageTop, endMs }) }
+        : {}),
     });
     currentY = target;
   });
   if (moves.length === 0) {
     return null;
+  }
+
+  /**
+   * The offsets that keep each line in view as it appears: a line whose
+   * bottom falls below the viewport moves the transcript up then, never
+   * later. The message's own padding follows once it has finished.
+   */
+  function followLines(follow: {
+    lines: RevealStep[];
+    from: number;
+    target: number;
+    messageTop: number;
+    endMs: number;
+  }): Array<{ atMs: number; toY: number }> {
+    const steps: Array<{ atMs: number; toY: number }> = [];
+    let reached = follow.from;
+    for (const line of follow.lines) {
+      const needed = Math.min(follow.target, offsetFor(follow.messageTop + line.bottom));
+      if (needed > reached + SUBPIXEL_PX) {
+        steps.push({ atMs: line.atMs, toY: needed });
+        reached = needed;
+      }
+    }
+    if (follow.target > reached + SUBPIXEL_PX) {
+      steps.push({ atMs: follow.endMs, toY: follow.target });
+    }
+    return steps;
   }
 
   const progressAt = (atMs: number): number => Math.max(0, Math.min(1, atMs / durationMs));
@@ -118,7 +170,25 @@ export function planAutoFollowScroll(options: {
     lastAt = clamped;
   };
 
+  /**
+   * The view is in place when each line's first character appears: the
+   * terminal in the repaint that writes it, the app after a short glide.
+   */
+  const pushLineSteps = (fromY: number, steps: Array<{ atMs: number; toY: number }>): void => {
+    let y = fromY;
+    for (const step of steps) {
+      const leaveMs = step.atMs - (surface === "tui" ? TUI_ROW_REPAINT_MS : APP_LINE_FOLLOW_MS);
+      pushFrame(progressAt(leaveMs), y);
+      pushFrame(progressAt(step.atMs), step.toY);
+      y = step.toY;
+    }
+  };
+
   for (const move of moves) {
+    if (move.steps !== undefined) {
+      pushLineSteps(move.fromY, move.steps);
+      continue;
+    }
     pushFrame(progressAt(move.startMs), move.fromY);
     if (surface === "tui" && !move.streamed) {
       // One repaint printed the whole block, so one repaint scrolls past it.
@@ -132,7 +202,10 @@ export function planAutoFollowScroll(options: {
       for (let row = 1; row <= rows; row += 1) {
         const rowTimeMs = move.startMs + ((move.endMs - move.startMs) * row) / rows;
         const rowY = Math.min(move.fromY + row * rowPx, move.toY);
-        pushFrame(progressAt(rowTimeMs - 34), Math.min(move.fromY + (row - 1) * rowPx, move.toY));
+        pushFrame(
+          progressAt(rowTimeMs - TUI_ROW_REPAINT_MS),
+          Math.min(move.fromY + (row - 1) * rowPx, move.toY),
+        );
         pushFrame(progressAt(rowTimeMs), rowY);
       }
     } else {

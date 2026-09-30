@@ -3,6 +3,11 @@ import { fallbackFor } from "./env.js";
 import { draftGraphemes } from "./graphemes.js";
 import type { ContentAlign } from "./model.js";
 
+/** A layout probe's canvas is never narrower than this, whatever it measures. */
+export const PROBE_CANVAS_MIN_WIDTH_PX = 60;
+/** Tall enough that nothing a probe lays out reaches the bottom. */
+export const PROBE_CANVAS_HEIGHT_PX = 32_000;
+
 export function measureLineWidthPx(
   engine: Engine | undefined,
   probe: {
@@ -130,7 +135,10 @@ export function measureMessageHeights(
   }
   try {
     const probe = Canvas(
-      { width: Math.max(60, Math.ceil(width)), height: 32_000 },
+      {
+        width: Math.max(PROBE_CANVAS_MIN_WIDTH_PX, Math.ceil(width)),
+        height: PROBE_CANVAS_HEIGHT_PX,
+      },
       Flex(
         { position: "absolute", left: 0, top: 0, width, direction: "column", gap: 0 },
         ...missing.map((index) => nodes[index]).filter((node) => node !== undefined),

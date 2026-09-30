@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "title": "Tables in the terminal",
+  "surface": "tui",
+  "basis": "fictional",
+  "modelLabel": "Kiln 3",
+  "workspaceLabel": "fictional/atlas-console",
+  "branchLabel": "feat/report",
+  "appearance": {
+    "theme": "ink",
+    "backdrop": "peach",
+    "canvasWidth": 1000,
+    "canvasHeight": 900
+  },
+  "chrome": {
+    "contextPercent": 22,
+    "clockTime": "9:20"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "Summarize the test run as a table."
+    },
+    {
+      "role": "tool",
+      "language": "bash",
+      "content": "pnpm test"
+    },
+    {
+      "role": "assistant",
+      "content": "## Test run\n\n| Suite | Tests | Time | Status |\n| :--- | ---: | ---: | :---: |\n| scene | 437 | 38.2s | **pass** |\n| render | 53 | 12.4s | **pass** |\n| cli | 10 | 3.1s | ~~fail~~ pass |\n\n- [x] Tables line up on the character grid\n- [x] Task boxes as `[ ]` and `[x]`\n- [ ] Narrow widths\n  - Columns shrink to fit\n  - A table that still does not fit stacks into one column\n\n> Rules are plain ASCII.\n>\n> > Quotes nest."
+    }
+  ]
+}

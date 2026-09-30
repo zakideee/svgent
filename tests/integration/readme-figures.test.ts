@@ -26,12 +26,12 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.md",
-    claim: "Animated WebP (3.43 MB)",
+    claim: "Animated WebP (3.42 MB)",
     artifact: `${DEMO_DIR}/readme-en-tui-dark-01.animated.webp`,
   },
   {
     file: "README.md",
-    claim: "MP4 (28.4 seconds, 0.26 MB)",
+    claim: "MP4 (28.4 seconds, 0.23 MB)",
     artifact: `${DEMO_DIR}/readme-en-tui-dark-01.mp4`,
   },
   {
@@ -46,7 +46,7 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.md",
-    claim: "MP4 (20.1 seconds, 0.18 MB)",
+    claim: "MP4 (20.1 seconds, 0.19 MB)",
     artifact: `${DEMO_DIR}/readme-en-app-image-01.mp4`,
   },
   {
@@ -76,7 +76,7 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.ja.md",
-    claim: "MP4 (26.8秒、0.25 MB)",
+    claim: "MP4 (26.8秒、0.23 MB)",
     artifact: `${DEMO_DIR}/readme-tui-dark-01.mp4`,
   },
   {
@@ -91,7 +91,7 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.ja.md",
-    claim: "MP4 (20.4秒、0.19 MB)",
+    claim: "MP4 (20.4秒、0.20 MB)",
     artifact: `${DEMO_DIR}/readme-app-image-01.mp4`,
   },
   {

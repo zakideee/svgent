@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "title": "Markdown tables, narrow (TUI)",
+  "surface": "tui",
+  "modelLabel": "Quill 2",
+  "appearance": {
+    "theme": "synth",
+    "canvasWidth": 640,
+    "canvasHeight": 1200,
+    "fontScale": 1.4,
+    "backdrop": "plain",
+    "terminalOpacity": 1
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "Check this table on a narrow canvas.\n\n| Case | Width |\n| --- | ---: |\n| narrow | 640 |"
+    },
+    {
+      "role": "assistant",
+      "content": "Columns shrink to fit, and long cells wrap:\n\n| Package | Description | Status | Owner | 担当 |\n| --- | :---: | ---: | --- | --- |\n| scene | Timeline and declarative scene construction for both surfaces. | **ok** | core | 表示の確認 |\n| render | Rasterizes to PNG, ~~GIF~~ WebP and MP4. | `ok` | io | 書き出し |"
+    },
+    {
+      "role": "assistant",
+      "content": "- Inside a list and a quote:\n\n  > | Step | Time |\n  > | :--- | ---: |\n  > | build | 12s |\n  > | test | 1m 4s |\n\nToo many columns for this width, so the table is stacked:\n\n| | Mon | Tue | Wed | Thu | Fri | Sat | Sun |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| lint | pass | pass | fail | pass | pass | pass | pass |"
+    }
+  ]
+}

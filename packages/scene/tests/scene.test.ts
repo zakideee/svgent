@@ -90,13 +90,20 @@ function textNode(nodes: AnyVNode[], text: string): AnyVNode | undefined {
   return nodes.find((node) => node.type === "Text" && directText(node) === text);
 }
 
-function quoteDecoration(nodes: AnyVNode[], surface: "app" | "tui"): AnyVNode | undefined {
-  if (surface === "tui") {
-    return textNode(nodes, "│");
-  }
+/** The bar beside a quote: a stretching row that holds one line box. */
+function quoteDecoration(nodes: AnyVNode[]): AnyVNode | undefined {
   return nodes.find((node) => {
-    const props = authoringProps(node);
-    return node.type === "Box" && props.width === 3 && props.minHeight !== undefined;
+    if (node.type !== "Flex") {
+      return false;
+    }
+    const children = node.children as readonly AnyVNode[];
+    const [bar] = children;
+    return (
+      children.length === 1 &&
+      bar?.type === "Box" &&
+      authoringProps(bar).minHeight !== undefined &&
+      authoringProps(node).animate !== undefined
+    );
   });
 }
 
@@ -307,7 +314,7 @@ describe("scene contract", () => {
       return animationDelay(node);
     });
     expect(markerDelays[1]).toBeGreaterThan(markerDelays[0] ?? 0);
-    const quote = quoteDecoration(descendants, surface);
+    const quote = quoteDecoration(descendants);
     expect(quote).toBeDefined();
     expect(quote && authoringProps(quote).animate).toBeDefined();
     const quoteDelay = animationDelay(quote);

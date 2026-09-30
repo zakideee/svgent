@@ -6,7 +6,7 @@
   "messages": [
     {
       "role": "user",
-      "content": "Explain it using every Markdown element."
+      "content": "Explain it using every Markdown element, starting from this table:\n\n| Element | Seen |\n| --- | :---: |\n| Table | yes |"
     },
     {
       "role": "thinking",
@@ -14,7 +14,7 @@
     },
     {
       "role": "assistant",
-      "content": "# H1 heading\n## H2 heading\n### H3 heading\n\nBody text mixing **bold**, *italic*, `inline code`, and a [link label](https://example.com).\n\n- Bullet with `code` mixed in\n- Second line with **bold** mixed in\n\n1. First numbered item\n2. Next numbered item\n\n> Quote block. A slightly longer sentence so typesetting can be checked.\n\n```ts\nconst label: string = \"chip\";\nexport function reveal(at: number): number { return at * 2; }\n```"
+      "content": "# H1 heading\n## H2 heading\n### H3 heading\n\nBody text mixing **bold**, *italic*, `inline code`, and a [link label](https://example.com).\n\n- Bullet with `code` mixed in\n- Second line with **bold** mixed in\n  - Nested item with ***bold italic*** and ~~struck~~ text\n\n* [x] Checked task\n* [ ] Open task\n\n1. First numbered item\n2. Next numbered item\n\n> Quote block. A slightly longer sentence so typesetting can be checked.\n>\n> > Nested quote.\n\n| Check | Result | Time |\n| :--- | :---: | ---: |\n| Lint | **pass** | 1.2s |\n| Unit tests | ~~fail~~ pass | 34.0s |\n| `pnpm check` | pending | |\n\nFirst line  \nsecond line after a hard break, with &copy; decoded.\n\n```ts\nconst label: string = \"chip\";\nexport function reveal(at: number): number { return at * 2; }\n```"
     }
   ],
   "appearance": {

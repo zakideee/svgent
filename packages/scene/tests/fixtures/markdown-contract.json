@@ -1,0 +1,417 @@
+{
+  "cases": [
+    {
+      "id": "empty",
+      "description": "empty input is one paragraph with empty text",
+      "source": "",
+      "plainText": "",
+      "revealCharacters": 0
+    },
+    {
+      "id": "whitespace",
+      "description": "blank input is one paragraph with empty text",
+      "source": " \t\n",
+      "plainText": "",
+      "revealCharacters": 0
+    },
+    {
+      "id": "line-endings",
+      "description": "CRLF and CR become LF; soft breaks display as spaces",
+      "source": "one\r\ntwo\rthree",
+      "plainText": "one two three",
+      "revealCharacters": 13
+    },
+    {
+      "id": "heading-six",
+      "description": "level 6 heading",
+      "source": "###### Small",
+      "plainText": "Small",
+      "revealCharacters": 5
+    },
+    {
+      "id": "setext",
+      "description": "setext heading is level 1",
+      "source": "Title\n===",
+      "plainText": "Title",
+      "revealCharacters": 5
+    },
+    {
+      "id": "heading-trim",
+      "description": "up to three spaces of indent and the closing hashes are removed",
+      "source": "  ## Title ##",
+      "plainText": "Title",
+      "revealCharacters": 5
+    },
+    {
+      "id": "empty-heading",
+      "description": "an empty level 3 heading is kept",
+      "source": "###",
+      "plainText": "",
+      "revealCharacters": 0
+    },
+    {
+      "id": "nested-marks",
+      "description": "strong inside emphasis, and strong inside strikethrough",
+      "source": "***both*** and ~~**gone**~~",
+      "plainText": "both and gone",
+      "revealCharacters": 13
+    },
+    {
+      "id": "underscore",
+      "description": "underscore emphasis and strong",
+      "source": "_one_ __two__",
+      "plainText": "one two",
+      "revealCharacters": 7
+    },
+    {
+      "id": "escaped-punctuation",
+      "description": "escaped asterisks display as asterisks",
+      "source": "\\*literal\\*",
+      "plainText": "*literal*",
+      "revealCharacters": 9
+    },
+    {
+      "id": "entities",
+      "description": "named, decimal and hexadecimal references decode once",
+      "source": "&amp; &#35; &#x41; &copy;",
+      "plainText": "& # A ©",
+      "revealCharacters": 7
+    },
+    {
+      "id": "entity-once",
+      "description": "an encoded ampersand is not decoded a second time",
+      "source": "&#38;copy;",
+      "plainText": "&copy;",
+      "revealCharacters": 6
+    },
+    {
+      "id": "escaped-entity",
+      "description": "an escaped ampersand is not joined with the text after it",
+      "source": "\\&copy;",
+      "plainText": "&copy;",
+      "revealCharacters": 6
+    },
+    {
+      "id": "invalid-entities",
+      "description": "invalid code points become U+FFFD; unknown names and missing semicolons stay text",
+      "source": "&#0; &#xD800; &#x110000; &unknown; &copy",
+      "plainText": "� � � &unknown; &copy",
+      "revealCharacters": 21
+    },
+    {
+      "id": "code-entity",
+      "description": "references inside a code span are not decoded",
+      "source": "`&copy; &#35;`",
+      "plainText": "&copy; &#35;",
+      "revealCharacters": 12
+    },
+    {
+      "id": "code-span-space",
+      "description": "multi-backtick code span with standard space stripping",
+      "source": "`` a ` b ``",
+      "plainText": "a ` b",
+      "revealCharacters": 5
+    },
+    {
+      "id": "hard-break-spaces",
+      "description": "two trailing spaces make a hard break",
+      "source": "one  \ntwo",
+      "plainText": "one\ntwo",
+      "revealCharacters": 7
+    },
+    {
+      "id": "hard-break-backslash",
+      "description": "a trailing backslash makes a hard break",
+      "source": "one\\\ntwo",
+      "plainText": "one\ntwo",
+      "revealCharacters": 7
+    },
+    {
+      "id": "soft-break",
+      "description": "a soft break displays as a space",
+      "source": "one\ntwo",
+      "plainText": "one two",
+      "revealCharacters": 7
+    },
+    {
+      "id": "link-nested",
+      "description": "strong inside a link; destination and title are not kept",
+      "source": "[**docs**](https://example.test/path \"title\")",
+      "plainText": "docs ↗",
+      "revealCharacters": 6
+    },
+    {
+      "id": "link-balanced",
+      "description": "balanced parentheses in a destination",
+      "source": "[docs](https://example.test/a_(b))",
+      "plainText": "docs ↗",
+      "revealCharacters": 6
+    },
+    {
+      "id": "reference-full",
+      "description": "full reference link resolves and its definition is hidden",
+      "source": "[docs][target]\n\n[target]: https://example.test",
+      "plainText": "docs ↗",
+      "revealCharacters": 6
+    },
+    {
+      "id": "reference-collapsed",
+      "description": "collapsed reference link",
+      "source": "[docs][]\n\n[docs]: https://example.test",
+      "plainText": "docs ↗",
+      "revealCharacters": 6
+    },
+    {
+      "id": "reference-shortcut",
+      "description": "shortcut reference link",
+      "source": "[docs]\n\n[docs]: https://example.test",
+      "plainText": "docs ↗",
+      "revealCharacters": 6
+    },
+    {
+      "id": "reference-unresolved",
+      "description": "an unresolved reference stays text",
+      "source": "[docs][missing]",
+      "plainText": "[docs][missing]",
+      "revealCharacters": 15
+    },
+    {
+      "id": "autolink",
+      "description": "angle-bracket autolink uses the address as its label",
+      "source": "<https://example.test>",
+      "plainText": "https://example.test ↗",
+      "revealCharacters": 22
+    },
+    {
+      "id": "bare-url",
+      "description": "GFM bare URL becomes a link",
+      "source": "https://example.test",
+      "plainText": "https://example.test ↗",
+      "revealCharacters": 22
+    },
+    {
+      "id": "image-alt",
+      "description": "image shows a label and its alt text; nothing is fetched",
+      "source": "![diagram](https://example.test/image.png)",
+      "plainText": "[image] diagram",
+      "revealCharacters": 15
+    },
+    {
+      "id": "image-empty",
+      "description": "image without alt text shows the label alone",
+      "source": "![](https://example.test/image.png)",
+      "plainText": "[image]",
+      "revealCharacters": 7
+    },
+    {
+      "id": "list-start",
+      "description": "ordered list keeps its start number",
+      "source": "7) seven\n8) eight",
+      "plainText": "seven\neight",
+      "revealCharacters": 12
+    },
+    {
+      "id": "list-plus",
+      "description": "plus-marker tight list",
+      "source": "+ one\n+ two",
+      "plainText": "one\ntwo",
+      "revealCharacters": 8
+    },
+    {
+      "id": "list-empty",
+      "description": "an empty item keeps its place and one tick",
+      "source": "-\n- two",
+      "plainText": "\ntwo",
+      "revealCharacters": 5
+    },
+    {
+      "id": "list-loose",
+      "description": "loose list; first item holds two paragraphs",
+      "source": "- first\n\n  second\n\n- third",
+      "plainText": "first\nsecond\nthird",
+      "revealCharacters": 18
+    },
+    {
+      "id": "list-nested",
+      "description": "an item holds a paragraph and a nested list",
+      "source": "- parent\n  - child",
+      "plainText": "parent\nchild",
+      "revealCharacters": 13
+    },
+    {
+      "id": "task-list",
+      "description": "task items keep unchecked and checked state; the box spends no tick",
+      "source": "- [ ] todo\n- [x] done",
+      "plainText": "todo\ndone",
+      "revealCharacters": 10
+    },
+    {
+      "id": "quote-nested",
+      "description": "a quote holds a paragraph and a nested quote",
+      "source": "> first\n>\n> > second",
+      "plainText": "first\nsecond",
+      "revealCharacters": 11
+    },
+    {
+      "id": "tilde-fence",
+      "description": "tilde fence; only the first info word is the language",
+      "source": "~~~ts extra\nconst ready = true;\n~~~",
+      "plainText": "const ready = true;",
+      "revealCharacters": 20
+    },
+    {
+      "id": "unclosed-fence",
+      "description": "an unclosed fence runs to the end",
+      "source": "```text\none\ntwo",
+      "plainText": "one\ntwo",
+      "revealCharacters": 8
+    },
+    {
+      "id": "indented-code",
+      "description": "indented code block",
+      "source": "    one\n    two",
+      "plainText": "one\ntwo",
+      "revealCharacters": 8
+    },
+    {
+      "id": "rule",
+      "description": "asterisk thematic break",
+      "source": "***",
+      "plainText": "",
+      "revealCharacters": 1
+    },
+    {
+      "id": "table-basic",
+      "description": "two columns with left and right alignment",
+      "source": "| A | B |\n| :--- | ---: |\n| x | y |",
+      "plainText": "A\tB\nx\ty",
+      "revealCharacters": 8
+    },
+    {
+      "id": "table-no-outer",
+      "description": "table without outer pipes; second column centred",
+      "source": "A | B\n--- | :---:\nx | y",
+      "plainText": "A\tB\nx\ty",
+      "revealCharacters": 8
+    },
+    {
+      "id": "table-empty",
+      "description": "empty cells still spend one tick",
+      "source": "| A | B |\n| --- | --- |\n| | |",
+      "plainText": "A\tB\n\t",
+      "revealCharacters": 6
+    },
+    {
+      "id": "table-head-only",
+      "description": "a header without body rows is still a table",
+      "source": "| A | B |\n| --- | --- |",
+      "plainText": "A\tB",
+      "revealCharacters": 4
+    },
+    {
+      "id": "table-row-width",
+      "description": "short rows are padded and extra cells dropped",
+      "source": "| A | B |\n| --- | --- |\n| x |\n| y | z | extra |",
+      "plainText": "A\tB\nx\t\ny\tz",
+      "revealCharacters": 11
+    },
+    {
+      "id": "table-header-mismatch",
+      "description": "header and delimiter with different column counts is not a table",
+      "source": "A | B\n--- | --- | ---\nx | y",
+      "plainText": "A | B --- | --- | --- x | y",
+      "revealCharacters": 27
+    },
+    {
+      "id": "table-escape-code",
+      "description": "an escaped pipe does not split cells, in text or code",
+      "source": "| A | B |\n| --- | --- |\n| a\\|b | `c\\|d` |",
+      "plainText": "A\tB\na|b\tc|d",
+      "revealCharacters": 12
+    },
+    {
+      "id": "table-in-quote",
+      "description": "table inside a quote",
+      "source": "> | A | B |\n> | --- | --- |\n> | x | y |",
+      "plainText": "A\tB\nx\ty",
+      "revealCharacters": 8
+    },
+    {
+      "id": "table-in-list",
+      "description": "list item holding a paragraph and a table",
+      "source": "- result\n\n  | A | B |\n  | --- | --- |\n  | x | y |",
+      "plainText": "result\nA\tB\nx\ty",
+      "revealCharacters": 15
+    },
+    {
+      "id": "html-inline",
+      "description": "inline HTML displays as text",
+      "source": "<em>safe</em>",
+      "plainText": "<em>safe</em>",
+      "revealCharacters": 13
+    },
+    {
+      "id": "html-block",
+      "description": "an HTML block displays as text with its line breaks",
+      "source": "<script>\nexample()\n</script>",
+      "plainText": "<script>\nexample()\n</script>",
+      "revealCharacters": 28
+    },
+    {
+      "id": "footnote-literal",
+      "description": "footnote reference and definition stay text and are not links",
+      "source": "Text[^1]\n\n[^1]: Note",
+      "plainText": "Text[^1]\n[^1]: Note",
+      "revealCharacters": 18
+    },
+    {
+      "id": "footnote-continuation",
+      "description": "an indented footnote continuation stays with its definition",
+      "source": "Text[^1]\n\n[^1]: Note\n    continued",
+      "plainText": "Text[^1]\n[^1]: Note\n    continued",
+      "revealCharacters": 32
+    },
+    {
+      "id": "footnote-in-code",
+      "description": "footnote handling leaves code alone",
+      "source": "```text\n[^1]: Note\n```",
+      "plainText": "[^1]: Note",
+      "revealCharacters": 11
+    },
+    {
+      "id": "non-goals",
+      "description": "math stays text, an alert is a plain quote, a diagram fence is code",
+      "source": "$x$\n\n> [!NOTE] plain\n\n```mermaid\ngraph LR\n```",
+      "plainText": "$x$\n[!NOTE] plain\ngraph LR",
+      "revealCharacters": 25
+    },
+    {
+      "id": "unicode",
+      "description": "CJK, a combining sequence and emoji count by code point",
+      "source": "日本語 é 😀",
+      "plainText": "日本語 é 😀",
+      "revealCharacters": 8
+    },
+    {
+      "id": "reference-unused",
+      "description": "an unused link definition is hidden",
+      "source": "before\n\n[unused]: https://example.test\n\nafter",
+      "plainText": "before\nafter",
+      "revealCharacters": 11
+    },
+    {
+      "id": "reference-definition-only",
+      "description": "a body of only definitions is one empty paragraph",
+      "source": "[unused]: https://example.test",
+      "plainText": "",
+      "revealCharacters": 0
+    },
+    {
+      "id": "unicode-precomposed",
+      "description": "a precomposed character is one code point; nothing normalizes it",
+      "source": "日本語 é 😀",
+      "plainText": "日本語 é 😀",
+      "revealCharacters": 7
+    }
+  ]
+}

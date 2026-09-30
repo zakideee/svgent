@@ -6,11 +6,11 @@
   "messages": [
     {
       "role": "user",
-      "content": "[[同じ|おなじ]]MarkdownをTUIで。"
+      "content": "[[同じ|おなじ]]MarkdownをTUIで。\n\n| 面 | 状態 |\n| --- | --- |\n| TUI | 確認 |"
     },
     {
       "role": "assistant",
-      "content": "## TUI見出し\n\n本文 **強調** *斜体* `code` [link](https://example.com)。\n\n- 箇条書き `chip`\n1. 番号付き\n\n> TUIの引用ガター確認\n\n```bash\nrg -n 'pattern' src | head -3\n```"
+      "content": "## TUI見出し\n\n本文 **強調** *斜体* `code` [link](https://example.com)。\n\n- 箇条書き `chip`\n1. 番号付き\n\n> TUIの引用ガター確認\n>\n> > 入れ子の引用。\n\n| 項目 | 結果 |\n| :--- | ---: |\n| 型検査 | **成功** |\n| 単体テスト | ~~失敗~~ 成功 |\n\n- [x] 表の描画\n- [ ] 入れ子のリスト\n  - 子の項目\n\n```bash\nrg -n 'pattern' src | head -3\n```"
     }
   ],
   "appearance": {

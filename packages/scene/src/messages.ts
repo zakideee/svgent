@@ -46,7 +46,12 @@ import {
 } from "./env.js";
 import { type SceneAction, sceneActionMeta } from "./interaction.js";
 import { markdownPlainText, parseMarkdown } from "./markdown.js";
-import { renderMarkdown } from "./markdown-render.js";
+import type { MarkdownBlock } from "./markdown-model.js";
+import {
+  markdownTableInkWidthPx,
+  renderMarkdown,
+  renderMarkdownBlocks,
+} from "./markdown-render.js";
 import { measureLineWidthPx, measureWrappedLineCount } from "./measure.js";
 import {
   type AttachedImage,
@@ -2850,16 +2855,130 @@ export function appMessageInkWidthPx(
       ) + INK_CHOICE_CHROME_PX;
   } else {
     // User and assistant bubbles: raw markdown source lines, code in mono.
+    // A table is measured as drawn instead, at the width the bubble lays it
+    // out in, so its pipes neither widen the bubble nor shrink it twice.
+    const source = stripDraftMarkup(message.content);
+    const tableInk = markdownTableInkWidthPx(parseMarkdown(source), {
+      env,
+      surface: "app",
+      width: sizeLeft(bandWidth, spacePx(metrics, APP_BUBBLE_INNER_PAD_PX / 2) * 2),
+    });
     ink =
-      stripDraftMarkup(message.content)
-        .split("\n")
-        .reduce((widest, raw) => {
-          const line = raw.trim();
-          const mono = line.startsWith("```") || raw.startsWith("    ");
-          return Math.max(widest, measure(line, mono ? MONO_FONT : SANS_FONT, metrics.prosePx));
-        }, 0) + APP_BUBBLE_INNER_PAD_PX;
+      Math.max(
+        rawSourceInkPx(source, tableInk > 0, (line, mono) =>
+          measure(line, mono ? MONO_FONT : SANS_FONT, metrics.prosePx),
+        ),
+        tableInk,
+      ) + APP_BUBBLE_INNER_PAD_PX;
   }
   return Math.min(bandWidth, Math.max(ink, INK_MIN_PX));
+}
+
+/** Quote markers, indentation, and one list marker in front of a line. */
+const CONTAINER_PREFIX = /^(?:[ \t]*>)*[ \t]*(?:(?:[-*+]|\d{1,9}[.)])[ \t]+)?/u;
+/** The quote markers in front of a line. */
+const QUOTE_PREFIX = /^(?:[ \t]*>[ \t]?)*/u;
+/** A line that opens a list item. */
+const LIST_ITEM_START = /^[ \t]*(?:[-*+]|\d{1,9}[.)])[ \t]+/u;
+/** A GFM table delimiter row, with or without outer pipes. */
+const TABLE_DELIMITER_ROW = /^\|?[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)*\|?[ \t]*$/u;
+/** A code fence marker, indented at most three spaces. */
+const FENCE_OPEN = /^[ \t]{0,3}(`{3,}|~{3,})/u;
+
+/** Cells in a table row, counting only unescaped pipes as separators. */
+function tableCellCount(row: string): number {
+  const cells = row
+    .trim()
+    .replace(/^\|/u, "")
+    .replace(/(?<!\\)\|$/u, "")
+    .split(/(?<!\\)\|/u);
+  return cells.length;
+}
+
+/**
+ * The fence open after a line: a fence closes on the same character, at least
+ * as long, and a line outside one may open one.
+ */
+function nextFence(fence: string | null, line: string): string | null {
+  const marker = FENCE_OPEN.exec(line)?.[1];
+  if (fence === null) {
+    return marker ?? null;
+  }
+  return marker !== undefined && marker[0] === fence[0] && marker.length >= fence.length
+    ? null
+    : fence;
+}
+
+/** A piped row directly above a delimiter row with as many cells. */
+function startsTable(header: string, next: string): boolean {
+  const delimiter = next.trim();
+  return (
+    delimiter.includes("|") &&
+    TABLE_DELIMITER_ROW.test(delimiter) &&
+    tableCellCount(delimiter) === tableCellCount(header)
+  );
+}
+
+/**
+ * Source lines that belong to a table, found by GFM's rule for where one
+ * starts: a row with pipes directly above a delimiter row with the same
+ * number of cells, then the piped rows after it. Fenced and indented code is
+ * skipped, so a shell pipeline in a code block is never mistaken for one.
+ */
+function tableSourceLines(lines: string[]): Set<number> {
+  const table = new Set<number>();
+  let fence: string | null = null;
+  let listed = false;
+  const body = (index: number) => (lines[index] ?? "").replace(CONTAINER_PREFIX, "");
+  for (let index = 0; index < lines.length; index += 1) {
+    const unquoted = (lines[index] ?? "").replace(QUOTE_PREFIX, "");
+    const fenced = fence !== null;
+    fence = nextFence(fence, unquoted);
+    if (fenced || fence !== null) {
+      continue;
+    }
+    if (unquoted.trim().length === 0) {
+      continue;
+    }
+    listed = LIST_ITEM_START.test(unquoted) || (listed && /^[ \t]/u.test(unquoted));
+    // Four columns of indent outside a list item is a code block.
+    const indentedCode = !listed && /^(?: {4}|\t)/u.test(unquoted);
+    if (indentedCode || table.has(index) || !body(index).includes("|")) {
+      continue;
+    }
+    if (!startsTable(body(index), body(index + 1))) {
+      continue;
+    }
+    table.add(index);
+    table.add(index + 1);
+    let row = index + 2;
+    while (row < lines.length && body(row).trim().length > 0 && body(row).includes("|")) {
+      table.add(row);
+      row += 1;
+    }
+  }
+  return table;
+}
+
+/**
+ * The widest raw source line. When the body holds a table its rows are left
+ * out, since the table's drawn width is counted separately.
+ */
+function rawSourceInkPx(
+  source: string,
+  skipTableRows: boolean,
+  measureLine: (line: string, mono: boolean) => number,
+): number {
+  const lines = source.split("\n");
+  const tableLines = skipTableRows ? tableSourceLines(lines) : new Set<number>();
+  return lines.reduce((widest, raw, index) => {
+    if (tableLines.has(index)) {
+      return widest;
+    }
+    const line = raw.trim();
+    const mono = line.startsWith("```") || raw.startsWith("    ");
+    return Math.max(widest, measureLine(line, mono));
+  }, 0);
 }
 
 /** Prefix glyph, gap, and trailing status a TUI row draws beside its text. */
@@ -2877,23 +2996,28 @@ export function tuiMessageInkWidthPx(
 ): number {
   const { metrics } = env;
   const { bandWidth, engine } = probe;
+  const source = stripDraftMarkup(message.content);
+  const blocks: MarkdownBlock[] =
+    message.role === "user" || message.role === "assistant" ? parseMarkdown(source) : [];
+  const tableInk = markdownTableInkWidthPx(blocks, {
+    env,
+    surface: "tui",
+    width: tuiMessageBodyWidth(bandWidth, metrics),
+  });
+  const measureMono = (line: string) =>
+    measureLineWidthPx(engine, {
+      text: line.trim(),
+      font: MONO_FONT,
+      fontSizePx: metrics.tuiFontPx,
+      fallbackRatio: TUI_CHAR_RATIO,
+    });
   const lines = [
-    ...stripDraftMarkup(message.content).split("\n"),
     ...(message.options ?? []),
     ...(message.images ?? []).map((image) => `[image] ${image.alt} · 0000×0000px`),
   ];
   const widest = lines.reduce(
-    (max, line) =>
-      Math.max(
-        max,
-        measureLineWidthPx(engine, {
-          text: line.trim(),
-          font: MONO_FONT,
-          fontSizePx: metrics.tuiFontPx,
-          fallbackRatio: TUI_CHAR_RATIO,
-        }),
-      ),
-    0,
+    (max, line) => Math.max(max, measureMono(line)),
+    Math.max(rawSourceInkPx(source, tableInk > 0, measureMono), tableInk),
   );
   return Math.min(
     bandWidth,
@@ -3023,7 +3147,8 @@ export function appMessage(timing: MessageTiming, env: SceneEnv, width: number):
   }).width;
   const markdown = renderMarkdown(isUser ? stripDraftMarkup(message.content) : message.content, {
     env,
-    width: sizeLeft(contentWidth, 30),
+    // The card's own side padding, which grows with the spacing scale.
+    width: sizeLeft(contentWidth, sp(APP_BUBBLE_INNER_PAD_PX / 2) * 2),
     messageTiming: timing,
     surface: "app",
     reveal: isUser ? "instant" : "streamed",
@@ -3065,6 +3190,14 @@ export function appMessage(timing: MessageTiming, env: SceneEnv, width: number):
   };
 }
 
+/** Space between a TUI row's prefix glyph and its body. */
+const TUI_PREFIX_GAP_PX = 8;
+
+/** The width a TUI row's body gets once its two-cell prefix and gap are taken. */
+function tuiMessageBodyWidth(width: number, metrics: SceneEnv["metrics"]): number {
+  return sizeLeft(width, Math.ceil(metrics.tuiCharPx * 2), TUI_PREFIX_GAP_PX);
+}
+
 export function tuiMessage(timing: MessageTiming, env: SceneEnv, width: number): RenderedBlock {
   const { palette, metrics } = env;
   const { message } = timing;
@@ -3084,17 +3217,15 @@ export function tuiMessage(timing: MessageTiming, env: SceneEnv, width: number):
     return tuiImageMessage(timing, env, width);
   }
 
-  const blocks = parseMarkdown(
-    message.role === "user" ? stripDraftMarkup(message.content) : message.content,
-  );
   const isUser = message.role === "user";
+  const blocks = parseMarkdown(isUser ? stripDraftMarkup(message.content) : message.content);
   // The user types in the prompt below; after the pre-send beat the
   // finished line is appended here in one repaint — real terminals have no
   // send effect beyond the prompt clearing. Agent output streams per cell.
   const anchorMs = isUser ? userLandingMs(timing) : timing.startMs;
   const prefixWidth = Math.ceil(metrics.tuiCharPx * 2);
-  const bodyWidth = sizeLeft(width, prefixWidth, 8);
-  const markdown = renderMarkdown(isUser ? stripDraftMarkup(message.content) : message.content, {
+  const bodyWidth = tuiMessageBodyWidth(width, metrics);
+  const markdown = renderMarkdownBlocks(blocks, {
     env,
     width: bodyWidth,
     messageTiming: timing,
@@ -3107,7 +3238,7 @@ export function tuiMessage(timing: MessageTiming, env: SceneEnv, width: number):
       {
         direction: "row",
         width,
-        gap: 8,
+        gap: TUI_PREFIX_GAP_PX,
         animate: tuiPop(anchorMs),
         meta: { edit: message.id },
       },
