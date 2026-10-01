@@ -16,17 +16,17 @@ const DEMO_DIR = "assets/readme/demo";
 const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   {
     file: "README.md",
-    claim: "transcript SVG (0.66 MB)",
+    claim: "transcript SVG (0.39 MB)",
     artifact: `${DEMO_DIR}/readme-english-01.transcript.svg`,
   },
   {
     file: "README.md",
-    claim: "animated SVG (1.77 MB)",
+    claim: "animated SVG (1.40 MB)",
     artifact: `${DEMO_DIR}/readme-en-tui-dark-01.animated.svg`,
   },
   {
     file: "README.md",
-    claim: "Animated WebP (3.42 MB)",
+    claim: "Animated WebP (6.87 MB)",
     artifact: `${DEMO_DIR}/readme-en-tui-dark-01.animated.webp`,
   },
   {
@@ -36,12 +36,12 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.md",
-    claim: "animated SVG (1.46 MB)",
+    claim: "animated SVG (1.23 MB)",
     artifact: `${DEMO_DIR}/readme-en-app-image-01.animated.svg`,
   },
   {
     file: "README.md",
-    claim: "Animated WebP (5.00 MB)",
+    claim: "Animated WebP (8.71 MB)",
     artifact: `${DEMO_DIR}/readme-en-app-image-01.animated.webp`,
   },
   {
@@ -51,7 +51,7 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.md",
-    claim: "animated SVG (1.54 MB)",
+    claim: "animated SVG (1.19 MB)",
     artifact: `${DEMO_DIR}/readme-en-app-zoom-01.animated.svg`,
   },
   {
@@ -66,12 +66,12 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.ja.md",
-    claim: "animated SVG (2.65 MB)",
+    claim: "animated SVG (1.86 MB)",
     artifact: `${DEMO_DIR}/readme-tui-dark-01.animated.svg`,
   },
   {
     file: "README.ja.md",
-    claim: "animated WebP (1.74 MB)",
+    claim: "animated WebP (3.51 MB)",
     artifact: `${DEMO_DIR}/readme-tui-dark-01.animated.webp`,
   },
   {
@@ -81,12 +81,12 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.ja.md",
-    claim: "animated SVG (1.81 MB)",
+    claim: "animated SVG (1.36 MB)",
     artifact: `${DEMO_DIR}/readme-app-image-01.animated.svg`,
   },
   {
     file: "README.ja.md",
-    claim: "animated WebP (2.46 MB)",
+    claim: "animated WebP (4.98 MB)",
     artifact: `${DEMO_DIR}/readme-app-image-01.animated.webp`,
   },
   {
@@ -96,7 +96,7 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.ja.md",
-    claim: "animated SVG (1.93 MB)",
+    claim: "animated SVG (1.36 MB)",
     artifact: `${DEMO_DIR}/readme-tui-zoom-01.animated.svg`,
   },
   {
