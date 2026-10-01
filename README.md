@@ -26,7 +26,7 @@ All rendered by the CLI from the scripts in [examples/](examples/). The Japanese
 
 Contents: an English request, visible progress, tool activity, an approval step, Markdown, and a TypeScript result
 
-Displayed format: transcript SVG (0.66 MB) · [Script](examples/readme-english.json)
+Displayed format: transcript SVG (0.39 MB) · [Script](examples/readme-english.json)
 
 ### TUI — From implementation research to approval
 
@@ -36,7 +36,7 @@ Displayed format: transcript SVG (0.66 MB) · [Script](examples/readme-english.j
 
 Contents: user input, thinking, tool execution, Markdown, TypeScript syntax highlighting, a choice, and an approval UI
 
-Displayed format: animated SVG (1.77 MB) · [Animated WebP (3.42 MB)](assets/readme/demo/readme-en-tui-dark-01.animated.webp) · [MP4 (28.4 seconds, 0.23 MB)](assets/readme/demo/readme-en-tui-dark-01.mp4) · [Script](examples/readme-en-tui-dark.json)
+Displayed format: animated SVG (1.40 MB) · [Animated WebP (6.87 MB)](assets/readme/demo/readme-en-tui-dark-01.animated.webp) · [MP4 (28.4 seconds, 0.23 MB)](assets/readme/demo/readme-en-tui-dark-01.mp4) · [Script](examples/readme-en-tui-dark.json)
 
 ### App — From a choice to image generation
 
@@ -46,7 +46,7 @@ Displayed format: animated SVG (1.77 MB) · [Animated WebP (3.42 MB)](assets/rea
 
 Generation starts after the selection, holds on a tiles skeleton, then resolves to the finished image. The status copy updates as it goes.
 
-Displayed format: animated SVG (1.46 MB) · [Animated WebP (5.00 MB)](assets/readme/demo/readme-en-app-image-01.animated.webp) · [MP4 (20.1 seconds, 0.19 MB)](assets/readme/demo/readme-en-app-image-01.mp4) · [Script](examples/readme-en-app-image.json) · [Generated image](packages/studio/assets/presets/watercolor-traveler-dusk.webp)
+Displayed format: animated SVG (1.23 MB) · [Animated WebP (8.71 MB)](assets/readme/demo/readme-en-app-image-01.animated.webp) · [MP4 (20.1 seconds, 0.19 MB)](assets/readme/demo/readme-en-app-image-01.mp4) · [Script](examples/readme-en-app-image.json) · [Generated image](packages/studio/assets/presets/watercolor-traveler-dusk.webp)
 
 ### App — A follow camera over a generated cover
 
@@ -58,7 +58,7 @@ The camera is planned from the timeline and the measured geometry before renderi
 
 Contents: a choice answered in freeform text instead of a pick, an _Allow always_ approval, and the `sweep` generating skeleton over an `ember` window on a `peach` canvas
 
-Displayed format: animated SVG (1.54 MB) · [Script](examples/readme-en-app-zoom.json) · [Generated image](packages/studio/assets/presets/generic-generated-result.webp)
+Displayed format: animated SVG (1.19 MB) · [Script](examples/readme-en-app-zoom.json) · [Generated image](packages/studio/assets/presets/generic-generated-result.webp)
 
 ### Still image and full transcript
 

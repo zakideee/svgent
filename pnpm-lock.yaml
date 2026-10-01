@@ -12,8 +12,8 @@ importers:
         specifier: 2.4.2
         version: 2.4.2
       '@boundsvg/core':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.6.0
+        version: 0.6.0
       '@j178/prek':
         specifier: ^0.3.4
         version: 0.3.13
@@ -136,8 +136,8 @@ importers:
   packages/cli:
     dependencies:
       '@boundsvg/core':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.6.0
+        version: 0.6.0
       '@svgent/assets':
         specifier: workspace:*
         version: link:../assets
@@ -151,8 +151,8 @@ importers:
   packages/render:
     dependencies:
       '@boundsvg/core':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.6.0
+        version: 0.6.0
       '@svgent/scene':
         specifier: workspace:*
         version: link:../scene
@@ -160,8 +160,8 @@ importers:
   packages/scene:
     dependencies:
       '@boundsvg/core':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.6.0
+        version: 0.6.0
       character-entities:
         specifier: 2.0.2
         version: 2.0.2
@@ -182,17 +182,17 @@ importers:
   packages/studio:
     dependencies:
       '@boundsvg/browser':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.6.0
+        version: 0.6.0
       '@boundsvg/core':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.6.0
+        version: 0.6.0
       '@boundsvg/video':
-        specifier: 0.4.0
-        version: 0.4.0(@boundsvg/core@0.4.0)
+        specifier: 0.6.0
+        version: 0.6.0(@boundsvg/core@0.6.0)
       '@boundsvg/worker':
-        specifier: 0.4.0
-        version: 0.4.0
+        specifier: 0.6.0
+        version: 0.6.0
       '@svgent/assets':
         specifier: workspace:*
         version: link:../assets
@@ -358,22 +358,22 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@boundsvg/browser@0.4.0':
-    resolution: {integrity: sha512-axNfwX1hpMYALoZplHcqAOmI5cMQWZbjVWTHztrpVf6u2AwxAmZPh5FtzUtvUveypnyX7YRVEfSJwYHL6EZYOQ==}
+  '@boundsvg/browser@0.6.0':
+    resolution: {integrity: sha512-OtZ8Lw9tgjWEW4ZrfD5YcEMNzJSfR/uG97dXSwTA13AIgDbR1To/Bu+C8WbuGy5E/JSp5fIhSI7FoaKdCPvyGQ==}
 
-  '@boundsvg/core@0.4.0':
-    resolution: {integrity: sha512-XgHa+Qrdrn2Rlqfh0VbAu4ZhHzLXjpS0W3PSe2/28V29C7x3UDYA946wgE57V4ajiV5n/2YWyycDXKJuBQor8w==}
+  '@boundsvg/core@0.6.0':
+    resolution: {integrity: sha512-lWiOwhmY4ReCt/hMopxYCRaevWr54KmRx/+t5uRunqW2pb8clhPGgXfvHOyml8HVZaCF2slbrQx30wGXoI8WiQ==}
 
-  '@boundsvg/shape@0.4.0':
-    resolution: {integrity: sha512-4nd1qDR0TOYC4JG28m/MqeV3at/cFkSKaaVzcUZ9+JlVYbMijcO26JGa3S30HYOdxWoAyveXbAvmQB7RBJXJHQ==}
+  '@boundsvg/shape@0.6.0':
+    resolution: {integrity: sha512-pC7/YeaUhHGwyiIKxzr6SNTNMMM00HJdy0vVCzvus9Sxv+pADbYYWJ+TyjM3+o1a7y9YtZ/Ui97bhZISux1WKA==}
 
-  '@boundsvg/video@0.4.0':
-    resolution: {integrity: sha512-9YYXpJNQN4ABjeb7brqNj5vavag07G1Esoz69wOwqdXEGzaP2ARPFuCwXEX2lX/WpdQbcylbFV8jAmrfkL+MAg==}
+  '@boundsvg/video@0.6.0':
+    resolution: {integrity: sha512-nwHib0oYVoVVbft9Wb+yFRtmcgS6bDFTxDYw6uToFKYJKItT/Zd9N5AJQUjqNb6N9st9LgA06atuDPKM7rL96g==}
     peerDependencies:
-      '@boundsvg/core': '>=0.4.0 <0.5.0'
+      '@boundsvg/core': '>=0.6.0 <0.7.0'
 
-  '@boundsvg/worker@0.4.0':
-    resolution: {integrity: sha512-78KzI4j6wTsjQf87iPU/SMpCzSTkFOKx6Yvbwt5mWkoj2xMVVoc8tDKWyPSwCh9KUMMxU564fXijozG5YbgKiA==}
+  '@boundsvg/worker@0.6.0':
+    resolution: {integrity: sha512-zDN8emcXW5TGwVV8QKByalJf+G0YRCqRXxBZD6xeEz8VS3xLFZZx85eVSibOuv4KX1PHDQPF640OfqX2A2xaig==}
 
   '@cloudflare/kv-asset-handler@0.5.0':
     resolution: {integrity: sha512-jxQYkj8dSIzc0cD6cMMNdOc1UVjqSqu8BZdor5s8cGjW2I8BjODt/kWPVdY+u9zj3ms75Q5qaZgnxUad83+eAg==}
@@ -2371,24 +2371,24 @@ snapshots:
   '@biomejs/cli-win32-x64@2.4.2':
     optional: true
 
-  '@boundsvg/browser@0.4.0':
+  '@boundsvg/browser@0.6.0':
     dependencies:
-      '@boundsvg/core': 0.4.0
+      '@boundsvg/core': 0.6.0
 
-  '@boundsvg/core@0.4.0':
+  '@boundsvg/core@0.6.0':
     dependencies:
-      '@boundsvg/shape': 0.4.0
+      '@boundsvg/shape': 0.6.0
 
-  '@boundsvg/shape@0.4.0': {}
+  '@boundsvg/shape@0.6.0': {}
 
-  '@boundsvg/video@0.4.0(@boundsvg/core@0.4.0)':
+  '@boundsvg/video@0.6.0(@boundsvg/core@0.6.0)':
     dependencies:
-      '@boundsvg/core': 0.4.0
+      '@boundsvg/core': 0.6.0
 
-  '@boundsvg/worker@0.4.0':
+  '@boundsvg/worker@0.6.0':
     dependencies:
-      '@boundsvg/browser': 0.4.0
-      '@boundsvg/core': 0.4.0
+      '@boundsvg/browser': 0.6.0
+      '@boundsvg/core': 0.6.0
 
   '@cloudflare/kv-asset-handler@0.5.0': {}
 

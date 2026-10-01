@@ -26,7 +26,7 @@ SVGENT は、**エージェントとの会話を創作して画像と動画に�
 
 内容: IME入力(`[[空状態|からじょうたい]]`)、日本語の折り返し、thinking、tool実行、Markdown、TypeScriptのsyntax highlight、choice、承認UI
 
-表示形式: animated SVG (2.65 MB) · [animated WebP (1.74 MB)](assets/readme/demo/readme-tui-dark-01.animated.webp) · [MP4 (26.8秒、0.23 MB)](assets/readme/demo/readme-tui-dark-01.mp4) · [台本](examples/readme-tui-dark.json)
+表示形式: animated SVG (1.86 MB) · [animated WebP (3.51 MB)](assets/readme/demo/readme-tui-dark-01.animated.webp) · [MP4 (26.8秒、0.23 MB)](assets/readme/demo/readme-tui-dark-01.mp4) · [台本](examples/readme-tui-dark.json)
 
 ### アプリ — choiceから画像生成へ
 
@@ -36,7 +36,7 @@ SVGENT は、**エージェントとの会話を創作して画像と動画に�
 
 選択のあと tiles skeleton で間を取り、完成画像へ切り替わります。生成中は状態文も更新されます。
 
-表示形式: animated SVG (1.81 MB) · [animated WebP (2.46 MB)](assets/readme/demo/readme-app-image-01.animated.webp) · [MP4 (20.4秒、0.20 MB)](assets/readme/demo/readme-app-image-01.mp4) · [台本](examples/readme-app-image.json) · [生成画像](packages/studio/assets/presets/watercolor-traveler-dusk.webp)
+表示形式: animated SVG (1.36 MB) · [animated WebP (4.98 MB)](assets/readme/demo/readme-app-image-01.animated.webp) · [MP4 (20.4秒、0.20 MB)](assets/readme/demo/readme-app-image-01.mp4) · [台本](examples/readme-app-image.json) · [生成画像](packages/studio/assets/presets/watercolor-traveler-dusk.webp)
 
 ### ターミナル — 追従カメラで拒否から承認へ
 
@@ -48,7 +48,7 @@ SVGENT は、**エージェントとの会話を創作して画像と動画に�
 
 内容: diffのsyntax highlight、方針のchoice、いったん**拒否**される承認とその後に通る承認。背景は `abyss`、ターミナルは `phosphor`
 
-表示形式: animated SVG (1.93 MB) · [台本](examples/readme-tui-zoom.json)
+表示形式: animated SVG (1.36 MB) · [台本](examples/readme-tui-zoom.json)
 
 ### 静止画と会話全体の一枚絵
 

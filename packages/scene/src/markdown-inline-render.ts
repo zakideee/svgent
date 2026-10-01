@@ -16,7 +16,12 @@ import {
   Text,
   type TextDecoration,
 } from "@boundsvg/core";
-import { chipRevealAnimation, revealUnitsFor, structureRevealAnimation } from "./animations.js";
+import {
+  chipRevealAnimation,
+  revealUnitsFor,
+  structureRevealAnimation,
+  typedUnits,
+} from "./animations.js";
 import { MONO_FALLBACK, MONO_FONT, SANS_FALLBACK, SANS_FONT } from "./env.js";
 import { draftGraphemeCount, draftGraphemes } from "./graphemes.js";
 import type { MarkdownRenderContext } from "./markdown-render.js";
@@ -491,13 +496,20 @@ function sliceLine(line: DisplayLine, start: number, end: number): DisplayLine {
 }
 
 /**
- * Centred or end-aligned text that streams in, one Text per visual line.
+ * Reveal timing for a probe. The unit map the wraps are read from only exists
+ * on unit-animated text; when the units play does not change where they sit.
+ */
+const PROBE_UNITS = typedUnits(0, 1, 0);
+
+/**
+ * Centred or end-aligned text, one Text per visual line.
  *
- * boundsvg lays such text out aligned but paints its revealed units from the
- * line start, so the words would sit left while their box sits right. The
- * wraps are read from the engine instead, each line becomes a Text exactly as
- * wide as its words, and the column aligns those. Returns `null` when there is
- * nothing to probe with.
+ * The wraps are read from the engine, each line becomes a Text exactly as wide
+ * as its words, and the column aligns those. A terminal moves them by whole
+ * cells, which the engine's own centring does not. Streamed text needs the
+ * split on both surfaces: its strike strokes are placed on a start-aligned
+ * layout (see `strikeOverlay`). Returns `null` when there is nothing to probe
+ * with.
  */
 function alignedLineText(
   line: DisplayLine,
@@ -505,14 +517,9 @@ function alignedLineText(
   options: LineTextOptions,
 ): AnyVNode | null {
   const { context, offset } = at;
-  const units = revealUnitsFor(context, offset);
-  if (units === undefined) {
-    return null;
-  }
-  // The unit map the wraps are read from only exists on unit-animated text.
   const probe = Text(
     {
-      animateUnits: units,
+      animateUnits: PROBE_UNITS,
       width: options.width,
       font: options.family.font,
       fallback: options.family.fallback,
@@ -631,7 +638,7 @@ function alignedInset(
 export function lineText(line: DisplayLine, at: RevealAt, options: LineTextOptions): AnyVNode {
   const streamed = !options.revealWhole && at.context.reveal !== "instant";
   const aligned = options.textAlign === "center" || options.textAlign === "end";
-  if (streamed && aligned && line.length > 0) {
+  if ((streamed || at.context.surface === "tui") && aligned && line.length > 0) {
     const split = alignedLineText(line, at, options);
     if (split !== null) {
       return split;

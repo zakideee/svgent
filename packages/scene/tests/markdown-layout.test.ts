@@ -62,7 +62,8 @@ afterAll(() => {
 });
 
 type Box = { x: number; y: number; w: number; h: number };
-type Leaf = { type: IRNode["type"]; text: string; bbox: Box };
+/** `glyphX` is where the first glyph advance starts, the cell a terminal draws it in. */
+type Leaf = { type: IRNode["type"]; text: string; bbox: Box; glyphX: number };
 type Settled = { leaves: Leaf[]; message: Box };
 
 type UnitSample = { bbox?: Box };
@@ -88,14 +89,33 @@ function inkBox(node: IRNode, visual: Box): Box | null {
   return { x: x + visual.x - layout.x, y: y + visual.y - layout.y, w, h };
 }
 
+/**
+ * Where text without revealed units paints horizontally: its glyph advances,
+ * which sit at origins inside the layout box rather than in the node's own
+ * box. A box can be aligned while its glyphs still start at the line start.
+ */
+function glyphBox(node: Extract<IRNode, { type: "text" }>, visual: Box): Box | null {
+  const glyphs = node.lines.flatMap((line) => line.positionedGlyphs ?? []);
+  if (glyphs.length === 0) {
+    return null;
+  }
+  const start = Math.min(...glyphs.map((glyph) => glyph.originX + glyph.xOffset));
+  const end = Math.max(...glyphs.map((glyph) => glyph.originX + glyph.xOffset + glyph.xAdvance));
+  const x = node.layoutBox.x + start + visual.x - node.bbox.x;
+  return { x, y: visual.y, w: end - start, h: visual.h };
+}
+
 function leafOf(node: IRNode, box: Box): Leaf {
-  return node.type === "text"
-    ? {
-        type: node.type,
-        text: node.lines.map((line) => line.text).join("\n"),
-        bbox: inkBox(node, box) ?? box,
-      }
-    : { type: node.type, text: "", bbox: box };
+  if (node.type !== "text") {
+    return { type: node.type, text: "", bbox: box, glyphX: box.x };
+  }
+  const glyphs = glyphBox(node, box);
+  return {
+    type: node.type,
+    text: node.lines.map((line) => line.text).join("\n"),
+    bbox: inkBox(node, box) ?? glyphs ?? box,
+    glyphX: glyphs?.x ?? box.x,
+  };
 }
 
 /** The settled frame of one message: its row's box and every leaf inside it. */
@@ -169,8 +189,11 @@ const ALIGNED = [
 ].join("\n");
 
 describe.each(["app", "tui"] as const)("table columns on %s", (surface) => {
-  it("share one set of column positions across rows, with each column's alignment", () => {
-    const settled = settle(projectWith(surface, ALIGNED), "m");
+  it.each([
+    "assistant",
+    "user",
+  ] as const)("share one set of column positions across rows, with each column's alignment: %s", (role) => {
+    const settled = settle(projectWith(surface, ALIGNED, {}, role), "m");
     const [leftWide, middleWide, rightWide] = texts(settled, "wider text");
     if (!leftWide || !middleWide || !rightWide) {
       throw new Error("expected three wide cells");
@@ -191,6 +214,22 @@ describe.each(["app", "tui"] as const)("table columns on %s", (surface) => {
     // Headers sit over their columns.
     expect(Math.abs(text(settled, "Left").bbox.x - a.bbox.x)).toBeLessThan(SLACK_PX + 1);
     expect(Math.abs(right(text(settled, "Right").bbox) - right(c.bbox))).toBeLessThan(SLACK_PX + 1);
+  });
+});
+
+describe("table cells on the terminal grid", () => {
+  it.each([
+    "assistant",
+    "user",
+  ] as const)("start every aligned cell on a whole cell: %s", (role) => {
+    const project = projectWith("tui", ALIGNED, {}, role);
+    const settled = settle(project, "m");
+    const cell = metricsFor(project).tuiCharPx;
+    const origin = text(settled, "a").glyphX;
+    for (const value of ["b", "c", "Middle", "Right"]) {
+      const cells = (text(settled, value).glyphX - origin) / cell;
+      expect(Math.abs(cells - Math.round(cells)), value).toBeLessThan(0.01);
+    }
   });
 });
 
