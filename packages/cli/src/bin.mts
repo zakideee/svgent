@@ -23,6 +23,7 @@ import {
   type AnimatedSvgIterations,
   assertIdentifierNamespace,
   DEFAULT_MOTION_EXPORT_QUALITY,
+  isAnimatedRasterKind,
   type MotionExportQuality,
   RASTER_MAX_LONG_EDGE,
   RASTER_MAX_PIXELS,
@@ -30,6 +31,7 @@ import {
   RENDERABLE_KINDS,
   type RenderableKind,
   type ResolvedRasterScale,
+  renderAnimatedRaster,
   renderArtifact,
   resolveMotionExportSettings,
   resolveSceneRasterScale,
@@ -402,10 +404,22 @@ async function renderOnePage(input: {
     });
     return outPath;
   }
+  if (isAnimatedRasterKind(kind)) {
+    const outPath = `${stem}.${RENDERABLE_EXTENSIONS[kind]}`;
+    await writeFile(
+      outPath,
+      await renderAnimatedRaster(engine, scene, {
+        kind,
+        scale: options.scale,
+        motionQuality: options.motionQuality,
+        onResolutionAdjusted,
+      }),
+    );
+    return outPath;
+  }
   const artifact = renderArtifact(engine, scene, {
     kind,
     scale: options.scale,
-    motionQuality: options.motionQuality,
     animatedSvgIterations: options.animatedSvgIterations,
     onResolutionAdjusted,
     ...(options.idNamespace === undefined ? {} : { identifierNamespace: options.idNamespace }),

@@ -23,6 +23,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { promisify } from "node:util";
+import type { MotionExportQuality } from "@svgent/render";
 
 const run = promisify(execFile);
 const repoRoot = path.dirname(path.dirname(new URL(import.meta.url).pathname));
@@ -44,11 +45,13 @@ type Target = keyof typeof TARGET_DIRS;
  * One render invocation. `scale` is omitted where it would not apply: SVG is
  * vector output and ignores it. `target` defaults to the README demos, and
  * `dir` to `examples` — the inputs page also shows fixture transcripts.
+ * `motionQuality` defaults to `high`.
  */
 type Job = {
   script: string;
   formats: string;
   scale?: number;
+  motionQuality?: MotionExportQuality;
   target?: Target;
   dir?: "examples" | "fixtures/scripts";
 };
@@ -56,25 +59,32 @@ type Job = {
 /**
  * Both languages, in the order the READMEs present them. Scales are the ones
  * the committed artifacts were made at — animated WebP at 0.75 keeps the motion
- * legible at README width, everything raster else at 0.5.
+ * legible at README width, everything raster else at 0.5. Animated WebP samples
+ * at 8 fps: every frame is a full lossless image, and at 20 fps a README demo
+ * runs past 30 MB.
  */
 const JOBS: Job[] = [
   { script: "readme-english", formats: "transcript-svg" },
 
   { script: "readme-en-tui-dark", formats: "animated-svg" },
-  { script: "readme-en-tui-dark", formats: "animated-webp", scale: 0.75 },
+  { script: "readme-en-tui-dark", formats: "animated-webp", scale: 0.75, motionQuality: "economy" },
   { script: "readme-en-tui-dark", formats: "poster-webp,mp4,transcript-png", scale: 0.5 },
   { script: "readme-en-app-image", formats: "animated-svg" },
-  { script: "readme-en-app-image", formats: "animated-webp", scale: 0.75 },
+  {
+    script: "readme-en-app-image",
+    formats: "animated-webp",
+    scale: 0.75,
+    motionQuality: "economy",
+  },
   { script: "readme-en-app-image", formats: "poster-webp,mp4", scale: 0.5 },
   { script: "readme-en-app-zoom", formats: "animated-svg" },
   { script: "readme-en-slides-light", formats: "poster-webp", scale: 0.5 },
 
   { script: "readme-tui-dark", formats: "animated-svg" },
-  { script: "readme-tui-dark", formats: "animated-webp", scale: 0.75 },
+  { script: "readme-tui-dark", formats: "animated-webp", scale: 0.75, motionQuality: "economy" },
   { script: "readme-tui-dark", formats: "poster-webp,mp4,transcript-png", scale: 0.5 },
   { script: "readme-app-image", formats: "animated-svg" },
-  { script: "readme-app-image", formats: "animated-webp", scale: 0.75 },
+  { script: "readme-app-image", formats: "animated-webp", scale: 0.75, motionQuality: "economy" },
   { script: "readme-app-image", formats: "poster-webp,mp4", scale: 0.5 },
   { script: "readme-tui-zoom", formats: "animated-svg" },
   { script: "readme-slides-light", formats: "poster-webp", scale: 0.5 },
@@ -163,10 +173,9 @@ async function renderInto(outDir: string): Promise<void> {
       // Pinned rather than inherited. The CLI's default motion profile is a
       // product decision about what an author's export should cost them, and
       // it has already moved once; these are the project's own showcase, and
-      // they should not re-encode because that default shifted. `high` is the
-      // sampling the committed artifacts were made at.
+      // they should not re-encode because that default shifted.
       "--motion-quality",
-      "high",
+      job.motionQuality ?? "high",
       ...(job.scale === undefined ? [] : ["--scale", String(job.scale)]),
     ];
     process.stdout.write(`  ${job.script} → ${job.formats}\n`);

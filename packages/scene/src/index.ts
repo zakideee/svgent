@@ -208,7 +208,6 @@ export type {
   SessionTimeline,
 } from "./timeline.js";
 export {
-  animatedRasterFps,
   buildTimeline,
   CHOICE_SEND_BEAT_MS,
   COMPLETION_ACCEPT_MS,

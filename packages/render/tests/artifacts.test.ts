@@ -1,11 +1,11 @@
 import { readdir, readFile } from "node:fs/promises";
 import {
+  type AnimatedRasterSink,
   RASTER_MAX_LONG_EDGE as BOUNDSVG_RASTER_MAX_LONG_EDGE,
   RASTER_MAX_PIXELS as BOUNDSVG_RASTER_MAX_PIXELS,
   createElement,
   createEngineAsync,
   type Engine,
-  MAX_ANIMATION_SVG_PAYLOAD_CHARS,
 } from "@boundsvg/core";
 import { initNodeWasm } from "@boundsvg/core/node";
 import { BUNDLED_FONT_FILES, GENERATED_SAMPLE_IMAGES } from "@svgent/assets";
@@ -13,12 +13,13 @@ import { bundledFontPath } from "@svgent/assets/node";
 import {
   DEFAULT_MOTION_EXPORT_QUALITY,
   documentIdPrefix,
+  isAnimatedRasterKind,
   normalizeIdentifierNamespace,
-  payloadSafeFps,
   RASTER_MAX_LONG_EDGE,
   RASTER_MAX_PIXELS,
   RENDERABLE_KINDS,
   type ResolvedRasterScale,
+  renderAnimatedRaster,
   renderArtifact,
   resolveMotionExportSettings,
   resolveRasterScale,
@@ -40,6 +41,16 @@ import {
 } from "./container-fixtures.js";
 
 const packageName = "svgent";
+/** A mocked engine render that streams one chunk into the caller's sink. */
+function streamInto(format: "gif" | "webp", bytes: () => Uint8Array) {
+  return async (_input: unknown, _options: unknown, sink: AnimatedRasterSink) => {
+    const chunk = bytes();
+    await sink.write(chunk);
+    await sink.finish();
+    return { format, frameCount: 1, bytesWritten: chunk.length };
+  };
+}
+
 const TEST_GENERATOR = { name: packageName, version: packageVersion } as const;
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47];
 
@@ -193,11 +204,11 @@ describe("headless artifact rendering", () => {
     expect(renderArtifact(engine, scene, "poster-png")).toEqual(png);
   });
 
-  it("embeds the identity in still WebP, animated WebP, and GIF containers", () => {
+  it("embeds the identity in still WebP, animated WebP, and GIF containers", async () => {
     const scene = tinyAnimatedScene();
     const stillWebp = renderArtifact(engine, scene, "poster-webp") as Uint8Array;
-    const animatedWebp = renderArtifact(engine, scene, "animated-webp") as Uint8Array;
-    const gif = renderArtifact(engine, scene, "gif") as Uint8Array;
+    const animatedWebp = await renderAnimatedRaster(engine, scene, { kind: "animated-webp" });
+    const gif = await renderAnimatedRaster(engine, scene, { kind: "gif" });
 
     expect(containsAscii(stillWebp, `<boundsvg:name>${packageName}</boundsvg:name>`)).toBe(true);
     expect(containsAscii(animatedWebp, `<boundsvg:name>${packageName}</boundsvg:name>`)).toBe(true);
@@ -230,8 +241,14 @@ describe("headless artifact rendering", () => {
     expect(() => renderArtifact(engine, scene, "poster-svg")).toThrow(/without an engine/u);
   });
 
-  it.each(RENDERABLE_KINDS)("keeps %s bytes deterministic with metadata", (kind) => {
+  it.each(RENDERABLE_KINDS)("keeps %s bytes deterministic with metadata", async (kind) => {
     const scene = tinyAnimatedScene();
+    if (isAnimatedRasterKind(kind)) {
+      expect(await renderAnimatedRaster(engine, scene, { kind })).toEqual(
+        await renderAnimatedRaster(engine, scene, { kind }),
+      );
+      return;
+    }
     expect(renderArtifact(engine, scene, kind)).toEqual(renderArtifact(engine, scene, kind));
   });
 
@@ -253,15 +270,15 @@ describe("headless artifact rendering", () => {
     expect(svg).not.toContain(`data-boundsvg-text="${packageName} v${packageVersion}"`);
   });
 
-  it("forwards the generator identity to every shared final-container renderer", () => {
+  it("forwards the generator identity to every shared final-container renderer", async () => {
     // Raster results pass through the provenance stamp, which parses the
     // container — the mocked bytes have to be minimally valid files.
     const renderToSvg = vi.fn((_input: unknown, _options?: unknown) => "<svg/>");
     const renderToAnimatedSvg = vi.fn((_input: unknown, _options?: unknown) => "<svg/>");
     const renderToPng = vi.fn((_input: unknown, _options?: unknown) => syntheticPng());
     const renderToWebp = vi.fn((_input: unknown, _options?: unknown) => syntheticWebp());
-    const renderToAnimatedWebp = vi.fn((_input: unknown, _options?: unknown) => syntheticWebp());
-    const renderToAnimatedGif = vi.fn((_input: unknown, _options?: unknown) => syntheticGif(true));
+    const renderToAnimatedWebp = vi.fn(streamInto("webp", syntheticWebp));
+    const renderToAnimatedGif = vi.fn(streamInto("gif", () => syntheticGif(true)));
     const mockEngine = {
       renderToSvg,
       renderToAnimatedSvg,
@@ -287,17 +304,17 @@ describe("headless artifact rendering", () => {
     expect(renderToPng.mock.calls.at(-1)?.[1]).toMatchObject({ generator: TEST_GENERATOR });
     renderArtifact(mockEngine, scene, "poster-webp");
     expect(renderToWebp.mock.calls.at(-1)?.[1]).toMatchObject({ generator: TEST_GENERATOR });
-    renderArtifact(mockEngine, scene, "animated-webp");
+    await renderAnimatedRaster(mockEngine, scene, { kind: "animated-webp" });
     expect(renderToAnimatedWebp.mock.calls.at(-1)?.[1]).toMatchObject({
       generator: TEST_GENERATOR,
     });
-    renderArtifact(mockEngine, scene, "gif");
+    await renderAnimatedRaster(mockEngine, scene, { kind: "gif" });
     expect(renderToAnimatedGif.mock.calls.at(-1)?.[1]).toMatchObject({
       generator: TEST_GENERATOR,
     });
   });
 
-  it("applies shared motion sampling profiles without changing the legacy default", () => {
+  it("applies shared motion sampling profiles without changing the legacy default", async () => {
     expect(DEFAULT_MOTION_EXPORT_QUALITY).toBe("balanced");
     expect(resolveMotionExportSettings("economy")).toEqual({
       animatedRasterFps: 8,
@@ -315,16 +332,25 @@ describe("headless artifact rendering", () => {
       mp4Crf: 18,
     });
 
-    const renderToSvg = vi.fn(() => "<svg/>");
-    const renderToAnimatedWebp = vi.fn((_input: unknown, _options: { fps?: number }) =>
-      syntheticWebp(),
-    );
-    const mockEngine = { renderToSvg, renderToAnimatedWebp } as unknown as Engine;
-    renderArtifact(mockEngine, tinyAnimatedScene(), {
+    const renderToAnimatedWebp = vi.fn(streamInto("webp", syntheticWebp));
+    const mockEngine = { renderToAnimatedWebp } as unknown as Engine;
+    await renderAnimatedRaster(mockEngine, tinyAnimatedScene(), {
       kind: "animated-webp",
       motionQuality: "economy",
     });
     expect(renderToAnimatedWebp.mock.calls[0]?.[1]).toMatchObject({ fps: 8 });
+  });
+
+  it("samples a long scene at the profile's frame rate", async () => {
+    // The engine streams frame by frame, so length no longer lowers the rate.
+    const renderToAnimatedWebp = vi.fn(streamInto("webp", syntheticWebp));
+    const mockEngine = { renderToAnimatedWebp } as unknown as Engine;
+    const scene = { ...tinyAnimatedScene(), durationMs: 600_000 };
+    await renderAnimatedRaster(mockEngine, scene, { kind: "animated-webp" });
+    expect(renderToAnimatedWebp.mock.calls[0]?.[1]).toMatchObject({
+      fps: 20,
+      durationMs: 600_000,
+    });
   });
 });
 
@@ -397,7 +423,7 @@ describe("raster resolution ceiling", () => {
   // an animated kind has to land where a poster would. A wide, short canvas
   // keeps the clamp on the long edge, so the assertion costs ~1MP a frame
   // instead of the 8MP a pixel-capped one would.
-  it("applies the same ceiling to animated output", () => {
+  it("applies the same ceiling to animated output", async () => {
     const scene: BuiltScene = {
       ...tinyAnimatedScene(),
       vnode: createElement(
@@ -413,7 +439,7 @@ describe("raster resolution ceiling", () => {
     const predicted = resolveRasterScale({ width: 3_000, height: 200, requestedScale: 2 });
     expect(predicted.adjusted).toBe(true);
     expect(predicted.outputWidth).toBe(RASTER_MAX_LONG_EDGE);
-    const bytes = renderArtifact(engine, scene, { kind: "gif", scale: 2 }) as Uint8Array;
+    const bytes = await renderAnimatedRaster(engine, scene, { kind: "gif", scale: 2 });
     expect(gifSize(bytes)).toEqual({
       width: predicted.outputWidth,
       height: predicted.outputHeight,
@@ -427,13 +453,12 @@ describe("raster resolution ceiling", () => {
    * play. No GIF is committed, and reading the header's screen size cannot
    * tell a file that plays once from a file that plays forever.
    */
-  it("declares a GIF that plays forever", () => {
-    // Quarter scale: what is read is the header, and every pixel encoded to
-    // reach it is time spent proving nothing.
-    const scene = buildSvgentScene(DEFAULT_PROJECT, 0, { engine });
-    const bytes = renderArtifact(engine, scene, { kind: "gif", scale: 0.25 }) as Uint8Array;
+  it("declares a GIF that plays forever", async () => {
+    // What is read is the header, and every pixel encoded to reach it is
+    // time spent proving nothing: the smallest animated scene will do.
+    const bytes = await renderAnimatedRaster(engine, tinyAnimatedScene(), { kind: "gif" });
     expect(gifLoopCount(bytes)).toBe(0);
-  }, 30_000);
+  });
 
   it("reports an adjustment to the caller instead of shrinking in silence", () => {
     const project = {
@@ -457,20 +482,6 @@ describe("raster resolution ceiling", () => {
       onResolutionAdjusted: (adjustment) => quiet.push(adjustment),
     });
     expect(quiet).toHaveLength(0);
-  });
-
-  it("budgets animation payloads from boundsvg's exported transport cap", () => {
-    const svgChars = 1_000_000;
-    const scene = { ...tinyAnimatedScene(), durationMs: 10_000 };
-    const renderToSvg = vi.fn(() => "x".repeat(svgChars));
-    const mockEngine = { renderToSvg } as unknown as Engine;
-    const perFrameChars = svgChars + 4_096;
-    const expectedFrameBudget = Math.floor(
-      (MAX_ANIMATION_SVG_PAYLOAD_CHARS * 0.92) / perFrameChars,
-    );
-    const expectedFps = Math.floor(expectedFrameBudget / (scene.durationMs / 1_000));
-
-    expect(payloadSafeFps(mockEngine, scene)).toBe(expectedFps);
   });
 });
 

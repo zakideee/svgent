@@ -1,6 +1,4 @@
-import { MAX_ANIMATION_FRAMES } from "@boundsvg/core";
 import {
-  animatedRasterFps,
   buildTimeline,
   countVisibleCharacters,
   DEFAULT_PROJECT,
@@ -120,15 +118,5 @@ describe("session timeline", () => {
     const pages = paginateMessages(project);
     expect(pages[0]).toHaveLength(4);
     expect(pages[1]?.length).toBeLessThanOrEqual(3);
-  });
-
-  it("keeps animated raster exports within boundsvg's exported frame budget", () => {
-    for (const durationMs of [1_000, 15_000, 30_000, 120_000]) {
-      const fps = animatedRasterFps(durationMs);
-      expect(Math.ceil((durationMs * fps) / 1_000)).toBeLessThanOrEqual(MAX_ANIMATION_FRAMES);
-      expect(fps).toBeGreaterThanOrEqual(1);
-      expect(fps).toBeLessThanOrEqual(20);
-    }
-    expect(Math.ceil((15_000 * animatedRasterFps(15_000)) / 1_000)).toBe(MAX_ANIMATION_FRAMES);
   });
 });

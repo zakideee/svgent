@@ -1,4 +1,3 @@
-import { MAX_ANIMATION_FRAMES } from "@boundsvg/core";
 import { CLUSTER_REVEAL_MS } from "./animations.js";
 import {
   MIN_DRAFT_REVEAL_MS,
@@ -441,9 +440,4 @@ export function paginateMessages(project: SvgentProject): SessionMessage[][] {
     pages.push(currentPage);
   }
   return pages.length > 0 ? pages : [[]];
-}
-
-export function animatedRasterFps(durationMs: number): number {
-  const frameBudgetFps = Math.floor((MAX_ANIMATION_FRAMES * 1_000) / Math.max(durationMs, 1));
-  return Math.max(1, Math.min(20, frameBudgetFps));
 }

@@ -24,7 +24,6 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import {
   assessBrowserMotionExport,
-  BROWSER_MOTION_MAX_ESTIMATE_MS,
   browserMotionAssessmentMessage,
   isBrowserMotionKind,
   studioEntryExportScale,
@@ -93,13 +92,6 @@ function assertBrowserMotionAdmission(options: {
   const blocked = assessments.find((assessment) => assessment.status === "blocked");
   if (blocked) {
     throw new Error(browserMotionAssessmentMessage(blocked, options.t));
-  }
-  const totalEstimatedMs = assessments.reduce(
-    (total, assessment) => total + (assessment.estimatedMs ?? 0),
-    0,
-  );
-  if (totalEstimatedMs > BROWSER_MOTION_MAX_ESTIMATE_MS) {
-    throw new Error(options.t.exportMotionTooLong(Math.ceil(totalEstimatedMs / 1_000)));
   }
 }
 

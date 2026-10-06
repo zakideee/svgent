@@ -10,7 +10,6 @@
 import type { Engine } from "@boundsvg/core";
 import {
   type MotionExportQuality,
-  payloadSafeFps,
   resolveMotionExportSettings,
   resolveSceneRasterScale,
 } from "@svgent/render";
@@ -24,19 +23,21 @@ const BROWSER_MOTION_MAX_PIXELS = 1_920 * 1_080;
 const BROWSER_MOTION_MIN_SCALE = 0.5;
 const BROWSER_MOTION_MAX_SCALE = 1;
 const BROWSER_MOTION_WARNING_MS = 60_000;
-export const BROWSER_MOTION_MAX_ESTIMATE_MS = 3 * 60_000;
 
+/**
+ * A browser motion job as this device would run it: refused for a resolution
+ * past the ceiling before any frame is probed, otherwise admitted with an
+ * estimate that may warn.
+ */
 export type BrowserMotionAssessment = {
-  status: "ready" | "warning" | "blocked";
-  reason: "none" | "resolution" | "fps" | "duration";
   width: number;
   height: number;
-  requestedFps: number;
-  effectiveFps: number;
-  maximumEffectiveFps: number;
+  fps: number;
   frameCount: number;
-  estimatedMs: number | null;
-};
+} & (
+  | { status: "blocked"; reason: "resolution"; estimatedMs: null }
+  | { status: "ready" | "warning"; reason: "none"; estimatedMs: number }
+);
 
 export function isBrowserMotionKind(kind: string): kind is BrowserMotionKind {
   return kind === "animated-webp" || kind === "gif" || kind === "mp4";
@@ -60,19 +61,16 @@ function browserMotionResolutionAllowed(width: number, height: number): boolean 
   );
 }
 
-export function browserMotionEstimateStatus(
-  estimatedMs: number,
-): BrowserMotionAssessment["status"] {
-  if (estimatedMs > BROWSER_MOTION_MAX_ESTIMATE_MS) {
-    return "blocked";
-  }
+/** A long estimate warns; how long to wait is the person's call. */
+export function browserMotionEstimateStatus(estimatedMs: number): "ready" | "warning" {
   return estimatedMs > BROWSER_MOTION_WARNING_MS ? "warning" : "ready";
 }
 
 /**
  * Price one frame on this device, then classify the complete browser job.
- * No result from this function changes renderer options: it either admits the
- * existing request unchanged or refuses it before the expensive work starts.
+ * No result from this function changes renderer options: it admits the
+ * request unchanged, with an estimate, or refuses a resolution beyond the
+ * browser ceiling before the expensive work starts.
  */
 export function assessBrowserMotionExport(options: {
   engine: Engine;
@@ -85,37 +83,17 @@ export function assessBrowserMotionExport(options: {
   const { engine, scene, kind, motionQuality } = options;
   const scale = studioEntryExportScale(kind, options.scale);
   const settings = resolveMotionExportSettings(motionQuality);
-  const requestedFps = kind === "mp4" ? settings.mp4FrameRate : settings.animatedRasterFps;
+  const fps = kind === "mp4" ? settings.mp4FrameRate : settings.animatedRasterFps;
   const resolved = resolveSceneRasterScale(scene, scale);
   const base = {
     width: resolved.outputWidth,
     height: resolved.outputHeight,
-    requestedFps,
-    frameCount: Math.max(2, Math.ceil((scene.durationMs / 1_000) * requestedFps)),
+    fps,
+    frameCount: Math.max(2, Math.ceil((scene.durationMs / 1_000) * fps)),
   };
 
   if (!browserMotionResolutionAllowed(base.width, base.height)) {
-    return {
-      ...base,
-      status: "blocked",
-      reason: "resolution",
-      effectiveFps: requestedFps,
-      maximumEffectiveFps: requestedFps,
-      estimatedMs: null,
-    };
-  }
-
-  const maximumEffectiveFps = kind === "mp4" ? requestedFps : payloadSafeFps(engine, scene, 20);
-  const effectiveFps = Math.min(requestedFps, maximumEffectiveFps);
-  if (effectiveFps < requestedFps) {
-    return {
-      ...base,
-      status: "blocked",
-      reason: "fps",
-      effectiveFps,
-      maximumEffectiveFps,
-      estimatedMs: null,
-    };
+    return { ...base, status: "blocked", reason: "resolution", estimatedMs: null };
   }
 
   const startedAt = performance.now();
@@ -128,13 +106,10 @@ export function assessBrowserMotionExport(options: {
   // Deliberately conservative: startup and encoding sit outside the sampled
   // PNG frame, while actual Worker throughput varies by browser and device.
   const estimatedMs = (frameRenderMs * base.frameCount * 1.3) / parallelism;
-  const status = browserMotionEstimateStatus(estimatedMs);
   return {
     ...base,
-    status,
-    reason: status === "blocked" ? "duration" : "none",
-    effectiveFps,
-    maximumEffectiveFps,
+    status: browserMotionEstimateStatus(estimatedMs),
+    reason: "none",
     estimatedMs,
   };
 }
@@ -143,24 +118,11 @@ export function browserMotionAssessmentMessage(
   assessment: BrowserMotionAssessment,
   t: UiStrings,
 ): string {
-  switch (assessment.reason) {
-    case "resolution":
-      return t.exportMotionResolutionBlocked(assessment.width, assessment.height);
-    case "fps":
-      return t.exportMotionFpsBlocked(assessment.requestedFps, assessment.effectiveFps);
-    case "duration":
-      return t.exportMotionTooLong(Math.ceil((assessment.estimatedMs ?? 0) / 1_000));
-    case "none":
-      return assessment.status === "warning"
-        ? t.exportMotionEstimateWarning(
-            assessment.frameCount,
-            assessment.effectiveFps,
-            Math.ceil((assessment.estimatedMs ?? 0) / 1_000),
-          )
-        : t.exportMotionEstimate(
-            assessment.frameCount,
-            assessment.effectiveFps,
-            Math.ceil((assessment.estimatedMs ?? 0) / 1_000),
-          );
+  if (assessment.reason === "resolution") {
+    return t.exportMotionResolutionBlocked(assessment.width, assessment.height);
   }
+  const seconds = Math.ceil(assessment.estimatedMs / 1_000);
+  return assessment.status === "warning"
+    ? t.exportMotionEstimateWarning(assessment.frameCount, assessment.fps, seconds)
+    : t.exportMotionEstimate(assessment.frameCount, assessment.fps, seconds);
 }

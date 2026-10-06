@@ -26,7 +26,7 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.md",
-    claim: "Animated WebP (6.87 MB)",
+    claim: "Animated WebP (13.66 MB)",
     artifact: `${DEMO_DIR}/readme-en-tui-dark-01.animated.webp`,
   },
   {
@@ -41,7 +41,7 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.md",
-    claim: "Animated WebP (8.71 MB)",
+    claim: "Animated WebP (9.94 MB)",
     artifact: `${DEMO_DIR}/readme-en-app-image-01.animated.webp`,
   },
   {
@@ -71,7 +71,7 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.ja.md",
-    claim: "animated WebP (3.51 MB)",
+    claim: "animated WebP (13.91 MB)",
     artifact: `${DEMO_DIR}/readme-tui-dark-01.animated.webp`,
   },
   {
@@ -86,7 +86,7 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.ja.md",
-    claim: "animated WebP (4.98 MB)",
+    claim: "animated WebP (9.92 MB)",
     artifact: `${DEMO_DIR}/readme-app-image-01.animated.webp`,
   },
   {

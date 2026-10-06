@@ -414,7 +414,6 @@ function ExportMotionControls({
   kind,
   motionQuality,
   resourceMode,
-  assessment,
   busy,
   onMotionQualityChange,
   onResourceModeChange,
@@ -423,7 +422,6 @@ function ExportMotionControls({
   kind: ExportChoice;
   motionQuality: MotionExportQuality;
   resourceMode: ExportResourceMode;
-  assessment: BrowserMotionAssessment | null;
   busy: boolean;
   onMotionQualityChange: (quality: MotionExportQuality) => void;
   onResourceModeChange: (mode: ExportResourceMode) => void;
@@ -451,15 +449,12 @@ function ExportMotionControls({
           const optionSettings = resolveMotionExportSettings(option);
           const optionFps =
             kind === "mp4" ? optionSettings.mp4FrameRate : optionSettings.animatedRasterFps;
-          const fpsUnavailable =
-            kind !== "mp4" && assessment !== null && optionFps > assessment.maximumEffectiveFps;
           return (
             <button
               type="button"
               key={option}
               className={motionQuality === option ? "is-active" : ""}
-              disabled={busy || fpsUnavailable}
-              title={fpsUnavailable ? t.exportMotionQualityUnavailable(optionFps) : undefined}
+              disabled={busy}
               onClick={() => onMotionQualityChange(option)}
             >
               {optionFps} fps
@@ -1219,7 +1214,6 @@ export function ExportDialog({
                 kind={overlay.kind}
                 motionQuality={motionQuality}
                 resourceMode={resourceMode}
-                assessment={motionAssessment.assessment}
                 busy={pendingExport !== null}
                 onMotionQualityChange={onMotionQualityChange}
                 onResourceModeChange={onResourceModeChange}

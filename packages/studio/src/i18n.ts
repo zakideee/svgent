@@ -391,8 +391,7 @@ const JA = {
   exportMotionQualityLabel: "フレームレート",
   exportMotionSettingsLabel: "動画ファイルの設定",
   exportMotionSettingsNote: "解像度・フレームレート・端末負荷",
-  exportMotionQualityNote: (frameRate: number) =>
-    `${frameRate}fpsを維持できるか、この端末で事前確認します`,
+  exportMotionQualityNote: (frameRate: number) => `${frameRate}fpsで書き出します`,
   exportResourceModeLabel: "生成リソース",
   exportResourceModeMemory: "省メモリ",
   exportResourceModeBalanced: "標準",
@@ -418,13 +417,13 @@ const JA = {
   exportMp4TooLargeNote:
     "この解像度はMP4(H.264)の上限を超えます。キャンバスかスケールを下げるか、GIF/WebPで書き出してください。",
   tipExportScale:
-    "静止画PNG/WebPは×0.5〜×3。ブラウザ動画は×0.5/×0.75/×1で、解像度を下げるほどフレーム生成が軽くなります。SVGはベクターのため対象外です。GIF/WebPの転送上限は縮小しても変わりません。",
+    "静止画PNG/WebPは×0.5〜×3。ブラウザ動画は×0.5/×0.75/×1で、解像度を下げるほどフレーム生成が軽くなります。SVGはベクターのため対象外です。",
   tipExportMotionQuality:
     "animated WebP/GIF/MP4の1秒あたりのフレーム数です。数値が高いほど生成時間・CPU・ファイルサイズが増えます。20fpsでも一般的な映像の滑らかさを保証する値ではなく、タイピングや遷移の見え方はシーン内容にも依存します。",
   tipExportResourceMode:
     "MP4のフレームを同時生成する数です。省メモリは1、標準は2、速度優先は端末に応じ最大4ワーカーを使います。ワーカー数を増やすほどメモリとCPU使用量が増えます。",
   exportLocalNote:
-    "書き出しはすべてこのブラウザ内で行われます。動画は開始前に、この端末で実測した1フレームの時間から完走可能性を確認します。",
+    "書き出しはすべてこのブラウザ内で行われます。動画は開始前に、この端末で実測した1フレームの時間から生成時間を見積もります。",
   exportNote:
     "MP4は1回再生、GIF/WebPはループ。animated SVGは「再生」の選択に従います。svgent のバージョンと上の宣言(創作/再現)がメタデータとして記録されます。",
   exportUseNote:
@@ -439,9 +438,7 @@ const JA = {
   exportRunning: "書き出し中…",
   exportEta: (elapsedSec: number, etaSec: number) =>
     `書き出し中… 経過 ${elapsedSec}s ・ 推定 ~${etaSec}s(端末性能に依存)`,
-  exportMotionQualityUnavailable: (fps: number) =>
-    `このシーンでは${fps}fpsを維持できないため選択できません`,
-  exportMotionPreflightChecking: "この端末で1フレームを試し、生成時間と実効fpsを確認中…",
+  exportMotionPreflightChecking: "この端末で1フレームを試し、生成時間を見積もり中…",
   exportMotionPreflightFailed:
     "動画の事前確認に失敗したため、ブラウザでは生成を開始できません。動くSVGまたはローカルCLIを利用してください。",
   exportMotionEstimate: (frames: number, fps: number, seconds: number) =>
@@ -450,12 +447,7 @@ const JA = {
     `${frames}フレーム・${fps}fps・推定約${seconds}秒。長時間処理になる可能性があります。`,
   exportMotionResolutionBlocked: (width: number, height: number) =>
     `書き出し後の${width}×${height}pxはブラウザ動画の1920×1080相当上限を超えます。スケールかキャンバスを下げてください。4K相当の書き出しは静止画だけで利用できます。`,
-  exportMotionFpsBlocked: (requestedFps: number, effectiveFps: number) =>
-    `${requestedFps}fpsでは安全な転送上限を超え、実際には${effectiveFps}fpsまで下がります。品質を黙って変更しないため、この設定は選択できません。`,
-  exportMotionTooLong: (seconds: number) =>
-    `この端末では推定約${seconds}秒かかり、ブラウザ生成の3分上限を超えます。`,
-  exportMotionCliNote:
-    "台本JSONを保存し、長時間処理を継続できるローカルCLIでのMP4生成を推奨します。",
+  exportMotionCliNote: "台本JSONを保存すると、長い書き出しはローカルCLIで最後まで実行できます。",
   exportMotionBrowserLifecycleNote:
     "生成中はこのタブを前面で開いたままにしてください。タブ移動、再読み込み、終了、スリープ、OSによるタブ破棄では停止または最初からやり直しになり、途中再開はできません。",
   tipBackdrop:
@@ -918,8 +910,7 @@ const EN: UiStrings = {
   exportMotionQualityLabel: "Frame rate",
   exportMotionSettingsLabel: "Motion file settings",
   exportMotionSettingsNote: "Resolution, frame rate, and device load",
-  exportMotionQualityNote: (frameRate: number) =>
-    `Preflight checks whether this device can preserve ${frameRate} fps`,
+  exportMotionQualityNote: (frameRate: number) => `Exports at ${frameRate} fps`,
   exportResourceModeLabel: "Generation resources",
   exportResourceModeMemory: "Low memory",
   exportResourceModeBalanced: "Balanced",
@@ -946,13 +937,13 @@ const EN: UiStrings = {
   exportMp4TooLargeNote:
     "This resolution is beyond what MP4 (H.264) can encode. Lower the canvas size or the scale, or export GIF/WebP instead.",
   tipExportScale:
-    "Still PNG/WebP offers ×0.5–×3. Browser motion offers ×0.5/×0.75/×1; reducing resolution lowers frame-rendering cost. SVG is vector and does not use scale. The GIF/WebP transfer budget does not improve when downscaled.",
+    "Still PNG/WebP offers ×0.5–×3. Browser motion offers ×0.5/×0.75/×1; reducing resolution lowers frame-rendering cost. SVG is vector and does not use scale.",
   tipExportMotionQuality:
     "Frames sampled per second for animated WebP, GIF, and MP4. Higher values increase generation time, CPU use, and file size. Even 20 fps does not guarantee generally smooth video; typing and transitions also depend on scene content.",
   tipExportResourceMode:
     "Controls how many MP4 frames are rendered at once. Low memory uses 1 worker, Balanced uses 2, and Faster uses up to 4 for this device. More workers use more memory and CPU.",
   exportLocalNote:
-    "Exports run entirely in this browser. Before motion starts, one frame is timed on this device to check whether the job is responsible to run here.",
+    "Exports run entirely in this browser. Before a video starts, one frame is timed on this device to estimate how long it takes.",
   exportNote:
     "MP4 plays once; GIF/WebP loop; the animated SVG follows the Playback choice. svgent's version and the declared basis above are recorded as metadata.",
   exportUseNote:
@@ -968,10 +959,7 @@ const EN: UiStrings = {
   exportRunning: "Exporting…",
   exportEta: (elapsedSec: number, etaSec: number) =>
     `Exporting… ${elapsedSec}s elapsed ・ ~${etaSec}s estimated (machine-dependent)`,
-  exportMotionQualityUnavailable: (fps: number) =>
-    `${fps} fps is unavailable because this scene cannot preserve it`,
-  exportMotionPreflightChecking:
-    "Timing one frame on this device and checking the effective frame rate…",
+  exportMotionPreflightChecking: "Timing one frame on this device to estimate the generation time…",
   exportMotionPreflightFailed:
     "The motion preflight failed, so browser rendering will not start. Use animated SVG or the local CLI.",
   exportMotionEstimate: (frames: number, fps: number, seconds: number) =>
@@ -980,12 +968,8 @@ const EN: UiStrings = {
     `${frames} frames at ${fps} fps · about ${seconds}s estimated. This may be a long-running browser job.`,
   exportMotionResolutionBlocked: (width: number, height: number) =>
     `The scaled ${width}×${height}px output exceeds the browser-motion ceiling of 1920×1080-equivalent. Lower the scale or canvas size. 4K-class export is available for still images only.`,
-  exportMotionFpsBlocked: (requestedFps: number, effectiveFps: number) =>
-    `${requestedFps} fps exceeds the safe transfer budget and would actually fall to ${effectiveFps} fps. This option is unavailable rather than silently changing quality.`,
-  exportMotionTooLong: (seconds: number) =>
-    `This device estimates about ${seconds}s, beyond the three-minute browser limit.`,
   exportMotionCliNote:
-    "Save the script JSON and use local CLI MP4 rendering for work that needs to run reliably for longer.",
+    "Save the script JSON to run a long export to completion with the local CLI.",
   exportMotionBrowserLifecycleNote:
     "Keep this tab open in the foreground. Switching tabs, reloading, closing, sleeping, or OS tab eviction may stop the job and requires starting over; resume is not supported.",
   tipBackdrop:
