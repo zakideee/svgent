@@ -35,10 +35,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@boundsvg/browser": "0.6.0",
-    "@boundsvg/core": "0.6.0",
-    "@boundsvg/video": "0.6.0",
-    "@boundsvg/worker": "0.6.0",
+    "@boundsvg/browser": "0.7.0",
+    "@boundsvg/core": "0.7.0",
+    "@boundsvg/video": "0.7.0",
+    "@boundsvg/worker": "0.7.0",
     "@svgent/assets": "workspace:*",
     "@svgent/render": "workspace:*",
     "@svgent/scene": "workspace:*",

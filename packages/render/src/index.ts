@@ -1,24 +1,29 @@
 export type {
+  AnimatedRasterKind,
   AnimatedSvgIterations,
   MotionExportQuality,
   MotionExportSettings,
   RenderableKind,
   ResolvedRasterScale,
+  StaticRenderableKind,
 } from "./artifacts.js";
 export {
   assertIdentifierNamespace,
   DEFAULT_MOTION_EXPORT_QUALITY,
   documentIdPrefix,
+  isAnimatedRasterKind,
   normalizeIdentifierNamespace,
-  payloadSafeFps,
   RASTER_MAX_LONG_EDGE,
   RASTER_MAX_PIXELS,
   RENDERABLE_EXTENSIONS,
   RENDERABLE_KINDS,
+  renderAnimatedRaster,
   renderArtifact,
+  resolveAnimatedRasterOptions,
   resolveMotionExportSettings,
   resolveRasterScale,
   resolveSceneRasterScale,
+  stampAnimatedRasterProvenance,
 } from "./artifacts.js";
 export type { ArtifactProvenance } from "./provenance.js";
 export {

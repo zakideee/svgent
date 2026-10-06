@@ -32,7 +32,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@boundsvg/core": "0.6.0",
+    "@boundsvg/core": "0.7.0",
     "@svgent/scene": "workspace:*"
   }
 }

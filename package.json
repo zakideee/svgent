@@ -53,7 +53,7 @@
     "@svgent/render": "workspace:*",
     "@svgent/scene": "workspace:*",
     "@svgent/studio": "workspace:*",
-    "@boundsvg/core": "0.6.0",
+    "@boundsvg/core": "0.7.0",
     "react": "^19.0.0",
     "@biomejs/biome": "2.4.2",
     "@j178/prek": "^0.3.4",

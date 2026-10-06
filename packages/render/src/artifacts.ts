@@ -1,13 +1,13 @@
 import {
+  type AnimatedRasterWriteOptions,
+  createAnimatedRasterCollector,
   type Engine,
-  MAX_ANIMATION_SVG_PAYLOAD_CHARS,
   RASTER_MAX_LONG_EDGE,
   RASTER_MAX_PIXELS,
   type ResolvedRasterScale,
   resolveRasterScale,
 } from "@boundsvg/core";
 import type { BuiltScene } from "@svgent/scene";
-import { animatedRasterFps } from "@svgent/scene";
 import {
   provenanceFor,
   stampGifProvenance,
@@ -18,7 +18,10 @@ import {
 /**
  * Artifact kinds the core engine can render in any runtime — browser and
  * Node share this path. MP4 is encoded elsewhere: WebCodecs in the studio UI
- * (src/exports.ts), ffmpeg in the CLI (scripts/mp4-ffmpeg.mts).
+ * (src/exports.ts), ffmpeg in the CLI (scripts/mp4-ffmpeg.mts). Animated WebP
+ * and GIF stream through the encoder, so they render with
+ * `renderAnimatedRaster`; every other kind returns at once from
+ * `renderArtifact`.
  */
 export type RenderableKind =
   | "poster-svg"
@@ -37,6 +40,17 @@ export const RENDERABLE_KINDS: readonly RenderableKind[] = [
   "gif",
 ];
 
+/** Kinds the engine streams frame by frame; `renderAnimatedRaster` draws them. */
+export type AnimatedRasterKind = Extract<RenderableKind, "animated-webp" | "gif">;
+
+/** Kinds `renderArtifact` returns at once. */
+export type StaticRenderableKind = Exclude<RenderableKind, AnimatedRasterKind>;
+
+/** Whether a kind goes through `renderAnimatedRaster` rather than `renderArtifact`. */
+export function isAnimatedRasterKind(kind: RenderableKind): kind is AnimatedRasterKind {
+  return kind === "animated-webp" || kind === "gif";
+}
+
 export const RENDERABLE_EXTENSIONS: Record<RenderableKind, string> = {
   "poster-svg": "svg",
   "animated-svg": "animated.svg",
@@ -53,7 +67,7 @@ export type MotionExportQuality = "economy" | "balanced" | "high";
 export type AnimatedSvgIterations = "infinite" | "once";
 
 export type MotionExportSettings = {
-  /** Upper bound for animated WebP/GIF sampling. */
+  /** Animated WebP/GIF sampling rate. */
   animatedRasterFps: number;
   /** MP4 sampling and playback rate. */
   mp4FrameRate: number;
@@ -94,29 +108,6 @@ export function resolveSceneRasterScale(
 ): ResolvedRasterScale {
   const { width, height } = sceneCanvasSize(scene);
   return resolveRasterScale({ width, height, requestedScale });
-}
-
-/**
- * Animated WebP/GIF ship every sampled frame as SVG text across the wasm
- * boundary, capped at 64M characters total. Text is outlined to paths, so
- * frames are big and near-constant in size — probe one frame and lower the
- * fps until the whole schedule fits.
- */
-export function payloadSafeFps(
-  engine: Engine,
-  scene: BuiltScene,
-  maximumFps = Number.POSITIVE_INFINITY,
-): number {
-  const baseFps = Math.min(animatedRasterFps(scene.durationMs), maximumFps);
-  const probe = engine.renderToSvg(scene.vnode, {
-    timeMs: scene.durationMs / 2,
-    resourceIdPrefix: documentIdPrefix("payload-probe"),
-  });
-  const perFrameChars = probe.length + 4_096;
-  const frameBudget = Math.floor((MAX_ANIMATION_SVG_PAYLOAD_CHARS * 0.92) / perFrameChars);
-  const durationSeconds = Math.max(scene.durationMs, 1_000) / 1_000;
-  const fpsBudget = Math.floor(frameBudget / durationSeconds);
-  return Math.max(1, Math.min(baseFps, fpsBudget));
 }
 
 /**
@@ -228,12 +219,10 @@ export function renderArtifact(
   engine: Engine,
   scene: BuiltScene,
   request:
-    | RenderableKind
+    | StaticRenderableKind
     | {
-        kind: RenderableKind;
+        kind: StaticRenderableKind;
         scale?: number;
-        /** Sampling preset for animated WebP/GIF. Other kinds ignore it. */
-        motionQuality?: MotionExportQuality;
         /**
          * How many times the animated SVG plays — "infinite" (the default)
          * loops the way GIF and WebP are encoded to, "once" rests on the
@@ -271,7 +260,6 @@ export function renderArtifact(
   const {
     kind,
     scale: requestedScale,
-    motionQuality,
     animatedSvgIterations,
     onResolutionAdjusted,
     identifierNamespace,
@@ -280,26 +268,14 @@ export function renderArtifact(
     ? {
         kind: request,
         scale: undefined,
-        motionQuality: undefined,
         animatedSvgIterations: undefined,
         onResolutionAdjusted: undefined,
         identifierNamespace: undefined,
         asTranscript: undefined,
       }
     : request;
-  if (!scene.measured) {
-    // The scene placed its rows by estimate and this engine would lay the
-    // glyphs out for real. Two sources of truth for one layout is how blocks
-    // come out with holes in them, or on top of each other.
-    throw new Error(
-      "Refusing to render a scene built without an engine: pass the rendering engine to buildSvgentScene so the layout is measured by whatever draws it",
-    );
-  }
-  if (scene.generator === undefined) {
-    throw new Error(
-      "Refusing to render a scene without generator identity: pass the owning runtime name and version to buildSvgentScene",
-    );
-  }
+  assertRenderableScene(scene);
+  const { generator } = scene;
   // SVG kinds carry provenance as canvas meta through the engine; raster
   // containers lose it in encoding, so it is stamped onto the bytes below.
   const provenance = provenanceFor(scene);
@@ -322,7 +298,7 @@ export function renderArtifact(
           asTranscript === true ? "transcript-poster" : "poster",
           identifierNamespace,
         ),
-        generator: scene.generator,
+        generator,
       });
     case "animated-svg":
       return engine.renderToAnimatedSvg(scene.vnode, {
@@ -337,13 +313,13 @@ export function renderArtifact(
         },
         reducedMotion: "pause",
         resourceIdPrefix: resourceIdPrefix(scene, "animation", identifierNamespace),
-        generator: scene.generator,
+        generator,
       });
     case "poster-png":
       return stampPngProvenance(
         engine.renderToPng(scene.vnode, {
           timeMs: scene.durationMs,
-          generator: scene.generator,
+          generator,
           ...scale,
         }),
         provenance,
@@ -352,38 +328,102 @@ export function renderArtifact(
       return stampWebpProvenance(
         engine.renderToWebp(scene.vnode, {
           timeMs: scene.durationMs,
-          generator: scene.generator,
+          generator,
           ...scale,
         }),
         provenance,
       );
-    case "animated-webp": {
-      const quality = motionQuality ?? "high";
-      const settings = resolveMotionExportSettings(quality);
-      return stampWebpProvenance(
-        engine.renderToAnimatedWebp(scene.vnode, {
-          durationMs: scene.durationMs,
-          fps: payloadSafeFps(engine, scene, settings.animatedRasterFps),
-          iterations: "infinite",
-          generator: scene.generator,
-          ...scale,
-        }),
-        provenance,
-      );
-    }
-    case "gif": {
-      const quality = motionQuality ?? "high";
-      const settings = resolveMotionExportSettings(quality);
-      return stampGifProvenance(
-        engine.renderToAnimatedGif(scene.vnode, {
-          durationMs: scene.durationMs,
-          fps: payloadSafeFps(engine, scene, settings.animatedRasterFps),
-          iterations: "infinite",
-          generator: scene.generator,
-          ...scale,
-        }),
-        provenance,
-      );
+  }
+}
+
+/**
+ * A scene the engine can draw for real, and the runtime that stamps it. The
+ * engine is what measures the layout; a scene placed by estimate would be
+ * drawn from two sources of truth, which is how blocks come out with holes in
+ * them, or on top of each other.
+ */
+function assertRenderableScene(
+  scene: BuiltScene,
+): asserts scene is BuiltScene & { generator: NonNullable<BuiltScene["generator"]> } {
+  if (!scene.measured) {
+    throw new Error(
+      "Refusing to render a scene built without an engine: pass the rendering engine to buildSvgentScene so the layout is measured by whatever draws it",
+    );
+  }
+  if (scene.generator === undefined) {
+    throw new Error(
+      "Refusing to render a scene without generator identity: pass the owning runtime name and version to buildSvgentScene",
+    );
+  }
+}
+
+/** The sampling every animated WebP/GIF render of a scene shares. */
+export function resolveAnimatedRasterOptions(
+  scene: BuiltScene,
+  options: { scale?: number; motionQuality?: MotionExportQuality } = {},
+) {
+  assertRenderableScene(scene);
+  const { generator } = scene;
+  const settings = resolveMotionExportSettings(options.motionQuality ?? "high");
+  return {
+    durationMs: scene.durationMs,
+    fps: settings.animatedRasterFps,
+    iterations: "infinite" as const,
+    generator,
+    ...(options.scale !== undefined && options.scale !== 1 ? { scale: options.scale } : {}),
+  };
+}
+
+/**
+ * Stamp a finished animated WebP/GIF with the scene's provenance. The
+ * container loses canvas meta in encoding, so it is written onto the bytes.
+ */
+export function stampAnimatedRasterProvenance(
+  kind: AnimatedRasterKind,
+  bytes: Uint8Array,
+  scene: BuiltScene,
+): Uint8Array {
+  const provenance = provenanceFor(scene);
+  return kind === "gif"
+    ? stampGifProvenance(bytes, provenance)
+    : stampWebpProvenance(bytes, provenance);
+}
+
+/**
+ * Render an animated WebP or GIF. The engine samples, rasterizes and encodes
+ * one frame at a time; the finished container is collected in memory so its
+ * provenance can be stamped before the bytes leave.
+ */
+export async function renderAnimatedRaster(
+  engine: Engine,
+  scene: BuiltScene,
+  request: {
+    kind: AnimatedRasterKind;
+    scale?: number;
+    /** Sampling preset; "high" when omitted. */
+    motionQuality?: MotionExportQuality;
+    /** Called when the engine's raster ceiling lowered the scale. */
+    onResolutionAdjusted?: (adjustment: ResolvedRasterScale) => void;
+    signal?: AnimatedRasterWriteOptions["signal"];
+  },
+): Promise<Uint8Array> {
+  const { kind, scale, motionQuality, onResolutionAdjusted, signal } = request;
+  const options = resolveAnimatedRasterOptions(scene, {
+    ...(scale !== undefined ? { scale } : {}),
+    ...(motionQuality !== undefined ? { motionQuality } : {}),
+  });
+  if (onResolutionAdjusted !== undefined && scale !== undefined) {
+    const resolved = resolveSceneRasterScale(scene, scale);
+    if (resolved.adjusted) {
+      onResolutionAdjusted(resolved);
     }
   }
+  const collector = createAnimatedRasterCollector();
+  const writeOptions = signal !== undefined ? { signal } : {};
+  if (kind === "gif") {
+    await engine.renderToAnimatedGif(scene.vnode, options, collector, writeOptions);
+  } else {
+    await engine.renderToAnimatedWebp(scene.vnode, options, collector, writeOptions);
+  }
+  return stampAnimatedRasterProvenance(kind, collector.takeBytes(), scene);
 }

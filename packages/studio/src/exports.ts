@@ -1,20 +1,28 @@
 import type { ResolvedBrowserFont } from "@boundsvg/browser";
-import { type Engine, toSceneDocument, type VNode } from "@boundsvg/core";
 import {
+  createAnimatedRasterCollector,
+  type Engine,
+  toSceneDocument,
+  type VNode,
+} from "@boundsvg/core";
+import type { WorkerEngine } from "@boundsvg/worker";
+import {
+  type AnimatedRasterKind,
   type AnimatedSvgIterations,
   type ArtifactProvenance,
   DEFAULT_MOTION_EXPORT_QUALITY,
   type MotionExportQuality,
-  payloadSafeFps,
   provenanceFor,
   RENDERABLE_EXTENSIONS,
   type RenderableKind,
+  renderAnimatedRaster,
   renderArtifact,
+  resolveAnimatedRasterOptions,
   resolveMotionExportSettings,
   resolveSceneRasterScale,
-  stampGifProvenance,
+  type StaticRenderableKind,
+  stampAnimatedRasterProvenance,
   stampMp4Provenance,
-  stampWebpProvenance,
 } from "@svgent/render";
 import type { BuiltScene } from "@svgent/scene";
 import type { UiStrings } from "./i18n.js";
@@ -310,7 +318,7 @@ function resolveExportProvenance(scene: BuiltScene): ArtifactProvenance {
 /** The kinds `renderArtifact` serves in-process, with the studio's options mapped. */
 function renderDirectArtifact(
   input: ExportInput,
-  kind: RenderableKind,
+  kind: StaticRenderableKind,
   rasterScale: number | undefined,
 ): Uint8Array | string {
   return renderArtifact(input.engine, input.scene, {
@@ -332,14 +340,7 @@ export async function exportArtifact(input: ExportInput): Promise<ExportResult> 
     }
     bytes = stampMp4Provenance(await exportMp4(input), provenance);
   } else if (kind === "animated-webp" || kind === "gif") {
-    // The worker render path returns raw engine bytes; stamping is idempotent,
-    // so the in-process fallback (already stamped by renderArtifact) passes
-    // through unchanged.
-    const raster = await exportAnimatedRaster(input, kind);
-    bytes =
-      kind === "gif"
-        ? stampGifProvenance(raster, provenance)
-        : stampWebpProvenance(raster, provenance);
+    bytes = await exportAnimatedRaster(input, kind);
   } else if (kind === "transcript-svg" || kind === "transcript-png") {
     // The caller hands in a fullHeight scene; only the artifact kind maps.
     // It renders as a poster, and a poster of the same scene would otherwise
@@ -359,32 +360,105 @@ export async function exportArtifact(input: ExportInput): Promise<ExportResult> 
   return { kind, fileName, blob: new Blob([body], { type: MIME_BY_KIND[kind] }) };
 }
 
-/** Long scenes take minutes to rasterize and encode; 30 s would cut them off. */
-const ANIMATED_RASTER_TIMEOUT_MS = 10 * 60 * 1_000;
+/**
+ * The encode streams frame by frame with no frame ceiling, so a long scene can
+ * run for as long as its estimate said. The person ends it with the cancel
+ * button; the deadline is the largest the Worker accepts. Starting the Worker
+ * has its own limit, `WORKER_INIT_TIMEOUT_MS`.
+ */
+const ANIMATED_RASTER_TIMEOUT_MS = 2_147_483_647;
 
 /**
- * Animated WebP/GIF rasterize and encode every frame in one synchronous wasm
- * call — on the main thread that freezes the tab for minutes until the
- * browser kills the page. Run it in a Worker engine instead; fall back to
- * the in-process renderer when workers are unavailable.
+ * One animated WebP/GIF render on a Worker engine, which this owns and
+ * disposes. The engine stops the stream and cleans up its sink on abort; the
+ * race only makes the rejection immediate.
+ */
+async function renderAnimatedRasterInWorker(
+  workerEngine: WorkerEngine,
+  request: {
+    kind: AnimatedRasterKind;
+    scene: BuiltScene;
+    options: ReturnType<typeof resolveAnimatedRasterOptions>;
+    signal: AbortSignal | undefined;
+  },
+): Promise<Uint8Array> {
+  const { kind, scene, options, signal } = request;
+  try {
+    const sceneDocument = toSceneDocument(scene.vnode as VNode);
+    const collector = createAnimatedRasterCollector();
+    const requestOptions = signal !== undefined ? { signal } : {};
+    const render =
+      kind === "gif"
+        ? workerEngine.renderToAnimatedGif(sceneDocument, options, collector, requestOptions)
+        : workerEngine.renderToAnimatedWebp(sceneDocument, options, collector, requestOptions);
+    const abort = abortRejection(signal);
+    try {
+      await Promise.race([render, abort.rejection]);
+    } finally {
+      abort.detach();
+    }
+    return stampAnimatedRasterProvenance(kind, collector.takeBytes(), scene);
+  } finally {
+    workerEngine.dispose();
+  }
+}
+
+/**
+ * How long a Worker engine may take to load its wasm and fonts. The render
+ * deadline is open-ended, so a Worker that never answers init would otherwise
+ * hold the export; past this it counts as unavailable and the in-process
+ * renderer takes over.
+ */
+const WORKER_INIT_TIMEOUT_MS = 60_000;
+
+/**
+ * Settle a Worker engine's creation, or give it up on abort or after
+ * `WORKER_INIT_TIMEOUT_MS`. An engine that arrives after giving up is disposed.
+ */
+async function awaitWorkerEngine(
+  created: Promise<WorkerEngine>,
+  signal: AbortSignal | undefined,
+): Promise<WorkerEngine> {
+  const abort = abortRejection(signal);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(
+      () => reject(new Error("The export Worker did not start in time")),
+      WORKER_INIT_TIMEOUT_MS,
+    );
+  });
+  try {
+    return await Promise.race([created, abort.rejection, timeout]);
+  } catch (cause) {
+    void created.then(
+      (engine) => engine.dispose(),
+      () => undefined,
+    );
+    throw cause;
+  } finally {
+    clearTimeout(timer);
+    abort.detach();
+  }
+}
+
+/**
+ * Animated WebP/GIF rasterize and encode every frame inside wasm — on the main
+ * thread that freezes the tab for as long as the encode runs. Run it in a
+ * Worker engine instead; fall back to the in-process renderer when workers
+ * are unavailable. Either way the container is collected and stamped here.
  */
 async function exportAnimatedRaster(
   input: ExportInput,
-  kind: "animated-webp" | "gif",
+  kind: AnimatedRasterKind,
 ): Promise<Uint8Array> {
   const { engine, scene, signal } = input;
   throwIfAborted(signal);
   const rasterScale = input.scale !== undefined && input.scale !== 1 ? input.scale : undefined;
-  const motionSettings = resolveMotionExportSettings(
-    input.motionQuality ?? DEFAULT_MOTION_EXPORT_QUALITY,
-  );
-  const options = {
-    durationMs: scene.durationMs,
-    fps: payloadSafeFps(engine, scene, motionSettings.animatedRasterFps),
-    iterations: "infinite" as const,
-    generator: scene.generator,
+  const motionQuality = input.motionQuality ?? DEFAULT_MOTION_EXPORT_QUALITY;
+  const options = resolveAnimatedRasterOptions(scene, {
+    motionQuality,
     ...(rasterScale !== undefined ? { scale: rasterScale } : {}),
-  };
+  });
   if (input.onEstimate) {
     // One probe frame prices the machine; encode overhead rides on a fudge
     // factor. Good enough for a "walk away or wait" call.
@@ -408,7 +482,7 @@ async function exportAnimatedRaster(
     if (fonts.length === 0) {
       throw new Error(`No fonts resolved for ${kind} export`);
     }
-    const workerEngine = await WorkerEngine.create({
+    const created = WorkerEngine.create({
       worker: new Worker(new URL("@boundsvg/worker/worker", import.meta.url), { type: "module" }),
       // Buffers are transferred into the Worker, so hand over copies.
       fonts: fonts.map((font) => ({
@@ -419,27 +493,9 @@ async function exportAnimatedRaster(
       })),
       timeout: ANIMATED_RASTER_TIMEOUT_MS,
     });
+    const workerEngine = await awaitWorkerEngine(created, signal);
     workerReady = true;
-    // Terminating the Worker is the cancel mechanism: the pending render
-    // promise loses its responder and the abort race below surfaces first.
-    const onAbort = () => workerEngine.dispose();
-    signal?.addEventListener("abort", onAbort, { once: true });
-    try {
-      const sceneDocument = toSceneDocument(scene.vnode as VNode);
-      const render =
-        kind === "gif"
-          ? workerEngine.renderToAnimatedGif(sceneDocument, options)
-          : workerEngine.renderToAnimatedWebp(sceneDocument, options);
-      const abort = abortRejection(signal);
-      try {
-        return await Promise.race([render, abort.rejection]);
-      } finally {
-        abort.detach();
-      }
-    } finally {
-      signal?.removeEventListener("abort", onAbort);
-      workerEngine.dispose();
-    }
+    return await renderAnimatedRasterInWorker(workerEngine, { kind, scene, options, signal });
   } catch (cause) {
     if (signal?.aborted) {
       throw abortError();
@@ -454,11 +510,16 @@ async function exportAnimatedRaster(
       `svgent: worker ${kind} export unavailable, falling back to in-process render`,
       cause,
     );
-    return renderArtifact(engine, scene, {
-      kind,
-      motionQuality: input.motionQuality ?? DEFAULT_MOTION_EXPORT_QUALITY,
-      ...(rasterScale !== undefined ? { scale: rasterScale } : {}),
-    }) as Uint8Array;
+    try {
+      return await renderAnimatedRaster(engine, scene, {
+        kind,
+        motionQuality,
+        ...(rasterScale !== undefined ? { scale: rasterScale } : {}),
+        ...(signal !== undefined ? { signal } : {}),
+      });
+    } catch (fallbackCause) {
+      throw signal?.aborted ? abortError() : fallbackCause;
+    }
   }
 }
 
@@ -473,6 +534,11 @@ function abortRejection(signal: AbortSignal | undefined): {
 } {
   let onAbort: (() => void) | null = null;
   const rejection = new Promise<never>((_resolve, reject) => {
+    // A signal that fired before this was attached dispatches no event.
+    if (signal?.aborted) {
+      reject(abortError());
+      return;
+    }
     onAbort = () => reject(abortError());
     signal?.addEventListener("abort", onAbort, { once: true });
   });

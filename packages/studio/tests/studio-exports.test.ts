@@ -1,5 +1,5 @@
 import type { ResolvedBrowserFont } from "@boundsvg/browser";
-import { createElement, type Engine } from "@boundsvg/core";
+import { type AnimatedRasterSink, createElement, type Engine } from "@boundsvg/core";
 import type { BuiltScene } from "@svgent/scene";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -153,8 +153,17 @@ describe("studio export generator metadata", () => {
     // container — the mocked bytes have to be minimally valid files.
     mocks.encodePngFramesToMp4.mockResolvedValue(syntheticMp4());
     mocks.renderToMp4.mockResolvedValue(syntheticMp4());
-    mocks.workerRenderToAnimatedGif.mockResolvedValue(syntheticGif());
-    mocks.workerRenderToAnimatedWebp.mockResolvedValue(syntheticWebp());
+    // The engine streams into the caller's sink and resolves once it commits.
+    const streamInto =
+      (format: "gif" | "webp", bytes: () => Uint8Array) =>
+      async (_scene: unknown, _options: unknown, sink: AnimatedRasterSink) => {
+        const chunk = bytes();
+        await sink.write(chunk);
+        await sink.finish();
+        return { format, frameCount: 1, bytesWritten: chunk.length };
+      };
+    mocks.workerRenderToAnimatedGif.mockImplementation(streamInto("gif", syntheticGif));
+    mocks.workerRenderToAnimatedWebp.mockImplementation(streamInto("webp", syntheticWebp));
     mocks.workerEngineCreate.mockResolvedValue({
       renderToAnimatedGif: mocks.workerRenderToAnimatedGif,
       renderToAnimatedWebp: mocks.workerRenderToAnimatedWebp,
@@ -333,6 +342,46 @@ describe("studio export generator metadata", () => {
     ).rejects.toThrow("Motion Workers are unavailable");
     expect(mocks.renderToMp4).not.toHaveBeenCalled();
   });
+
+  it("gives up on an animated raster Worker that never starts", async () => {
+    vi.useFakeTimers();
+    try {
+      mocks.workerEngineCreate.mockReturnValueOnce(new Promise(() => {}));
+      const run = exportArtifact({
+        engine,
+        scene,
+        kind: "animated-webp",
+        mp4Background: "#090b10",
+        fonts,
+        allowInProcessMotionFallback: false,
+        t: UI_STRINGS.en,
+      });
+      const settled = expect(run).rejects.toThrow("Motion Workers are unavailable");
+      await vi.waitFor(() => expect(mocks.workerEngineCreate).toHaveBeenCalled());
+      await vi.advanceTimersByTimeAsync(60_000);
+      await settled;
+      expect(mocks.workerRenderToAnimatedWebp).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("cancels while the animated raster Worker is still starting", async () => {
+    mocks.workerEngineCreate.mockReturnValueOnce(new Promise(() => {}));
+    const controller = new AbortController();
+    const run = exportArtifact({
+      engine,
+      scene,
+      kind: "gif",
+      mp4Background: "#090b10",
+      fonts,
+      signal: controller.signal,
+      t: UI_STRINGS.en,
+    });
+    controller.abort();
+    await expect(run).rejects.toMatchObject({ name: "AbortError" });
+    expect(mocks.workerRenderToAnimatedGif).not.toHaveBeenCalled();
+  });
 });
 
 describe("MP4 frame-size limit", () => {
@@ -427,7 +476,8 @@ describe("Studio browser-motion admission policy", () => {
   it("classifies device estimates without changing the render request", () => {
     expect(browserMotionEstimateStatus(59_999)).toBe("ready");
     expect(browserMotionEstimateStatus(60_001)).toBe("warning");
-    expect(browserMotionEstimateStatus(180_001)).toBe("blocked");
+    // A long job warns rather than refusing: waiting is the person's call.
+    expect(browserMotionEstimateStatus(180_001)).toBe("warning");
   });
 
   it("blocks greater-than-FHD browser motion before probing a frame", () => {
@@ -488,26 +538,28 @@ describe("Studio browser-motion admission policy", () => {
     );
   });
 
-  it("blocks animated raster when the advertised fps would be reduced", () => {
-    const longScene = { ...scene, durationMs: 20_000 };
-    const largePayloadEngine = {
-      renderToSvg: vi.fn(() => "x".repeat(1_000_000)),
+  it("admits a long animated raster estimate at its requested frame rate, with a warning", () => {
+    const longScene = { ...scene, durationMs: 600_000 };
+    const slowEngine = {
       renderToPng: vi.fn(() => new Uint8Array([1])),
     } as unknown as Engine;
-
-    const assessment = assessBrowserMotionExport({
-      engine: largePayloadEngine,
-      scene: longScene,
-      kind: "animated-webp",
-      scale: 1,
-      motionQuality: "economy",
-      workerCount: 1,
-    });
-
-    expect(assessment.status).toBe("blocked");
-    expect(assessment.reason).toBe("fps");
-    expect(assessment.effectiveFps).toBeLessThan(assessment.requestedFps);
-    expect(largePayloadEngine.renderToPng).not.toHaveBeenCalled();
+    // Every probed frame takes a second, so the job runs for well over an hour.
+    const clock = vi.spyOn(performance, "now").mockReturnValueOnce(0).mockReturnValueOnce(1_000);
+    try {
+      const assessment = assessBrowserMotionExport({
+        engine: slowEngine,
+        scene: longScene,
+        kind: "animated-webp",
+        scale: 1,
+        motionQuality: "economy",
+        workerCount: 1,
+      });
+      expect(assessment).toMatchObject({ status: "warning", reason: "none", fps: 8 });
+      expect(assessment.frameCount).toBe(4_800);
+      expect(assessment.estimatedMs).toBeGreaterThan(3_600_000);
+    } finally {
+      clock.mockRestore();
+    }
   });
 });
 
