@@ -146,5 +146,5 @@ jobs:
           NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/npm-bootstrap-config
         run: |
           test -n "$NODE_AUTH_TOKEN"
-          printf 'registry=https://registry.npmjs.org/\n//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}\n' > "$NPM_CONFIG_USERCONFIG"
+          printf "registry=https://registry.npmjs.org/\n//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}\n" > "$NPM_CONFIG_USERCONFIG"
           npm publish "$ARTIFACT_ROOT/svgent-cli-0.1.0.tgz" --access public --provenance --ignore-scripts --registry https://registry.npmjs.org/
