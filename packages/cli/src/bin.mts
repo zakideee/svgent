@@ -1,515 +1,483 @@
 #!/usr/bin/env node
-/**
- * Headless render CLI: turns svgent script JSON files into SVG / PNG / WebP /
- * GIF artifacts without a browser, so coding agents and shell pipelines can
- * produce the same output as the studio UI.
- *
- * Usage:
- *   pnpm render <script.json…> [--out DIR] [--formats LIST] [--pages all|N]
- *               [--lang ja|en] [--sans-font PATH] [--mono-font PATH] [--strict]
- *
- * MP4 encodes through a locally installed ffmpeg (Remotion-style frame
- * piping); without ffmpeg the format is rejected up front.
- */
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+/** File-based authoring and rendering commands for svgent. */
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { parseArgs } from "node:util";
-import { createEngineAsync, type Engine } from "@boundsvg/core";
-import { initWasm } from "@boundsvg/core/wasm";
-import { BUNDLED_FONT_FILES, GENERATED_SAMPLE_IMAGES } from "@svgent/assets";
-import { bundledFontPath, loadBundledBoundsvgWasm } from "@svgent/assets/node";
 import {
-  type AnimatedSvgIterations,
+  applyScenePatch,
+  fitSceneDuration,
+  parseScenePatchOperations,
+  reviewSceneAnimation,
+} from "@svgent/authoring";
+import {
   assertIdentifierNamespace,
   DEFAULT_MOTION_EXPORT_QUALITY,
-  isAnimatedRasterKind,
   type MotionExportQuality,
-  RASTER_MAX_LONG_EDGE,
-  RASTER_MAX_PIXELS,
-  RENDERABLE_EXTENSIONS,
-  RENDERABLE_KINDS,
-  type RenderableKind,
-  type ResolvedRasterScale,
-  renderAnimatedRaster,
-  renderArtifact,
-  resolveMotionExportSettings,
-  resolveSceneRasterScale,
 } from "@svgent/render";
 import {
-  type BuiltScene,
-  buildGoogleFontCssUrl,
-  buildSvgentScene,
-  bundledFallbackFonts,
-  collectProjectCharacters,
-  describeMissingGlyphs,
+  buildTimeline,
   deserializeProject,
-  draftTimelineIssues,
-  FONT_ALIAS,
-  type FontSlot,
-  findProjectMissingGlyphs,
-  MAX_DRAFT_RUN_CLUSTERS,
-  MAX_PROJECT_DURATION_MS,
-  type SvgentProject,
+  paginateMessages,
+  serializeProject,
 } from "@svgent/scene";
 import { version as cliVersion } from "../package.json";
+import { directScript } from "./direction.mjs";
+import { authoringGuide } from "./guide.mjs";
+import { ffmpegNotFoundMessage, probeFfmpeg, resolveFfmpegCommand } from "./mp4-ffmpeg.mjs";
 import {
-  encodeMp4WithFfmpeg,
-  ffmpegNotFoundMessage,
-  probeFfmpeg,
-  resolveFfmpegCommand,
-} from "./mp4-ffmpeg.mjs";
+  CLI_FORMATS,
+  type CliFormat,
+  type CliOptions,
+  renderScriptFile,
+  snapshotScriptFile,
+} from "./rendering.mjs";
+import {
+  assertScriptWarnings,
+  CliError,
+  readScriptFile,
+  scriptTimelineWarnings,
+  writeScriptFile,
+} from "./script-file.mjs";
 
-const CLI_GENERATOR = Object.freeze({ name: "svgent", version: cliVersion });
+/** File-based command names. */
+const COMMANDS = [
+  "guide",
+  "validate",
+  "inspect",
+  "snapshot",
+  "direct",
+  "patch",
+  "fit",
+  "render",
+] as const;
+type Command = (typeof COMMANDS)[number];
+/** Shared machine-output and validation options. */
+const COMMON_OPTIONS = {
+  json: { type: "boolean" },
+  help: { type: "boolean", short: "h" },
+  lang: { type: "string", default: "en" },
+  strict: { type: "boolean" },
+} as const;
+/** Controls that apply only to rendered artifacts. */
+const RENDER_OPTIONS = {
+  out: { type: "string", short: "o", default: "render-out" },
+  formats: { type: "string", short: "f", default: "poster-svg,poster-png" },
+  pages: { type: "string", default: "all" },
+  scale: { type: "string", default: "1" },
+  "motion-quality": { type: "string", default: DEFAULT_MOTION_EXPORT_QUALITY },
+  "svg-play": { type: "string", default: "loop" },
+  "id-namespace": { type: "string" },
+  "sans-font": { type: "string" },
+  "mono-font": { type: "string" },
+  "allow-font-fetch": { type: "boolean" },
+} as const;
+/** Separate output and optimistic source identity for edits. */
+const EDIT_OPTIONS = {
+  output: { type: "string", short: "o" },
+  "in-place": { type: "boolean" },
+  "expect-source": { type: "string" },
+} as const;
+/** The installed version's command contract. */
+const USAGE = `svgent ${cliVersion} — authored conversations to images and animations
 
-type CliFormat = RenderableKind | "mp4" | "transcript-svg" | "transcript-png";
+Usage: svgent <command> [options]
+  guide                         Authoring rules, schema, presets, and workflow
+  validate <script.json>        Validate without changing the input
+  inspect <script.json>         IDs, page durations, reveal/settled times, review
+  snapshot <script.json>        PNG at --page N --time MS [--output frame.png]
+  direct <script.json>          Stage the script with --settings direction.json
+  patch <script.json>           Edit named messages with --operations patch.json
+  fit <script.json>             Fit --page N --target-ms MS [--preserve ID,ID]
+  render <script.json…>         --out DIR --formats ${CLI_FORMATS.join(",")}
 
-const CLI_FORMATS: readonly CliFormat[] = [
-  ...RENDERABLE_KINDS,
-  "mp4",
-  "transcript-svg",
-  "transcript-png",
-];
-
-const DEFAULT_FORMATS: CliFormat[] = ["poster-svg", "poster-png"];
-
-const USAGE = `svgent render — script JSON to SVG/PNG/WebP/GIF artifacts
-
-Usage:
-  pnpm render <script.json…> [options]
-
-Options:
-  --out, -o <dir>      Output directory (default: render-out)
-  --formats, -f <list> Comma-separated: ${CLI_FORMATS.join(", ")}
-                       (default: ${DEFAULT_FORMATS.join(",")}; mp4 needs ffmpeg)
-  --pages <all|N>      Page to render for slide flows, 1-based (default: all)
-  --lang <ja|en>       Language for script validation warnings (default: en)
-  --sans-font <path>   Font file overriding the sans slot (bundled subset otherwise)
-  --mono-font <path>   Font file overriding the mono slot
-  --scale <n>          Raster resolution multiplier 0.5–4 (default: 1).
-                       Applies to png/webp/gif/mp4; SVG output is vector
-  --motion-quality <economy|balanced|high>
-                       Motion sampling/encoding profile (default: balanced)
-  --svg-play <loop|once>
-                       How many times the animated SVG plays (default: loop,
-                       matching GIF and WebP)
-  --id-namespace <s>   Distinguishes this render's CSS and \`<defs>\` names.
-                       Letters, digits and \`-\`, starting with a letter or
-                       digit. Needed only when several SVGs are expanded
-                       inline into one HTML document — \`img\`, \`object\`
-                       and \`iframe\` are separate documents and need nothing
-  --allow-font-fetch   Let a script's Google Fonts choice reach the network.
-                       Off by default: rendering a script is otherwise
-                       offline, and the request carries every character the
-                       script draws. Without it the bundled font is used and
-                       the substitution is reported
-  --strict             Exit with code 1 when the script produced validation warnings
-  --help, -h           Show this help
+All commands: --json (one stdout result), --help, --lang en|ja, --strict.
+Edits: --output FILE (default: INPUT.edited.json, must be new), or
+       --in-place --expect-source SHA256. Warnings stop edits.
+Render/snapshot: --scale 0.5..4, --sans-font FILE, --mono-font FILE,
+                 --allow-font-fetch (explicit Google Fonts network request).
+Render: --pages all|N, --motion-quality economy|balanced|high,
+        --svg-play loop|once, --id-namespace NAME. MP4 needs local ffmpeg.
+Snapshot: --page N (default: 1), --time MS (required); page numbers are 1-based.
+Guide: --topic all|schema|presets|workflow (default: all).
+Examples:
+  svgent guide --json
+  svgent inspect script.json --json
+  svgent patch script.json --operations patch.json --expect-source SHA256 --json
+  svgent render script.json --out out --formats poster-png,animated-svg --strict --json
 `;
 
-type CliOptions = {
-  inputs: string[];
-  outDir: string;
-  formats: CliFormat[];
-  /** Separates this render's document-global names from another's. */
-  idNamespace: string | undefined;
-  pages: "all" | number;
-  lang: "ja" | "en";
-  fontOverrides: Partial<Record<FontSlot, string>>;
-  strict: boolean;
-  /**
-   * Whether a script may pull its font from Google Fonts. Off by default:
-   * a script arriving from somewhere else should not be able to make the
-   * renderer talk to a third party, and the subset request spells out every
-   * character the script draws.
-   */
-  allowFontFetch: boolean;
-  /** Raster resolution multiplier; vector SVG output ignores it. */
-  scale: number;
-  motionQuality: MotionExportQuality;
-  /** How many times the animated SVG plays; other formats ignore it. */
-  animatedSvgIterations: AnimatedSvgIterations;
-  /** Resolved ffmpeg command; set only when mp4 output was requested. */
-  ffmpeg?: string;
-};
-
-function parsePages(raw: string | undefined): number | "all" {
-  const pages = raw === "all" ? ("all" as const) : Number(raw);
-  if (pages !== "all" && (!Number.isInteger(pages) || pages < 1)) {
-    throw new Error(`--pages expects "all" or a 1-based page number, got "${raw}"`);
-  }
-  return pages;
+type Options = Record<string, string | boolean | (string | boolean)[] | undefined>;
+function optionString(options: Options, key: string): string | undefined {
+  const candidate = options[key];
+  return typeof candidate === "string" ? candidate : undefined;
 }
-
-function parseLang(raw: string | undefined): "ja" | "en" {
-  if (raw !== "ja" && raw !== "en") {
-    throw new Error(`--lang expects "ja" or "en", got "${raw}"`);
+function requiredString(options: Options, key: string): string {
+  const candidate = optionString(options, key);
+  if (candidate === undefined || candidate.length === 0) {
+    throw new CliError("INVALID_ARGUMENT", `--${key} is required.`);
   }
-  return raw;
+  return candidate;
 }
-
-function parseScale(raw: string | undefined): number {
-  const scale = Number(raw);
-  if (!Number.isFinite(scale) || scale < 0.5 || scale > 4) {
-    throw new Error(`--scale expects a number between 0.5 and 4, got "${raw}"`);
+function numberOption(
+  options: Options,
+  key: string,
+  range: { min: number; max: number; integer?: boolean; default?: number },
+): number {
+  const raw = optionString(options, key);
+  const candidate = raw === undefined ? range.default : raw.trim() === "" ? undefined : Number(raw);
+  if (
+    candidate === undefined ||
+    !Number.isFinite(candidate) ||
+    candidate < range.min ||
+    candidate > range.max ||
+    (range.integer && !Number.isInteger(candidate))
+  ) {
+    throw new CliError(
+      "INVALID_ARGUMENT",
+      `--${key} expects ${range.integer ? "an integer" : "a number"} in ${range.min}..${range.max}.`,
+    );
   }
-  return scale;
+  return candidate;
 }
-
-function parseMotionQuality(raw: string | undefined): MotionExportQuality {
-  if (raw !== "economy" && raw !== "balanced" && raw !== "high") {
-    throw new Error(`--motion-quality expects "economy", "balanced", or "high", got "${raw}"`);
+function language(options: Options): "en" | "ja" {
+  const lang = optionString(options, "lang");
+  if (lang !== "en" && lang !== "ja") {
+    throw new CliError("INVALID_ARGUMENT", "--lang expects en or ja.");
   }
-  return raw;
+  return lang;
 }
-
-function parseSvgPlay(raw: string | undefined): AnimatedSvgIterations {
-  if (raw !== "loop" && raw !== "once") {
-    throw new Error(`--svg-play expects "loop" or "once", got "${raw}"`);
+function renderOptions(options: Options): CliOptions {
+  const formats = (optionString(options, "formats") ?? "poster-png")
+    .split(",")
+    .map((entry) => entry.trim());
+  if (formats.some((format) => !CLI_FORMATS.includes(format as CliFormat))) {
+    throw new CliError("INVALID_ARGUMENT", "Unknown artifact format.");
   }
-  return raw === "loop" ? "infinite" : "once";
-}
-
-/** MP4 is the one format that needs a local binary, so it is probed up front. */
-function requireFfmpeg(): string {
-  const ffmpeg = resolveFfmpegCommand();
-  if (!probeFfmpeg(ffmpeg)) {
-    throw new Error(ffmpegNotFoundMessage(ffmpeg));
+  const pages =
+    options.pages === "all" || options.pages === undefined
+      ? "all"
+      : numberOption(options, "pages", { min: 1, max: 12, integer: true });
+  const quality = optionString(options, "motion-quality") ?? DEFAULT_MOTION_EXPORT_QUALITY;
+  if (!["economy", "balanced", "high"].includes(quality)) {
+    throw new CliError("INVALID_ARGUMENT", "Invalid --motion-quality.");
   }
-  return ffmpeg;
-}
-
-function parseCliOptions(argv: string[]): CliOptions {
-  const { values, positionals } = parseArgs({
-    args: argv,
-    allowPositionals: true,
-    options: {
-      out: { type: "string", short: "o", default: "render-out" },
-      formats: { type: "string", short: "f", default: DEFAULT_FORMATS.join(",") },
-      "id-namespace": { type: "string" },
-      pages: { type: "string", default: "all" },
-      lang: { type: "string", default: "en" },
-      "sans-font": { type: "string" },
-      "mono-font": { type: "string" },
-      scale: { type: "string", default: "1" },
-      "motion-quality": { type: "string", default: DEFAULT_MOTION_EXPORT_QUALITY },
-      "svg-play": { type: "string", default: "loop" },
-      "allow-font-fetch": { type: "boolean", default: false },
-      strict: { type: "boolean", default: false },
-      help: { type: "boolean", short: "h", default: false },
-    },
-  });
-  if (values.help || positionals.length === 0) {
-    process.stdout.write(USAGE);
-    process.exit(values.help ? 0 : 2);
+  const svgPlay = optionString(options, "svg-play") ?? "loop";
+  if (svgPlay !== "loop" && svgPlay !== "once") {
+    throw new CliError("INVALID_ARGUMENT", "Invalid --svg-play.");
   }
-
-  const formats = values.formats.split(",").map((entry) => entry.trim()) as CliFormat[];
-  for (const format of formats) {
-    if (!CLI_FORMATS.includes(format)) {
-      throw new Error(`Unknown format "${format}". Supported formats: ${CLI_FORMATS.join(", ")}`);
-    }
-  }
-
-  const idNamespace = values["id-namespace"];
+  const idNamespace = optionString(options, "id-namespace");
   if (idNamespace !== undefined) {
-    // Every other option is checked here, before a byte is written. Leaving
-    // this one to the render would let a raster format succeed with a value
-    // an SVG rejects, and a mixed --formats list write half its files first.
     assertIdentifierNamespace(idNamespace);
-    if (positionals.length > 1) {
-      // The stem a render names itself after is the surface and the page, not
-      // the input file, so one namespace across several scripts of the same
-      // surface produces exactly the collision the flag exists to prevent.
-      throw new Error(
-        "--id-namespace names one render; pass one script at a time, or run it once per script with a different value",
-      );
+  }
+  let ffmpeg: string | undefined;
+  if (formats.includes("mp4")) {
+    ffmpeg = resolveFfmpegCommand();
+    if (!probeFfmpeg(ffmpeg)) {
+      throw new CliError("FFMPEG_UNAVAILABLE", ffmpegNotFoundMessage(ffmpeg));
     }
   }
-
-  const pages = parsePages(values.pages);
-  const lang = parseLang(values.lang);
-  const scale = parseScale(values.scale);
-  const motionQuality = parseMotionQuality(values["motion-quality"]);
-  const animatedSvgIterations = parseSvgPlay(values["svg-play"]);
-  const ffmpeg = formats.includes("mp4") ? requireFfmpeg() : undefined;
-
   return {
-    inputs: positionals,
-    outDir: values.out,
-    formats,
+    outDir: optionString(options, "out") ?? "render-out",
+    formats: [...new Set(formats)] as CliFormat[],
     pages,
-    lang,
+    lang: language(options),
     fontOverrides: {
-      ...(values["sans-font"] ? { sans: values["sans-font"] } : {}),
-      ...(values["mono-font"] ? { mono: values["mono-font"] } : {}),
+      ...(optionString(options, "sans-font") ? { sans: optionString(options, "sans-font") } : {}),
+      ...(optionString(options, "mono-font") ? { mono: optionString(options, "mono-font") } : {}),
     },
-    strict: values.strict,
-    allowFontFetch: values["allow-font-fetch"],
-    scale,
-    motionQuality,
-    animatedSvgIterations,
+    strict: options.strict === true,
+    allowFontFetch: options["allow-font-fetch"] === true,
+    scale: numberOption(options, "scale", { min: 0.5, max: 4, default: 1 }),
+    motionQuality: quality as MotionExportQuality,
+    animatedSvgIterations: svgPlay === "loop" ? "infinite" : "once",
     idNamespace,
+    warnings: [],
     ...(ffmpeg ? { ffmpeg } : {}),
   };
 }
-
-async function fetchGoogleFontBinary(family: string, text: string): Promise<Uint8Array> {
-  const cssUrl = buildGoogleFontCssUrl(family, text);
-  const cssResponse = await fetch(cssUrl, { headers: { Accept: "text/css,*/*;q=0.1" } });
-  if (!cssResponse.ok) {
-    throw new Error(`Google Fonts css2 returned HTTP ${cssResponse.status} for "${family}"`);
-  }
-  const match = /src:\s*url\((https:[^)]+)\)/u.exec(await cssResponse.text());
-  if (!match?.[1]) {
-    throw new Error(`Google Fonts returned no font URL for "${family}"`);
-  }
-  const fontResponse = await fetch(match[1]);
-  if (!fontResponse.ok) {
-    throw new Error(`Font binary fetch failed with HTTP ${fontResponse.status} for "${family}"`);
-  }
-  return new Uint8Array(await fontResponse.arrayBuffer());
-}
-
-/**
- * Resolve one slot to font bytes. Upload-sourced choices have no binary in
- * the script file, so they need --sans-font/--mono-font or fall back to the
- * bundled font, mirroring what the UI does when importing such a script.
- */
-async function resolveSlotData(
-  project: SvgentProject,
-  slot: FontSlot,
-  options: CliOptions,
-): Promise<Uint8Array> {
-  const override = options.fontOverrides[slot];
-  if (override) {
-    return new Uint8Array(await readFile(override));
-  }
-  const choice = project.fonts[slot];
-  if (choice.source === "google") {
-    if (!options.allowFontFetch) {
-      // Never a silent substitution: the render still succeeds, but the
-      // reader of the log has to be able to see that the font on screen is
-      // not the font the script asked for.
-      console.warn(
-        `[svgent] ${slot} slot asks for the Google font "${choice.family}", which would send every character this script draws to fonts.googleapis.com — using the bundled font instead. Pass --allow-font-fetch to fetch it.`,
-      );
-      return readBundledFontFile(BUNDLED_FONT_FILES[slot]);
-    }
-    return fetchGoogleFontBinary(choice.family, collectProjectCharacters(project));
-  }
-  if (choice.source === "upload") {
-    console.warn(
-      `[svgent] ${slot} slot references an uploaded font ("${choice.fileName}") that script files do not embed — using the bundled font. Pass --${slot}-font to supply the file.`,
-    );
-  }
-  return readBundledFontFile(BUNDLED_FONT_FILES[slot]);
-}
-
-/** Read one of the fonts that ship with svgent. */
-async function readBundledFontFile(fileName: string): Promise<Uint8Array> {
-  return new Uint8Array(await readFile(bundledFontPath(fileName)));
-}
-
-async function createEngineForProject(
-  project: SvgentProject,
-  options: CliOptions,
-): Promise<Engine> {
-  const slots: FontSlot[] = ["sans", "mono"];
-  const fonts = await Promise.all(
-    slots.map(async (slot) => ({
-      alias: FONT_ALIAS[slot],
-      weight: 400,
-      style: "normal" as const,
-      data: await resolveSlotData(project, slot, options),
-    })),
-  );
-  // The bundled pair is always registered under the fallback aliases so a
-  // subset or upload that lacks a glyph resolves instead of drawing tofu.
-  const fallbacks = await bundledFallbackFonts((slot) =>
-    readBundledFontFile(BUNDLED_FONT_FILES[slot]),
-  );
-  return createEngineAsync({ fonts: [...fonts, ...fallbacks] });
-}
-
-/**
- * Writes one artifact and returns its path. Transcript kinds rebuild the scene
- * at full height so content that scrolled away still lands in the file; MP4 is
- * the only kind that leaves the engine and goes through ffmpeg.
- */
-async function renderOnePage(input: {
-  engine: Engine;
-  project: SvgentProject;
-  scene: BuiltScene;
-  kind: CliFormat;
-  pageIndex: number;
-  inputStem: string;
-  options: CliOptions;
-}): Promise<string> {
-  const { engine, project, scene, kind, pageIndex, inputStem, options } = input;
-  const pageLabel = String(pageIndex + 1).padStart(2, "0");
-  const stem = path.join(options.outDir, `${inputStem}-${pageLabel}`);
-  // The engine lowers an oversized raster request instead of refusing it, so
-  // an unreported --scale would hand back a smaller file than it named.
-  const onResolutionAdjusted = (adjustment: ResolvedRasterScale): void => {
-    const message =
-      `${inputStem} page ${pageIndex + 1}: --scale ${options.scale} exceeds the ` +
-      `${RASTER_MAX_LONG_EDGE}px / ${RASTER_MAX_PIXELS.toLocaleString()}px raster ceiling; ` +
-      `rendering at ${adjustment.appliedScale.toFixed(2)}x ` +
-      `(${adjustment.outputWidth}x${adjustment.outputHeight})`;
-    if (options.strict) {
-      throw new Error(message);
-    }
-    console.warn(`[svgent] ${message}`);
-  };
-  if (kind === "transcript-svg" || kind === "transcript-png") {
-    const fullScene = buildSvgentScene(project, pageIndex, {
-      fullHeight: true,
-      engine,
-      generator: CLI_GENERATOR,
-      fallbackImage: GENERATED_SAMPLE_IMAGES.generic,
-    });
-    const artifact = renderArtifact(engine, fullScene, {
-      kind: kind === "transcript-svg" ? "poster-svg" : "poster-png",
-      scale: options.scale,
-      onResolutionAdjusted,
-      // A transcript renders as a poster; without this it would name its
-      // identifiers exactly as a poster of the same scene does.
-      asTranscript: true,
-      ...(options.idNamespace === undefined ? {} : { identifierNamespace: options.idNamespace }),
-    });
-    const outPath = `${stem}.${kind === "transcript-svg" ? "transcript.svg" : "transcript.png"}`;
-    await writeFile(outPath, artifact);
-    return outPath;
-  }
-  if (kind === "mp4") {
-    const outPath = `${stem}.mp4`;
-    // ffmpeg gets PNG frames from the same engine, so the raster ceiling
-    // applies to video exactly as it does to stills.
-    const videoScale = resolveSceneRasterScale(scene, options.scale);
-    if (videoScale.adjusted) {
-      onResolutionAdjusted(videoScale);
-    }
-    const motionSettings = resolveMotionExportSettings(options.motionQuality);
-    await encodeMp4WithFfmpeg({
-      // parseCliOptions resolved the command before any rendering started.
-      command: options.ffmpeg ?? "ffmpeg",
-      engine,
-      scene,
-      background: project.appearance.background,
-      outputPath: outPath,
-      scale: options.scale,
-      mp4FrameRate: motionSettings.mp4FrameRate,
-      mp4Crf: motionSettings.mp4Crf,
-    });
-    return outPath;
-  }
-  if (isAnimatedRasterKind(kind)) {
-    const outPath = `${stem}.${RENDERABLE_EXTENSIONS[kind]}`;
-    await writeFile(
-      outPath,
-      await renderAnimatedRaster(engine, scene, {
-        kind,
-        scale: options.scale,
-        motionQuality: options.motionQuality,
-        onResolutionAdjusted,
-      }),
-    );
-    return outPath;
-  }
-  const artifact = renderArtifact(engine, scene, {
-    kind,
-    scale: options.scale,
-    animatedSvgIterations: options.animatedSvgIterations,
-    onResolutionAdjusted,
-    ...(options.idNamespace === undefined ? {} : { identifierNamespace: options.idNamespace }),
-  });
-  const outPath = `${stem}.${RENDERABLE_EXTENSIONS[kind]}`;
-  await writeFile(outPath, artifact);
-  return outPath;
-}
-
-async function renderScriptFile(inputPath: string, options: CliOptions): Promise<string[]> {
-  const source = await readFile(inputPath, "utf8");
-  const { project, warnings } = deserializeProject(source, options.lang);
-  const timelineWarnings = draftTimelineIssues(project).map((issue) => {
-    if (options.lang === "en") {
-      return issue.detail;
-    }
-    switch (issue.code) {
-      case "ime-run-too-long":
-        return `${(issue.messageIndex ?? 0) + 1}件目のIME読みは1回の変換につき${MAX_DRAFT_RUN_CLUSTERS}文字以下に分けてください。`;
-      case "duration-too-short":
-        return `${(issue.messageIndex ?? 0) + 1}件目の表示時間ではIME変換・確定・補完を完了できません。`;
-      case "project-too-long":
-        return `アニメーションの総尺は${MAX_PROJECT_DURATION_MS / 1_000}秒以下にしてください。`;
-    }
-    return issue.detail;
-  });
-  for (const warning of [...warnings, ...timelineWarnings]) {
-    console.warn(`[svgent] ${path.basename(inputPath)}: ${warning}`);
-  }
-  const warningCount = warnings.length + timelineWarnings.length;
-  if (options.strict && warningCount > 0) {
-    throw new Error(`${inputPath}: ${warningCount} validation warning(s) in --strict mode`);
-  }
-
-  const engine = await createEngineForProject(project, options);
-  const written: string[] = [];
+async function readRequest(filePath: string): Promise<unknown> {
   try {
-    // Nothing downstream reports this: the engine draws a box and carries on,
-    // so an unattended render would ship tofu without a word.
-    const missingGlyphs = findProjectMissingGlyphs(engine, project);
-    if (missingGlyphs.length > 0) {
-      const message =
-        `${path.basename(inputPath)}: ${missingGlyphs.length} character(s) have no glyph ` +
-        `in the selected fonts and render as boxes: ${describeMissingGlyphs(missingGlyphs)}`;
-      if (options.strict) {
-        throw new Error(message);
-      }
-      console.warn(`[svgent] ${message}`);
+    return JSON.parse(await readFile(filePath, "utf8")) as unknown;
+  } catch (cause) {
+    if (cause instanceof SyntaxError) {
+      throw new CliError("INVALID_ARGUMENT", "Request file must contain JSON.");
     }
-    const pageCount = buildSvgentScene(project, 0).pageCount;
-    if (options.pages !== "all" && options.pages > pageCount) {
-      throw new Error(`${inputPath}: page ${options.pages} requested but only ${pageCount} exist`);
-    }
-    const pageIndexes =
-      options.pages === "all"
-        ? Array.from({ length: pageCount }, (_unused, index) => index)
-        : [options.pages - 1];
-    const inputStem = path.basename(inputPath).replace(/\.json$/u, "");
-
-    for (const pageIndex of pageIndexes) {
-      const scene = buildSvgentScene(project, pageIndex, {
-        engine,
-        generator: CLI_GENERATOR,
-        fallbackImage: GENERATED_SAMPLE_IMAGES.generic,
-      });
-      for (const kind of options.formats) {
-        written.push(
-          await renderOnePage({ engine, project, scene, kind, pageIndex, inputStem, options }),
-        );
-      }
-    }
-  } finally {
-    engine.dispose();
+    throw cause;
   }
-  return written;
+}
+
+function assertRenderInputs(inputs: string[], options: Options): void {
+  if (options["id-namespace"] !== undefined && inputs.length > 1) {
+    throw new CliError("INVALID_ARGUMENT", "--id-namespace names one render; pass one input.");
+  }
+  const stems = inputs.map((input) => path.basename(input).replace(/\.json$/u, ""));
+  const outputNames =
+    process.platform === "win32" ? stems.map((stem) => stem.toLowerCase()) : stems;
+  if (new Set(outputNames).size !== inputs.length) {
+    throw new CliError(
+      "OUTPUT_COLLISION",
+      "Input names would produce the same artifacts. Render them into separate output directories.",
+    );
+  }
+}
+
+async function runCommand(
+  command: Command,
+  inputs: string[],
+  options: Options,
+): Promise<Record<string, unknown>> {
+  if (command === "guide") {
+    if (inputs.length > 0) {
+      throw new CliError("INVALID_ARGUMENT", "guide takes no input file.");
+    }
+    return { guide: authoringGuide(optionString(options, "topic") ?? "all"), warnings: [] };
+  }
+  const validInputCount = command === "render" ? inputs.length > 0 : inputs.length === 1;
+  if (!validInputCount) {
+    throw new CliError(
+      "INVALID_ARGUMENT",
+      "Pass one script file (render also accepts multiple files).",
+    );
+  }
+  if (command === "render") {
+    assertRenderInputs(inputs, options);
+    const scripts = [];
+    const writtenArtifacts = new Set<string>();
+    for (const input of inputs) {
+      scripts.push(
+        await renderScriptFile(input, renderOptions(options), {
+          inputPaths: inputs,
+          writtenArtifacts,
+        }),
+      );
+    }
+    return {
+      scripts,
+      warnings: scripts.flatMap((script) => script.warnings),
+      artifacts: scripts.flatMap((script) => script.artifacts),
+    };
+  }
+  const script = await readScriptFile(inputs[0] ?? "", language(options));
+  const source = { path: script.path, sha256: script.sha256 };
+  const base = { source, warnings: script.warnings };
+  if (options.strict || ["direct", "patch", "fit"].includes(command)) {
+    assertScriptWarnings(script);
+  }
+  if (command === "validate") {
+    return {
+      ...base,
+      normalized: JSON.parse(
+        serializeProject(script.project, script.provenance ?? undefined),
+      ) as unknown,
+    };
+  }
+  if (command === "inspect") {
+    return {
+      ...base,
+      pages: paginateMessages(script.project).map((messages, index) => {
+        const timeline = buildTimeline(script.project, messages);
+        return {
+          page: index + 1,
+          durationMs: timeline.durationMs,
+          messages: timeline.messages.map(({ message, startMs, revealEndMs, settledMs }) => ({
+            id: message.id,
+            role: message.role,
+            content: message.content,
+            startMs,
+            revealEndMs,
+            settledMs,
+          })),
+        };
+      }),
+      review: reviewSceneAnimation(script.project),
+    };
+  }
+  if (command === "snapshot") {
+    const rendering = renderOptions(options);
+    const artifact = await snapshotScriptFile(script, rendering, {
+      page: numberOption(options, "page", { min: 1, max: 12, integer: true, default: 1 }),
+      timeMs: numberOption(options, "time", { min: 0, max: 120000 }),
+      outputPath:
+        optionString(options, "output") ?? `${path.basename(script.path, ".json")}.snapshot.png`,
+    });
+    return { source, warnings: rendering.warnings, artifacts: [artifact] };
+  }
+  return editScript(command, script, options);
+}
+
+async function editScript(
+  command: Command,
+  script: Awaited<ReturnType<typeof readScriptFile>>,
+  options: Options,
+): Promise<Record<string, unknown>> {
+  const base = { source: { path: script.path, sha256: script.sha256 }, warnings: script.warnings };
+  const expectedSourceHash = optionString(options, "expect-source");
+  if (expectedSourceHash !== undefined && !/^[a-f\d]{64}$/u.test(expectedSourceHash)) {
+    throw new CliError("INVALID_ARGUMENT", "--expect-source requires a SHA-256 hex digest.");
+  }
+  if (expectedSourceHash !== undefined && expectedSourceHash !== script.sha256) {
+    throw new CliError("STALE_SOURCE", "The input differs from the inspected source hash.");
+  }
+  let edited: ReturnType<typeof applyScenePatch> | ReturnType<typeof directScript>;
+  let fit: ReturnType<typeof fitSceneDuration> | undefined;
+  if (command === "direct") {
+    edited = directScript(script.project, await readRequest(requiredString(options, "settings")));
+  } else if (command === "patch") {
+    edited = applyScenePatch(
+      script.project,
+      parseScenePatchOperations(await readRequest(requiredString(options, "operations"))),
+    );
+  } else {
+    const page = numberOption(options, "page", { min: 1, max: 12, integer: true, default: 1 });
+    const pageCount = paginateMessages(script.project).length;
+    if (page > pageCount) {
+      throw new CliError("INVALID_ARGUMENT", `Page ${page} requested but only ${pageCount} exist.`);
+    }
+    fit = fitSceneDuration(script.project, {
+      pageIndex: page - 1,
+      targetMs: numberOption(options, "target-ms", { min: 1000, max: 120000 }),
+      preserveMessageIds: optionString(options, "preserve")?.split(","),
+    });
+    if (fit.constrained) {
+      throw new CliError(
+        "FIT_CONSTRAINED",
+        "The target cannot be reached within the existing timing limits.",
+        { fit },
+      );
+    }
+    edited = applyScenePatch(script.project, fit.operations);
+  }
+  const outputText = serializeProject(edited.project, script.provenance ?? undefined);
+  const checked = deserializeProject(outputText, language(options));
+  const outputWarnings = [
+    ...checked.warnings,
+    ...scriptTimelineWarnings(checked.project, language(options)),
+  ];
+  if (outputWarnings.length > 0) {
+    throw new CliError("WARNINGS", "The edit needs a correction. No output was saved.", {
+      warnings: outputWarnings,
+      changes: edited.changes,
+    });
+  }
+  const output = await writeScriptFile(script, edited.project, {
+    outputPath: optionString(options, "output"),
+    inPlace: options["in-place"] === true,
+    expectedSourceHash,
+  });
+  return {
+    ...base,
+    output,
+    changes: edited.changes,
+    ...(fit ? { fit } : {}),
+    review: reviewSceneAnimation(edited.project),
+  };
+}
+
+function optionsFor(command: Command): NonNullable<Parameters<typeof parseArgs>[0]>["options"] {
+  switch (command) {
+    case "guide":
+      return { topic: { type: "string" } };
+    case "render":
+      return RENDER_OPTIONS;
+    case "snapshot":
+      return {
+        scale: RENDER_OPTIONS.scale,
+        "sans-font": RENDER_OPTIONS["sans-font"],
+        "mono-font": RENDER_OPTIONS["mono-font"],
+        "allow-font-fetch": RENDER_OPTIONS["allow-font-fetch"],
+        page: { type: "string" },
+        time: { type: "string" },
+        output: { type: "string", short: "o" },
+      };
+    case "direct":
+      return { ...EDIT_OPTIONS, settings: { type: "string" } };
+    case "patch":
+      return { ...EDIT_OPTIONS, operations: { type: "string" } };
+    case "fit":
+      return {
+        ...EDIT_OPTIONS,
+        page: { type: "string" },
+        "target-ms": { type: "string" },
+        preserve: { type: "string" },
+      };
+    default:
+      return {};
+  }
+}
+
+function failureCode(cause: unknown): string {
+  if (cause instanceof CliError) {
+    return cause.code;
+  }
+  const code = (cause as NodeJS.ErrnoException).code;
+  if (code === "EEXIST") {
+    return "OUTPUT_EXISTS";
+  }
+  if (typeof code !== "string") {
+    return "INVALID_INPUT";
+  }
+  return code.startsWith("ERR_PARSE_ARGS") ? "INVALID_ARGUMENT" : "IO_ERROR";
 }
 
 async function main(): Promise<void> {
-  const options = parseCliOptions(process.argv.slice(2));
-  initWasm(loadBundledBoundsvgWasm() as Parameters<typeof initWasm>[0]);
-  await mkdir(options.outDir, { recursive: true });
-  for (const input of options.inputs) {
-    const written = await renderScriptFile(input, options);
-    for (const file of written) {
-      console.info(file);
+  const argv = process.argv.slice(2);
+  const commandName = argv.shift();
+  const json = argv.includes("--json");
+  try {
+    if (commandName === "--version") {
+      process.stdout.write(
+        json ? `${JSON.stringify({ ok: true, cliVersion })}\n` : `${cliVersion}\n`,
+      );
+      return;
     }
+    if (commandName === undefined || commandName === "--help" || commandName === "-h") {
+      process.stdout.write(
+        json ? `${JSON.stringify({ ok: true, cliVersion, help: USAGE })}\n` : USAGE,
+      );
+      return;
+    }
+    if (!COMMANDS.includes(commandName as Command)) {
+      throw new CliError(
+        "INVALID_ARGUMENT",
+        `Unknown command "${commandName}". Use svgent --help.`,
+      );
+    }
+    const command = commandName as Command;
+    const specific = optionsFor(command);
+    const { values, positionals } = parseArgs({
+      args: argv,
+      allowPositionals: true,
+      options: { ...COMMON_OPTIONS, ...specific },
+    });
+    if (values.help) {
+      process.stdout.write(
+        json ? `${JSON.stringify({ ok: true, cliVersion, command, help: USAGE })}\n` : USAGE,
+      );
+      return;
+    }
+    const outcome = {
+      ok: true,
+      cliVersion,
+      command,
+      ...(await runCommand(command, positionals, values)),
+    };
+    process.stdout.write(`${JSON.stringify(outcome, null, json ? undefined : 2)}\n`);
+  } catch (cause) {
+    const code = failureCode(cause);
+    const message = cause instanceof Error ? cause.message : String(cause);
+    const failure = {
+      ok: false,
+      cliVersion,
+      command: commandName,
+      error: { code, message },
+      ...(cause instanceof CliError ? cause.details : {}),
+    };
+    if (json) {
+      process.stdout.write(`${JSON.stringify(failure)}\n`);
+    }
+    console.error(`[svgent] ${code}: ${message}`);
+    process.exitCode = 1;
   }
 }
-
-main().catch((cause: unknown) => {
-  console.error(`[svgent] ${cause instanceof Error ? cause.message : String(cause)}`);
-  process.exit(1);
-});
+await main();

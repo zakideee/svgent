@@ -102,15 +102,30 @@ MP4 は WebCodecs H.264 encoder を持つブラウザでのみ書き出せます
 書き出します。その間、人はステージで手直しできます。読み込んだ台本の名前・パス・ホストは、既定で架空のものに
 置き換えます。詳しくは [apps/webmcp/README.md](apps/webmcp/README.md) を参照してください。
 
-## CLIレンダリング
+## エージェントに制作を頼む
 
-UI を開かずに、台本 JSON から直接アーティファクトを生成できます:
+svgentのskillを一度導入すると、普段のエージェントに会話の台本作成、演出、確認、局所修正、書き出しを頼めます。
 
 ```bash
-pnpm render examples/logo-motion.json --out render-out --formats poster-svg,poster-png
+npx skills add zakideee/svgent --skill svgent
 ```
 
-対応フォーマットは poster-svg / animated-svg / poster-png / poster-webp / animated-webp / gif / mp4 / transcript-svg / transcript-png です。transcript はスクロールなしで会話全体を書き出します。animated-svg / animated-webp / gif はループ再生で書き出します。`--svg-play once` を渡すと animated-svg は 1 回再生になり、最後のフレームで止まります。MP4 にはローカルの ffmpeg が必要で、`FFMPEG_PATH` で `PATH` 上の実行ファイルを上書きできます。
+Node.js 20以上と、CLI実行・画像閲覧に対応したエージェントを使います。skillは固定CLI版のguideを読み、ローカルにプレビューと書き出したファイルを作ります。Studioを開く必要はありません。導入時はネットワークを使います。installerのtelemetryはinstallerの設定に従います。
+
+## CLIで書き出す
+
+JSONの台本を直接書き出せます。
+
+```bash
+npx --yes --package @svgent/cli@0.1.0 svgent guide --json
+npx --yes --package @svgent/cli@0.1.0 svgent render script.json --out out --formats poster-png,animated-svg --strict --json
+```
+
+`guide`は台本の仕様、プリセット、`validate` / `inspect` / `snapshot` / `direct` / `patch` / `fit` / `render`の制作手順を返します。`--json`はstdoutへ一つの結果を返します。進捗はstderrへ出します。編集は別ファイルへ保存します。既存ファイルの更新には`inspect`が返すsource hashが必要です。[CLIの説明](packages/cli/README.md)も参照できます。
+
+このrepositoryでは、`pnpm render examples/logo-motion.json --out render-out --formats poster-svg,poster-png`で同じrenderコマンドを呼びます。
+
+対応フォーマットは poster-svg / animated-svg / poster-png / poster-webp / animated-webp / gif / mp4 / transcript-svg / transcript-png です。transcript はスクロールなしで会話全体を書き出します。animated-svg / animated-webp / gif はループ再生で書き出します。`--svg-play once` を渡すと animated-svg は1回再生になり、最後のフレームで止まります。MP4にはローカルのffmpegが必要です。`FFMPEG_PATH`で`PATH`上の実行ファイルを選べます。fontsとWASM runtimeは同梱します。Google Fontsの取得には`--allow-font-fetch`が必要です。台本の文字がGoogle Fontsへ送られます。
 
 ### ページに置くとき
 

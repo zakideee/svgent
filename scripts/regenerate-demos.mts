@@ -164,6 +164,7 @@ async function renderInto(outDir: string): Promise<void> {
   for (const job of JOBS) {
     const args = [
       "packages/cli/dist/bin.js",
+      "render",
       `${job.dir ?? "examples"}/${job.script}.json`,
       "--out",
       path.join(outDir, job.target ?? "demo"),

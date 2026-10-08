@@ -138,15 +138,20 @@ importers:
       '@boundsvg/core':
         specifier: 0.7.0
         version: 0.7.0
+    devDependencies:
       '@svgent/assets':
         specifier: workspace:*
         version: link:../assets
+      '@svgent/authoring':
+        specifier: workspace:*
+        version: link:../authoring
       '@svgent/render':
         specifier: workspace:*
         version: link:../render
       '@svgent/scene':
         specifier: workspace:*
         version: link:../scene
+    publishDirectory: package
 
   packages/render:
     dependencies:

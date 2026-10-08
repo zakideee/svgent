@@ -239,6 +239,7 @@ async function main(): Promise<void> {
       [
         "exec",
         "svgent",
+        "render",
         "logo-motion.json",
         "--out",
         "rendered",

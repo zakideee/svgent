@@ -43,7 +43,6 @@ Unless the person says otherwise, the agent treats what it knows from the conver
 apps/webmcp/src
   App.tsx        the page: studio + agent rail
   tools.ts       the WebMCP tools
-  direction.ts   scene and camera direction shared by tools and chips
   privacy.ts     the privacy default, the script allowlist, every word, sensitive hints
   showcase.ts    the showcase scripts
   ids.ts, dev-shim.ts, webmcp.d.ts   small helpers and the WebMCP typings

@@ -10,11 +10,19 @@
  */
 
 import {
+  applyCameraDirection,
+  applySceneDirection,
   applyScenePatch,
+  CAMERA_STYLES,
+  type CameraDirection,
+  DIRECTION_CHOICES,
+  FLOWS,
   fitSceneDuration,
   type PatchChange,
   parseScenePatchOperations,
   reviewSceneAnimation,
+  type SceneDirection,
+  SURFACES,
 } from "@svgent/authoring";
 import {
   buildScriptPrompt,
@@ -27,16 +35,6 @@ import {
   serializeProject,
 } from "@svgent/scene";
 import type { StudioExportResult, StudioHandle } from "@svgent/studio";
-import {
-  applyCameraDirection,
-  applySceneDirection,
-  CAMERA_STYLES,
-  type CameraDirection,
-  DIRECTION_CHOICES,
-  FLOWS,
-  type SceneDirection,
-  SURFACES,
-} from "./direction.js";
 import { mintId } from "./ids.js";
 import {
   PRIVACY_DEFAULT,
@@ -231,7 +229,7 @@ const PATCH_OPERATION_SCHEMA = {
   minItems: 1,
   maxItems: 24,
   description:
-    'Operations from the studio\'s patch vocabulary. Each is one of: {"op":"set-message-timing","messageId":string,"changes":{"durationMs"?:number|null,"pauseBeforeMs"?:number|null,"transitionMs"?:number|null}} · {"op":"set-message-content","messageId":string,"content":string} · {"op":"set-message-page-break","messageId":string,"value":boolean} · {"op":"set-project-timing","changes":{"userTypingCps"?,"agentTypingCps"?,"thinkingMs"?,"toolRunMs"?,"imageGenMs"?,"permissionMs"?,"transitionMs"?,"finalHoldMs"?}} · {"op":"set-appearance","changes":{"theme"?,"canvasWidth"?,"canvasHeight"?,"transparentCanvas"?,"background"?,"accent"?,"userBubbleColor"?,"backdrop"?,"fontScale"?,"chromeScale"?,"spacingScale"?,"contentAlign"?,"messageAlign"?,"assistantSurface"?}}. Call list_presets for the allowed enum values and ranges.',
+    'Operations from the studio\'s patch vocabulary. Each is one of: {"op":"set-message-timing","messageId":string,"changes":{"durationMs"?:number|null,"pauseBeforeMs"?:number|null,"transitionMs"?:number|null}} · {"op":"set-message-content","messageId":string,"content":string} · {"op":"set-message-page-break","messageId":string,"value":boolean} · {"op":"set-project-timing","changes":{"userTypingCps"?,"agentTypingCps"?,"reactionMs"?,"thinkingMs"?,"toolRunMs"?,"imageGenMs"?,"permissionMs"?,"transitionMs"?,"finalHoldMs"?}} · {"op":"set-appearance","changes":{"theme"?,"canvasWidth"?,"canvasHeight"?,"transparentCanvas"?,"background"?,"accent"?,"userBubbleColor"?,"backdrop"?,"fontScale"?,"chromeScale"?,"spacingScale"?,"contentAlign"?,"messageAlign"?,"assistantSurface"?}}. Call list_presets for the allowed enum values and ranges.',
   items: { type: "object" },
 } as const;
 

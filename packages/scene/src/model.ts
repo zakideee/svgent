@@ -1813,7 +1813,8 @@ function readImage(value: unknown, warn: () => void): AttachedImage | undefined 
   };
 }
 
-const MESSAGE_ROLES: readonly MessageRole[] = [
+/** Roles that the importer and authoring guide accept. */
+export const MESSAGE_ROLES: readonly MessageRole[] = [
   "user",
   "thinking",
   "tool",

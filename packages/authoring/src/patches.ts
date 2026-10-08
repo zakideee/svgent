@@ -109,6 +109,7 @@ const MESSAGE_TIMING_KEYS = ["durationMs", "pauseBeforeMs", "transitionMs"] as c
 const PROJECT_TIMING_KEYS = [
   "userTypingCps",
   "agentTypingCps",
+  "reactionMs",
   "thinkingMs",
   "toolRunMs",
   "imageGenMs",
@@ -297,6 +298,17 @@ function readMessageId(value: unknown): string {
 function parsePatchOperation(value: unknown): ScenePatchOperation {
   if (!isRecord(value) || typeof value.op !== "string") {
     throw new Error("Every patch operation must be an object with an op field");
+  }
+  const fields: Record<string, readonly string[]> = {
+    "set-message-timing": ["op", "messageId", "changes"],
+    "set-message-content": ["op", "messageId", "content"],
+    "set-message-page-break": ["op", "messageId", "value"],
+    "set-project-timing": ["op", "changes"],
+    "set-appearance": ["op", "changes"],
+  };
+  const allowed = fields[value.op];
+  if (allowed) {
+    assertOnlyKeys(value, allowed, value.op);
   }
   switch (value.op) {
     case "set-message-timing":

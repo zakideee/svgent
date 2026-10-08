@@ -255,6 +255,8 @@ export function renderArtifact(
          * and cannot share a document.
          */
         asTranscript?: boolean;
+        /** Moment to capture for a static artifact; defaults to the final frame. */
+        timeMs?: number;
       },
 ): Uint8Array | string {
   const {
@@ -264,6 +266,7 @@ export function renderArtifact(
     onResolutionAdjusted,
     identifierNamespace,
     asTranscript,
+    timeMs,
   } = typeof request === "string"
     ? {
         kind: request,
@@ -272,6 +275,7 @@ export function renderArtifact(
         onResolutionAdjusted: undefined,
         identifierNamespace: undefined,
         asTranscript: undefined,
+        timeMs: undefined,
       }
     : request;
   assertRenderableScene(scene);
@@ -292,7 +296,7 @@ export function renderArtifact(
   switch (kind) {
     case "poster-svg":
       return engine.renderToSvg(scene.vnode, {
-        timeMs: scene.durationMs,
+        timeMs: timeMs ?? scene.durationMs,
         resourceIdPrefix: resourceIdPrefix(
           scene,
           asTranscript === true ? "transcript-poster" : "poster",
@@ -318,7 +322,7 @@ export function renderArtifact(
     case "poster-png":
       return stampPngProvenance(
         engine.renderToPng(scene.vnode, {
-          timeMs: scene.durationMs,
+          timeMs: timeMs ?? scene.durationMs,
           generator,
           ...scale,
         }),
@@ -327,7 +331,7 @@ export function renderArtifact(
     case "poster-webp":
       return stampWebpProvenance(
         engine.renderToWebp(scene.vnode, {
-          timeMs: scene.durationMs,
+          timeMs: timeMs ?? scene.durationMs,
           generator,
           ...scale,
         }),

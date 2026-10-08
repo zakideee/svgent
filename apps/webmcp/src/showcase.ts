@@ -6,6 +6,7 @@
  * and directs from there.
  */
 
+import { applySceneDirection, type SceneDirection } from "@svgent/authoring";
 import { deserializeProject, type SvgentProject } from "@svgent/scene";
 import appImage from "../scripts/app-image.json";
 import approvalsSlides from "../scripts/approvals-slides.json";
@@ -14,7 +15,6 @@ import jaTuiZoom from "../scripts/ja-ime.json";
 import mcpReadme from "../scripts/mcp-readme.json";
 import shareSafely from "../scripts/share-safely.json";
 import heroTuiZoom from "../scripts/terminal-camera.json";
-import { applySceneDirection, type SceneDirection } from "./direction.js";
 
 type Showcase = {
   id: string;

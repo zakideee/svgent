@@ -1,8 +1,7 @@
 {
   "name": "@svgent/cli",
   "version": "0.1.0",
-  "private": true,
-  "description": "Headless Node CLI for rendering svgent scripts",
+  "description": "Create, inspect, edit, and render authored svgent scripts locally",
   "license": "MIT OR Apache-2.0",
   "repository": {
     "type": "git",
@@ -13,32 +12,36 @@
   "bin": {
     "svgent": "./dist/bin.js"
   },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./internal/*": null
-  },
   "files": [
     "dist",
+    "fonts",
+    "runtime",
+    "licenses",
+    "README.md",
     "LICENSE-MIT",
     "LICENSE-APACHE"
   ],
-  "sideEffects": false,
   "scripts": {
-    "build": "tsup src/index.ts src/bin.mts --format esm --dts --sourcemap --clean",
-    "render": "node dist/bin.js",
+    "build": "tsup && tsx scripts/copy-assets.mts",
+    "render": "node dist/bin.js render",
     "test": "vitest run --root ../.. packages/cli/tests",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@boundsvg/core": "0.7.0",
-    "@svgent/assets": "workspace:*",
-    "@svgent/render": "workspace:*",
-    "@svgent/scene": "workspace:*"
+    "@boundsvg/core": "0.7.0"
   },
   "engines": {
     "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "package",
+    "linkDirectory": false
+  },
+  "devDependencies": {
+    "@svgent/assets": "workspace:*",
+    "@svgent/render": "workspace:*",
+    "@svgent/scene": "workspace:*",
+    "@svgent/authoring": "workspace:*"
   }
 }
