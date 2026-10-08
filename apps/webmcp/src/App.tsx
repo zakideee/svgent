@@ -1,3 +1,12 @@
+import {
+  applyCameraDirection,
+  applySceneDirection,
+  CAMERA_STYLES,
+  type CameraDirection,
+  DIRECTION_CHOICES,
+  locateMessage,
+  type SceneDirection,
+} from "@svgent/authoring";
 import { defaultProjectFor, type SvgentProject } from "@svgent/scene";
 import {
   Studio,
@@ -7,15 +16,6 @@ import {
 } from "@svgent/studio";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { version } from "../package.json";
-import {
-  applyCameraDirection,
-  applySceneDirection,
-  CAMERA_STYLES,
-  type CameraDirection,
-  DIRECTION_CHOICES,
-  locateMessage,
-  type SceneDirection,
-} from "./direction.js";
 import { mintId } from "./ids.js";
 import {
   collectRenderedText,

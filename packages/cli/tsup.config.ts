@@ -1,8 +1,8 @@
 import { defineConfig } from "tsup";
 
-// Published source maps carry locations only, not embedded source text.
 export default defineConfig({
-  esbuildOptions(options) {
-    options.sourcesContent = false;
-  },
+  entry: ["src/bin.mts"],
+  format: ["esm"],
+  clean: true,
+  noExternal: [/^@svgent\//u, "marked", "character-entities", "prismjs", "unicode-segmenter"],
 });

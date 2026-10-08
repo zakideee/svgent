@@ -1,3 +1,13 @@
+export type { CameraDirection, SceneDirection } from "./direction.js";
+export {
+  applyCameraDirection,
+  applySceneDirection,
+  CAMERA_STYLES,
+  DIRECTION_CHOICES,
+  FLOWS,
+  locateMessage,
+  SURFACES,
+} from "./direction.js";
 export type { PatchProposal } from "./draft-store.js";
 export { DraftStore } from "./draft-store.js";
 export { fitSceneDuration } from "./fit-duration.js";

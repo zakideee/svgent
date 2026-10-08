@@ -112,15 +112,30 @@ script, directs the scene and the camera, and exports, while you keep editing on
 paths, and hosts in a loaded script are fictionalized by default. See
 [apps/webmcp/README.md](apps/webmcp/README.md).
 
-## CLI rendering
+## Create with an agent
 
-Generate artifacts directly from a JSON script without opening the UI:
+Install the svgent skill once, then ask your usual agent to write, stage, preview, revise, and export a conversation:
 
 ```bash
-pnpm render examples/logo-motion.json --out render-out --formats poster-svg,poster-png
+npx skills add zakideee/svgent --skill svgent
 ```
 
-Supported formats are poster-svg, animated-svg, poster-png, poster-webp, animated-webp, gif, mp4, transcript-svg, and transcript-png. Transcript exports include the entire conversation without scrolling. Animated SVG, animated WebP, and GIF loop; `--svg-play once` renders the animated SVG as a single play that rests on its final frame. MP4 requires local ffmpeg; `FFMPEG_PATH` can override the executable found on `PATH`.
+Use an agent that can execute local commands and read images, with Node.js 20 or newer. The skill reads the fixed CLI version's authoring guide and produces local preview and export files. Studio is optional. Installation uses the network; the skill installer controls its own telemetry.
+
+## CLI rendering
+
+Render a JSON script directly:
+
+```bash
+npx --yes --package @svgent/cli@0.1.0 svgent guide --json
+npx --yes --package @svgent/cli@0.1.0 svgent render script.json --out out --formats poster-png,animated-svg --strict --json
+```
+
+`guide` describes the schema, presets, and workflow for `validate`, `inspect`, `snapshot`, `direct`, `patch`, `fit`, and `render`. `--json` returns one result on stdout, with progress on stderr. Edits save a new file by default; in-place updates require the source hash from `inspect`. See [the CLI documentation](packages/cli/README.md).
+
+From this repository, `pnpm render examples/logo-motion.json --out render-out --formats poster-svg,poster-png` calls the same render command.
+
+Supported formats are poster-svg, animated-svg, poster-png, poster-webp, animated-webp, gif, mp4, transcript-svg, and transcript-png. Transcript exports include the entire conversation without scrolling. Animated SVG, animated WebP, and GIF loop; `--svg-play once` renders the animated SVG as a single play that rests on its final frame. MP4 requires local ffmpeg; `FFMPEG_PATH` can override the executable found on `PATH`. Fonts and the WASM runtime are bundled. Google Fonts fetching requires `--allow-font-fetch` and sends the script's characters to Google Fonts.
 
 ### Putting an SVG on a page
 

@@ -43,6 +43,7 @@ describe("a script that names a Google font", () => {
     // what catches it.
     const { stderr } = await run(process.execPath, [
       binPath,
+      "render",
       scriptPath,
       "--out",
       path.join(dir, "out"),

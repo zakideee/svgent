@@ -1,0 +1,54 @@
+name: CLI consumer
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cli-consumer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  consumer:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [20, 24]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm build:packages
+      - name: Installed CLI consumer
+        run: pnpm exec tsx scripts/check-cli-consumer.mts --output "${{ runner.temp }}/cli-consumer"
+      - name: PowerShell npx and missing ffmpeg
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          CONSUMER_ROOT: ${{ runner.temp }}/cli-consumer/consumer
+        run: |
+          Set-Location $env:CONSUMER_ROOT
+          npx --no-install svgent render app-en.json --out powershell --formats poster-png,animated-svg --scale 0.5 --strict --json
+          if ($LASTEXITCODE -ne 0) { throw 'PowerShell npx failed' }
+          Copy-Item app-en.json app-en-01.SVG
+          $sourceHash = (Get-FileHash app-en-01.SVG).Hash
+          $collision = npx --no-install svgent render app-en.json app-en-01.SVG --out . --formats poster-svg --json | ConvertFrom-Json
+          if ($LASTEXITCODE -eq 0 -or $collision.error.code -ne 'INVALID_OUTPUT') { throw 'Case-insensitive input collision did not fail' }
+          if ((Get-FileHash app-en-01.SVG).Hash -ne $sourceHash) { throw 'Input changed through a case-insensitive artifact path' }
+          $env:FFMPEG_PATH = Join-Path $env:CONSUMER_ROOT 'missing-ffmpeg'
+          $failure = npx --no-install svgent render app-en.json --formats mp4 --json | ConvertFrom-Json
+          if ($LASTEXITCODE -eq 0 -or $failure.error.code -ne 'FFMPEG_UNAVAILABLE') { throw 'Missing ffmpeg did not fail' }
+          exit 0

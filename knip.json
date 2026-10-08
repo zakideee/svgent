@@ -18,8 +18,8 @@
       "project": ["src/**/*.ts", "tests/**/*.ts"]
     },
     "packages/cli": {
-      "entry": ["src/index.ts", "src/bin.mts", "tests/**/*.test.ts"],
-      "project": ["src/**/*.{ts,mts}", "tests/**/*.ts"]
+      "entry": ["src/bin.mts", "scripts/*.mts", "tests/**/*.test.ts"],
+      "project": ["src/**/*.{ts,mts}", "scripts/*.mts", "tests/**/*.ts"]
     },
     "packages/render": {
       "entry": ["src/index.ts", "tests/**/*.test.ts"],

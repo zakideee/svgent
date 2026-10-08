@@ -23,18 +23,18 @@
   "scripts": {
     "postinstall": "node scripts/install-git-hooks.mjs",
     "dev": "pnpm build:packages && pnpm --parallel --stream --filter @svgent/assets --filter @svgent/scene --filter @svgent/render --filter @svgent/studio --filter @svgent/studio-app dev",
-    "build:packages": "pnpm --filter './packages/**' build",
+    "build:packages": "pnpm --filter \"./packages/**\" --fail-if-no-match build",
     "build": "pnpm build:packages && pnpm --filter @svgent/studio-app build && pnpm --filter @svgent/webmcp-app build",
     "deploy:check": "pnpm build && pnpm --filter @svgent/studio-app deploy:dry-run",
     "preview": "pnpm --filter @svgent/studio-app preview",
     "test": "pnpm build:packages && pnpm test:packages && pnpm test:integration",
-    "test:packages": "pnpm --workspace-concurrency=1 --if-present --filter './packages/**' test",
+    "test:packages": "pnpm --workspace-concurrency=1 --if-present --filter \"./packages/**\" --fail-if-no-match test",
     "test:integration": "vitest run tests/integration",
     "test:watch": "vitest",
     "assets:sync": "tsx scripts/sync-generated-assets.mts",
-    "render": "pnpm build:packages && node packages/cli/dist/bin.js",
+    "render": "pnpm build:packages && node packages/cli/dist/bin.js render",
     "demos:regen": "tsx scripts/regenerate-demos.mts",
-    "render:fixtures": "pnpm build:packages && node packages/cli/dist/bin.js fixtures/scripts/*.json --out render-out/fixtures --formats poster-png,animated-svg,transcript-png && tsx scripts/fixture-gallery.mts render-out/fixtures",
+    "render:fixtures": "pnpm build:packages && node packages/cli/dist/bin.js render fixtures/scripts/*.json --out render-out/fixtures --formats poster-png,animated-svg,transcript-png && tsx scripts/fixture-gallery.mts render-out/fixtures",
     "typecheck": "tsc --noEmit && pnpm -r --if-present typecheck",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
@@ -44,7 +44,8 @@
     "licenses:check": "tsx scripts/check-licenses.mts",
     "packages:check": "pnpm build:packages && pnpm packages:contracts",
     "packages:contracts": "tsx scripts/check-package-contracts.mts",
-    "check": "pnpm lint && pnpm format:check && pnpm build:packages && pnpm --filter @svgent/studio-app build && pnpm --filter @svgent/studio-app deploy:dry-run && pnpm --filter @svgent/webmcp-app build && pnpm --filter @svgent/webmcp-app deploy:dry-run && pnpm typecheck && pnpm knip && pnpm licenses:check && pnpm packages:contracts && pnpm test:packages && pnpm test:integration"
+    "check": "pnpm install --frozen-lockfile --ignore-scripts --lockfile-only --offline && pnpm lint && pnpm format:check && pnpm build:packages && pnpm --filter @svgent/studio-app build && pnpm --filter @svgent/studio-app deploy:dry-run && pnpm --filter @svgent/webmcp-app build && pnpm --filter @svgent/webmcp-app deploy:dry-run && pnpm typecheck && pnpm knip && pnpm licenses:check && pnpm packages:contracts && pnpm cli:contracts && pnpm test:packages && pnpm test:integration",
+    "cli:contracts": "tsx scripts/check-cli-consumer.mts"
   },
   "devDependencies": {
     "@svgent/assets": "workspace:*",

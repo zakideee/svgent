@@ -4,7 +4,6 @@
  * both apply a direction the same way and describe it with the same words.
  */
 
-import { applyScenePatch, type PatchChange, type ScenePatchOperation } from "@svgent/authoring";
 import {
   BACKDROP_PRESETS,
   type BackdropId,
@@ -23,11 +22,16 @@ import {
   THEME_PRESETS,
   type ThemeId,
 } from "@svgent/scene";
+import { applyScenePatch, type PatchChange, type ScenePatchOperation } from "./patches.js";
 
+/** Supported physical surfaces. */
 export const SURFACES: readonly SurfaceMode[] = ["app", "tui"];
+/** Supported page flows. */
 export const FLOWS: readonly FlowMode[] = ["scroll", "slides"];
+/** Supported camera timings. */
 export const CAMERA_STYLES: readonly CameraStyle[] = ["anticipate", "sync", "trail"];
 
+/** Scene settings that do not edit message content. */
 export type SceneDirection = {
   surface?: SurfaceMode;
   sizePreset?: string;
@@ -41,6 +45,7 @@ export type SceneDirection = {
   transparentCanvas?: boolean;
 };
 
+/** Camera settings for both surfaces. */
 export type CameraDirection = {
   follow: boolean;
   zoom?: number;
@@ -72,20 +77,9 @@ function presetOrThrow<T extends { id: string }>(
   return found;
 }
 
-export function applySceneDirection(project: SvgentProject, direction: SceneDirection): Directed {
+function applySceneAppearance(project: SvgentProject, direction: SceneDirection): Directed {
   let current = project;
   const changes: PatchChange[] = [];
-
-  if (direction.surface !== undefined) {
-    if (!SURFACES.includes(direction.surface)) {
-      throw new Error(`surface must be one of ${SURFACES.join(", ")}`);
-    }
-    if (current.surface !== direction.surface) {
-      changes.push(change("surface", current.surface, direction.surface));
-      current = { ...current, surface: direction.surface };
-    }
-  }
-
   const appearance: Record<string, unknown> = {};
   if (direction.theme !== undefined) {
     presetOrThrow(THEME_PRESETS, direction.theme, "theme");
@@ -120,6 +114,28 @@ export function applySceneDirection(project: SvgentProject, direction: SceneDire
     changes.push(...applied.changes);
   }
 
+  return { project: current, changes };
+}
+
+/** Apply scene presets while preserving message content. */
+export function applySceneDirection(project: SvgentProject, direction: SceneDirection): Directed {
+  let current = project;
+  const changes: PatchChange[] = [];
+
+  if (direction.surface !== undefined) {
+    if (!SURFACES.includes(direction.surface)) {
+      throw new Error(`surface must be one of ${SURFACES.join(", ")}`);
+    }
+    if (current.surface !== direction.surface) {
+      changes.push(change("surface", current.surface, direction.surface));
+      current = { ...current, surface: direction.surface };
+    }
+  }
+
+  const staged = applySceneAppearance(current, direction);
+  current = staged.project;
+  changes.push(...staged.changes);
+
   if (direction.displayPreset !== undefined) {
     const preset = presetOrThrow(DISPLAY_PRESETS, direction.displayPreset, "display preset");
     const { display, ...rest } = preset.apply;
@@ -132,7 +148,16 @@ export function applySceneDirection(project: SvgentProject, direction: SceneDire
     current = next;
   }
 
-  if (direction.flow !== undefined || direction.messagesPerPage !== undefined) {
+  const paged = applyPageDirection(current, direction);
+  return { project: paged.project, changes: [...changes, ...paged.changes] };
+}
+
+function applyPageDirection(project: SvgentProject, direction: SceneDirection): Directed {
+  let current = project;
+  const changes: PatchChange[] = [];
+  const pageDirectionRequested =
+    direction.flow !== undefined || direction.messagesPerPage !== undefined;
+  if (pageDirectionRequested) {
     const flow = direction.flow ?? current.pagination.flow;
     if (!FLOWS.includes(flow)) {
       throw new Error(`flow must be one of ${FLOWS.join(", ")}`);
@@ -155,6 +180,7 @@ export function applySceneDirection(project: SvgentProject, direction: SceneDire
   return { project: current, changes };
 }
 
+/** Apply camera settings and report their changes. */
 export function applyCameraDirection(project: SvgentProject, direction: CameraDirection): Directed {
   const zoom = direction.zoom ?? project.camera.zoom;
   if (!Number.isFinite(zoom) || zoom < CAMERA_ZOOM_MIN || zoom > CAMERA_ZOOM_MAX) {
@@ -200,6 +226,7 @@ export function locateMessage(
   return null;
 }
 
+/** Available direction presets and bounds. */
 export const DIRECTION_CHOICES = {
   themes: THEME_PRESETS.map(({ id, label, background, accent }) => ({
     id,

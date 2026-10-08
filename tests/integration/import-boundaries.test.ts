@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 type PackageManifest = {
   dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
 };
 
@@ -13,7 +14,7 @@ const ALLOWED_WORKSPACE_DEPS: Record<string, readonly string[]> = {
   "packages/render": ["@svgent/scene"],
   "packages/authoring": ["@svgent/scene"],
   "packages/studio": ["@svgent/assets", "@svgent/render", "@svgent/scene"],
-  "packages/cli": ["@svgent/assets", "@svgent/render", "@svgent/scene"],
+  "packages/cli": ["@svgent/assets", "@svgent/authoring", "@svgent/render", "@svgent/scene"],
   "apps/studio": ["@svgent/studio"],
   "apps/webmcp": ["@svgent/authoring", "@svgent/scene", "@svgent/studio"],
 };
@@ -36,6 +37,7 @@ describe("workspace import boundaries", () => {
       ) as PackageManifest;
       const declared = {
         ...manifest.dependencies,
+        ...(workspace === "packages/cli" ? manifest.devDependencies : {}),
         ...manifest.peerDependencies,
       };
       const svgentDependencies = Object.keys(declared)

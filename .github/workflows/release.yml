@@ -1,0 +1,150 @@
+name: Release CLI
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        required: true
+        options: [npm-cli]
+      release-commit:
+        description: Full approved public main commit
+        type: string
+        required: true
+      source-tree:
+        description: Approved source tree
+        type: string
+        required: true
+      tarball-sha256:
+        description: SHA-256 of the approved packed CLI
+        type: string
+        required: true
+      settings-confirmed:
+        description: Maintainer confirmed the current source and publication settings
+        type: boolean
+        required: true
+        default: false
+      auth-mode:
+        description: Publication authentication
+        type: choice
+        required: true
+        default: oidc
+        options: [oidc, bootstrap]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-cli-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-id: ${{ steps.artifact.outputs.artifact-id }}
+    permissions:
+      contents: read
+      actions: read
+      checks: read
+      deployments: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - name: Verify npm version
+        run: test "$(npm --version)" = "11.19.0"
+      - name: Verify source and checks
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/verify-cli-release.mts
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Check workspace
+        run: pnpm check
+      - name: Pack CLI
+        env:
+          ARTIFACT_ROOT: ${{ runner.temp }}/cli-release
+        run: |
+          mkdir -p "$ARTIFACT_ROOT"
+          pnpm --filter @svgent/cli pack --pack-destination "$ARTIFACT_ROOT"
+      - name: Verify tarball and consumer
+        env:
+          ARTIFACT_ROOT: ${{ runner.temp }}/cli-release
+          EXPECTED_SHA256: ${{ inputs.tarball-sha256 }}
+        run: |
+          [[ "$EXPECTED_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          echo "$EXPECTED_SHA256  $ARTIFACT_ROOT/svgent-cli-0.1.0.tgz" | sha256sum --check --strict
+          pnpm exec tsx scripts/check-cli-consumer.mts --tarball "$ARTIFACT_ROOT/svgent-cli-0.1.0.tgz"
+      - name: Verify current source and checks
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/verify-cli-release.mts
+      - name: Preserve verified CLI
+        id: artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: cli-release-${{ github.sha }}
+          path: ${{ runner.temp }}/cli-release/svgent-cli-0.1.0.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: prepare
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      actions: read
+      checks: read
+      deployments: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.21.0
+          package-manager-cache: false
+      - name: Verify npm version
+        run: test "$(npm --version)" = "11.19.0"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.prepare.outputs.artifact-id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/cli-release
+      - name: Verify tarball identity
+        env:
+          ARTIFACT_ROOT: ${{ runner.temp }}/cli-release
+          EXPECTED_SHA256: ${{ inputs.tarball-sha256 }}
+        run: |
+          [[ "$EXPECTED_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          echo "$EXPECTED_SHA256  $ARTIFACT_ROOT/svgent-cli-0.1.0.tgz" | sha256sum --check --strict
+      - name: Verify current source and checks
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/verify-cli-release.mts
+      - name: Publish with OIDC
+        if: inputs.auth-mode == 'oidc'
+        env:
+          ARTIFACT_ROOT: ${{ runner.temp }}/cli-release
+          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/npm-oidc-config
+        run: |
+          unset NODE_AUTH_TOKEN NPM_TOKEN NPM_CONFIG_TOKEN npm_config_token
+          printf 'registry=https://registry.npmjs.org/\n' > "$NPM_CONFIG_USERCONFIG"
+          npm publish "$ARTIFACT_ROOT/svgent-cli-0.1.0.tgz" --access public --provenance --ignore-scripts --registry https://registry.npmjs.org/
+      - name: Publish first version
+        if: inputs.auth-mode == 'bootstrap'
+        env:
+          ARTIFACT_ROOT: ${{ runner.temp }}/cli-release
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_BOOTSTRAP_TOKEN }}
+          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/npm-bootstrap-config
+        run: |
+          test -n "$NODE_AUTH_TOKEN"
+          printf 'registry=https://registry.npmjs.org/\n//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}\n' > "$NPM_CONFIG_USERCONFIG"
+          npm publish "$ARTIFACT_ROOT/svgent-cli-0.1.0.tgz" --access public --provenance --ignore-scripts --registry https://registry.npmjs.org/

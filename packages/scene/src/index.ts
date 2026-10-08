@@ -181,6 +181,7 @@ export {
   MAX_MESSAGE_CHARS,
   MAX_MESSAGE_IMAGES,
   MAX_MESSAGES,
+  MESSAGE_ROLES,
   MESSAGE_TIMING_LIMITS,
   messageIdToken,
   modelLabelIssue,
