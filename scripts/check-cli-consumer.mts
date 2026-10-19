@@ -142,7 +142,7 @@ try {
     manifest.devDependencies !== undefined ||
     manifest.scripts !== undefined ||
     Object.keys(manifest.dependencies).some((name) => name.startsWith("@svgent/")) ||
-    manifest.dependencies["@boundsvg/core"] !== "0.7.0"
+    manifest.dependencies["@boundsvg/core"] !== "0.9.0"
   ) {
     throw new Error("CLI retained a workspace runtime dependency or JS API");
   }

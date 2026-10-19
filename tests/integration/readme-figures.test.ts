@@ -21,7 +21,7 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.md",
-    claim: "animated SVG (1.40 MB)",
+    claim: "animated SVG (1.39 MB)",
     artifact: `${DEMO_DIR}/readme-en-tui-dark-01.animated.svg`,
   },
   {
@@ -51,7 +51,7 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.md",
-    claim: "animated SVG (1.19 MB)",
+    claim: "animated SVG (1.18 MB)",
     artifact: `${DEMO_DIR}/readme-en-app-zoom-01.animated.svg`,
   },
   {
@@ -66,22 +66,22 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.ja.md",
-    claim: "animated SVG (1.86 MB)",
+    claim: "animated SVG (1.83 MB)",
     artifact: `${DEMO_DIR}/readme-tui-dark-01.animated.svg`,
   },
   {
     file: "README.ja.md",
-    claim: "animated WebP (13.91 MB)",
+    claim: "animated WebP (13.92 MB)",
     artifact: `${DEMO_DIR}/readme-tui-dark-01.animated.webp`,
   },
   {
     file: "README.ja.md",
-    claim: "MP4 (26.8秒、0.23 MB)",
+    claim: "MP4 (26.8秒、0.24 MB)",
     artifact: `${DEMO_DIR}/readme-tui-dark-01.mp4`,
   },
   {
     file: "README.ja.md",
-    claim: "animated SVG (1.36 MB)",
+    claim: "animated SVG (1.34 MB)",
     artifact: `${DEMO_DIR}/readme-app-image-01.animated.svg`,
   },
   {
@@ -96,7 +96,7 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.ja.md",
-    claim: "animated SVG (1.36 MB)",
+    claim: "animated SVG (1.35 MB)",
     artifact: `${DEMO_DIR}/readme-tui-zoom-01.animated.svg`,
   },
   {
