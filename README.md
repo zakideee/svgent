@@ -36,7 +36,7 @@ Displayed format: transcript SVG (0.39 MB) · [Script](examples/readme-english.j
 
 Contents: user input, thinking, tool execution, Markdown, TypeScript syntax highlighting, a choice, and an approval UI
 
-Displayed format: animated SVG (1.40 MB) · [Animated WebP (13.66 MB)](assets/readme/demo/readme-en-tui-dark-01.animated.webp) · [MP4 (28.4 seconds, 0.23 MB)](assets/readme/demo/readme-en-tui-dark-01.mp4) · [Script](examples/readme-en-tui-dark.json)
+Displayed format: animated SVG (1.39 MB) · [Animated WebP (13.66 MB)](assets/readme/demo/readme-en-tui-dark-01.animated.webp) · [MP4 (28.4 seconds, 0.23 MB)](assets/readme/demo/readme-en-tui-dark-01.mp4) · [Script](examples/readme-en-tui-dark.json)
 
 ### App — From a choice to image generation
 
@@ -58,7 +58,7 @@ The camera is planned from the timeline and the measured geometry before renderi
 
 Contents: a choice answered in freeform text instead of a pick, an _Allow always_ approval, and the `sweep` generating skeleton over an `ember` window on a `peach` canvas
 
-Displayed format: animated SVG (1.19 MB) · [Script](examples/readme-en-app-zoom.json) · [Generated image](packages/studio/assets/presets/generic-generated-result.webp)
+Displayed format: animated SVG (1.18 MB) · [Script](examples/readme-en-app-zoom.json) · [Generated image](packages/studio/assets/presets/generic-generated-result.webp)
 
 ### Still image and full transcript
 
