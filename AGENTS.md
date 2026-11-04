@@ -77,8 +77,8 @@ another workspace's `src/` tree or move shared scene/render logic into a runtime
   capture — and records `model-kind` as the declared basis. Never weaken or bypass this provenance
   stamping.
 - Keep svgent's own visual identity: never reproduce a real product's pixels, trade dress, or
-  logos on either surface. Model-name text is the only real-product reference an
-  output may contain.
+  logos on either surface. svgent itself uses no real model names, product names, or logos in its
+  UI, samples, or defaults. Names, logos, and screens a user supplies are the user's content.
 - Images remain tab-local Data URLs. Do not add uploads, accounts, server storage, or external asset
   fetching.
 - WebMCP (`apps/webmcp/`) runs in the one direction this boundary allows: the page exposes tools, and
