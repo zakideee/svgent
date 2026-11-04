@@ -21,6 +21,7 @@ import {
   sendMomentMs,
 } from "@svgent/scene";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { bboxesByNode, sourceMeta } from "./inspection-nodes.js";
 
 const VISIBLE = 0.01;
 let engine: Engine;
@@ -93,19 +94,17 @@ type MetaPaint = {
 
 function metaPaint(inspection: SceneInspection, matches: Record<string, string>): MetaPaint[] {
   const found: MetaPaint[] = [];
-  const bboxes = new Map(
-    inspection.bboxes.map((bbox) => [`${bbox.nodeId}\u0000${bbox.type}`, bbox.visualBBox]),
-  );
+  const bboxes = bboxesByNode(inspection);
   const walk = (node: IRNode, inheritedOpacity: number): void => {
     const opacity = inheritedOpacity * (node.type === "group" ? (node.opacity ?? 1) : 1);
+    const meta = sourceMeta(node);
     if (
-      node.type === "group" &&
-      node.meta !== undefined &&
-      Object.entries(matches).every(([key, value]) => node.meta?.[key] === value)
+      meta !== undefined &&
+      Object.entries(matches).every(([key, value]) => meta[key] === value)
     ) {
-      const bbox = bboxes.get(`${node.nodeId}\u0000${node.type}`);
+      const bbox = bboxes.get(node)?.visualBBox;
       found.push({
-        meta: node.meta,
+        meta,
         opacity,
         x: bbox?.x ?? 0,
         y: bbox?.y ?? 0,
@@ -124,7 +123,7 @@ function visibleDraftInk(inspection: SceneInspection, messageId: string): number
   let visible = 0;
   const walk = (node: IRNode, inheritedOpacity: number, inDraft: boolean): void => {
     const opacity = inheritedOpacity * (node.type === "group" ? (node.opacity ?? 1) : 1);
-    const belongs = inDraft || (node.type === "group" && node.meta?.["draft-root"] === messageId);
+    const belongs = inDraft || sourceMeta(node)?.["draft-root"] === messageId;
     if (belongs && node.type === "text" && opacity > VISIBLE) {
       const hasInk = node.lines.some((line) => line.text.trim().length > 0);
       const unitsPaint =

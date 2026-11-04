@@ -26,7 +26,7 @@ All rendered by the CLI from the scripts in [examples/](examples/). The Japanese
 
 Contents: an English request, visible progress, tool activity, an approval step, Markdown, and a TypeScript result
 
-Displayed format: transcript SVG (0.39 MB) · [Script](examples/readme-english.json)
+Displayed format: transcript SVG (0.43 MB) · [Script](examples/readme-english.json)
 
 ### TUI — From implementation research to approval
 
@@ -36,7 +36,7 @@ Displayed format: transcript SVG (0.39 MB) · [Script](examples/readme-english.j
 
 Contents: user input, thinking, tool execution, Markdown, TypeScript syntax highlighting, a choice, and an approval UI
 
-Displayed format: animated SVG (1.39 MB) · [Animated WebP (13.66 MB)](assets/readme/demo/readme-en-tui-dark-01.animated.webp) · [MP4 (28.4 seconds, 0.23 MB)](assets/readme/demo/readme-en-tui-dark-01.mp4) · [Script](examples/readme-en-tui-dark.json)
+Displayed format: animated SVG (1.34 MB) · [Animated WebP (13.66 MB)](assets/readme/demo/readme-en-tui-dark-01.animated.webp) · [MP4 (28.4 seconds, 0.23 MB)](assets/readme/demo/readme-en-tui-dark-01.mp4) · [Script](examples/readme-en-tui-dark.json)
 
 ### App — From a choice to image generation
 

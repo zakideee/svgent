@@ -585,8 +585,10 @@ function taskBox(
       width: sizePx,
       height: sizePx,
       borderRadius: TASK_BOX_RADIUS_PX,
-      borderWidth: TASK_BOX_BORDER_PX,
-      borderColor: checked ? palette.accent : palette.muted,
+      outline: {
+        stroke: checked ? palette.accent : palette.muted,
+        strokeWidth: TASK_BOX_BORDER_PX,
+      },
       ...(checked ? { background: palette.accent } : {}),
     },
     ...(checked

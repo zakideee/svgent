@@ -31,6 +31,7 @@ import {
   userLandingMs,
 } from "@svgent/scene";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { bboxesByNode, sourceMeta } from "./inspection-nodes.js";
 
 const VISIBLE_OPACITY = 0.01;
 /** Reveal moments are fractional milliseconds; sample either side of them. */
@@ -114,20 +115,18 @@ function leafOf(node: IRNode, bbox: InspectionBBox, opacity: number): Leaf {
 
 /** Every painted leaf inside one message, with composed opacity. */
 function messageLeaves(inspection: SceneInspection, messageId: string): Leaf[] {
-  const bboxes = new Map(
-    inspection.bboxes.map((bbox) => [`${bbox.nodeId}\u0000${bbox.type}`, bbox] as const),
-  );
+  const bboxes = bboxesByNode(inspection);
   const leaves: Leaf[] = [];
   const walk = (node: IRNode, inherited: number, inside: boolean): void => {
     const opacity = inherited * (node.type === "group" ? (node.opacity ?? 1) : 1);
-    const within = inside || (node.type === "group" && node.meta?.edit === messageId);
+    const within = inside || sourceMeta(node)?.edit === messageId;
     if (node.type === "group") {
       for (const child of node.children ?? []) {
         walk(child, opacity, within);
       }
       return;
     }
-    const bbox = bboxes.get(`${node.nodeId}\u0000${node.type}`);
+    const bbox = bboxes.get(node);
     if (within && bbox !== undefined) {
       leaves.push(leafOf(node, bbox, opacity));
     }

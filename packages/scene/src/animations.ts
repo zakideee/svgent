@@ -421,13 +421,15 @@ export function appSpinnerRing(accent: string, sizePx: number, spinUntilMs: numb
       width: sizeLeft(sizePx, inset * 2),
       height: sizeLeft(sizePx, inset * 2),
       borderRadius: 999,
-      borderWidth: strokePx,
-      borderColor: accent,
-      // The gap-to-dash proportion is what reads as a spinner, so the
-      // pattern scales with the ring instead of repeating more often on a
-      // larger circumference.
-      strokeDasharray: `${((sizePx - inset * 2) / 14) * 30} ${((sizePx - inset * 2) / 14) * 14}`,
-      strokeLinecap: "round",
+      outline: {
+        stroke: accent,
+        strokeWidth: strokePx,
+        // The gap-to-dash proportion is what reads as a spinner, so the
+        // pattern scales with the ring instead of repeating more often on a
+        // larger circumference.
+        strokeDasharray: `${((sizePx - inset * 2) / 14) * 30} ${((sizePx - inset * 2) / 14) * 14}`,
+        strokeLinecap: "round",
+      },
       // One even spin over the whole window, instead of an infinite 900ms
       // cycle. Every other repeating track here returns to its starting
       // value, but a rotation ends 360 away from where it began — identical

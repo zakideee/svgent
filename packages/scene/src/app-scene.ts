@@ -534,8 +534,7 @@ function appHeaderNodes(layout: {
               width: chromePx(APP_HEADER_ICONS_SIZE),
               height: chromePx(APP_HEADER_ICONS_SIZE),
               borderRadius: chromePx(8),
-              borderWidth: 1,
-              borderColor: chromeBorder,
+              outline: { stroke: chromeBorder, strokeWidth: 1 },
             },
             Box({
               position: "absolute",
@@ -544,8 +543,7 @@ function appHeaderNodes(layout: {
               width: chromePx(16),
               height: chromePx(16),
               borderRadius: chromePx(4),
-              borderWidth: 1.6 * chromeScale,
-              borderColor: chromeMuted,
+              outline: { stroke: chromeMuted, strokeWidth: 1.6 * chromeScale },
             }),
             // The plus sits on whole pixels: 1.8-wide bars at x/y 14.1 shared
             // the icon's centre exactly, but their fractional edges antialias
@@ -577,8 +575,7 @@ function appHeaderNodes(layout: {
               width: chromePx(APP_HEADER_ICONS_SIZE),
               height: chromePx(APP_HEADER_ICONS_SIZE),
               borderRadius: chromePx(8),
-              borderWidth: 1,
-              borderColor: chromeBorder,
+              outline: { stroke: chromeBorder, strokeWidth: 1 },
             },
             Box({
               position: "absolute",
@@ -587,8 +584,7 @@ function appHeaderNodes(layout: {
               width: chromePx(12),
               height: chromePx(12),
               borderRadius: 999,
-              borderWidth: 1.8 * chromeScale,
-              borderColor: chromeMuted,
+              outline: { stroke: chromeMuted, strokeWidth: 1.8 * chromeScale },
             }),
             Box({
               position: "absolute",
@@ -609,8 +605,7 @@ function appHeaderNodes(layout: {
               width: chromePx(APP_HEADER_ICONS_SIZE),
               height: chromePx(APP_HEADER_ICONS_SIZE),
               borderRadius: chromePx(8),
-              borderWidth: 1,
-              borderColor: chromeBorder,
+              outline: { stroke: chromeBorder, strokeWidth: 1 },
             },
             ...[8, 13.8, 19.6].map((top) =>
               Box({
@@ -975,8 +970,7 @@ function appComposerNodes(layout: {
               height: composerBoxHeight,
               borderRadius: chromePx(16),
               background: hexToRgba(palette.panelStrong, messageSurfaceAlpha(project)),
-              borderWidth: 1,
-              borderColor: palette.border,
+              outline: { stroke: palette.border, strokeWidth: 1 },
               meta: { "composer-panel": "base" },
               ...(composerBasePanel ? { animate: composerBasePanel } : {}),
             }),
@@ -1002,8 +996,7 @@ function appComposerNodes(layout: {
                   height: composerBoxHeight + step.extraLines * composerLinePx,
                   borderRadius: chromePx(16),
                   background: hexToRgba(palette.panelStrong, messageSurfaceAlpha(project)),
-                  borderWidth: 1,
-                  borderColor: palette.border,
+                  outline: { stroke: palette.border, strokeWidth: 1 },
                   meta: {
                     "composer-panel": `${timing.message.id}:${stepIndex}`,
                   },
@@ -1229,8 +1222,7 @@ function appComposerNodes(layout: {
                     width: chromePx(24),
                     height: chromePx(24),
                     borderRadius: chromePx(8),
-                    borderWidth: 1.2 * chromeScale,
-                    borderColor: chromeBorder,
+                    outline: { stroke: chromeBorder, strokeWidth: 1.2 * chromeScale },
                   },
                   Box({
                     position: "absolute",
@@ -1256,8 +1248,7 @@ function appComposerNodes(layout: {
                     padding: [chromePx(2), chromePx(9), chromePx(3), chromePx(9)],
                     borderRadius: 999,
                     background: palette.panelSoft,
-                    borderWidth: 1,
-                    borderColor: palette.border,
+                    outline: { stroke: palette.border, strokeWidth: 1 },
                   },
                   Text(
                     {
@@ -1347,8 +1338,10 @@ function appComposerNodes(layout: {
                         width: chromePx(22),
                         height: chromePx(22),
                         borderRadius: 999,
-                        borderWidth: Math.max(0.5, chromePx(1.6)),
-                        borderColor: palette.accent,
+                        outline: {
+                          stroke: palette.accent,
+                          strokeWidth: Math.max(0.5, chromePx(1.6)),
+                        },
                       }),
                       Path({
                         position: "absolute",
@@ -2139,8 +2132,7 @@ export function appScene(
           height: sizeLeft(height, win * 2),
           borderRadius: 18,
           background: hexToRgba(palette.panel, project.appearance.terminalOpacity),
-          borderWidth: 1,
-          borderColor: palette.border,
+          outline: { stroke: palette.border, strokeWidth: 1 },
         }),
         // Border only — the base window box supplies the translucent panel
         // fill, so the header stays as see-through as the rest of the window.
@@ -2153,8 +2145,7 @@ export function appScene(
                 width: winW,
                 height: headerHeight,
                 borderRadius: [18, 18, 0, 0],
-                borderWidth: 1,
-                borderColor: palette.border,
+                outline: { stroke: palette.border, strokeWidth: 1 },
               }),
             ]
           : []),

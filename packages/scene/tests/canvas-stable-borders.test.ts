@@ -28,7 +28,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 type IrNode = {
   type?: string;
-  meta?: Record<string, string>;
+  ownership?: { role: string; meta?: Record<string, string> };
   strokeScaling?: string;
   strokeWidth?: number;
   children?: IrNode[];
@@ -80,7 +80,7 @@ function canvasStableOwners(timeMs: number): Array<string | null> {
   };
   const found: Array<string | null> = [];
   const walk = (node: IrNode, owner: string | null): void => {
-    const meta = node.meta ?? {};
+    const meta = node.ownership?.meta ?? {};
     const next =
       meta.action === "compose-user"
         ? "composer"
@@ -175,10 +175,10 @@ describe("canvas-stable terminal borders", () => {
     // The attribute must not be painted on statically: a viewer without the
     // feature has to fall back to the sampled width, not to a stroke it cannot
     // interpret.
-    expect(svg).not.toMatch(/<rect[^>]*vector-effect=/);
+    expect(svg).not.toMatch(/<(?:rect|path)[^>]*vector-effect=/);
 
-    // Every class the rule names has to reach a real rect that already carries
-    // a fallback width.
+    // Every class the rule names has to reach a real outline path that already
+    // carries a fallback width.
     const classes = [...svg.matchAll(/\.([A-Za-z0-9_\\:.-]*vstroke[A-Za-z0-9_\\:.-]*)\s*\{/g)].map(
       (match) => (match[1] ?? "").replace(/\\/g, ""),
     );
@@ -186,10 +186,10 @@ describe("canvas-stable terminal borders", () => {
     for (const name of classes) {
       const element = svg.match(
         new RegExp(
-          `<rect[^>]*class="[^"]*${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[^"]*"[^>]*>`,
+          `<path[^>]*class="[^"]*${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[^"]*"[^>]*>`,
         ),
       );
-      expect(element, `class ${name} reaches a rect`).not.toBeNull();
+      expect(element, `class ${name} reaches an outline path`).not.toBeNull();
       expect(element?.[0], `class ${name} has a fallback width`).toMatch(/stroke-width="[\d.]+"/);
     }
   });
@@ -205,8 +205,10 @@ describe("canvas-stable terminal borders", () => {
         timeMs,
         skipValidation: true,
       });
-      const rect = svg.match(/<rect[^>]*stroke-width="([\d.]+)"[^>]*>/);
-      return Number(rect?.[1] ?? 0);
+      const frame = svg.match(
+        /<path[^>]*class="[^"]*vstroke[^"]*"[^>]*stroke-width="([\d.]+)"[^>]*>/,
+      );
+      return Number(frame?.[1] ?? 0);
     });
     for (const width of widths) {
       expect(width).toBeGreaterThan(0);

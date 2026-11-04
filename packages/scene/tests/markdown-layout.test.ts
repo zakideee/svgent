@@ -9,13 +9,7 @@
  */
 
 import { readFile } from "node:fs/promises";
-import {
-  createEngineAsync,
-  type Engine,
-  type InspectionBBox,
-  type IRNode,
-  inspectScene,
-} from "@boundsvg/core";
+import { createEngineAsync, type Engine, type IRNode, inspectScene } from "@boundsvg/core";
 import { initNodeWasm } from "@boundsvg/core/node";
 import { BUNDLED_FONT_FILES } from "@svgent/assets";
 import { bundledFontPath } from "@svgent/assets/node";
@@ -30,6 +24,7 @@ import {
   spacePx,
 } from "@svgent/scene";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { bboxesByNode, sourceMeta } from "./inspection-nodes.js";
 
 const SLACK_PX = 1.5;
 
@@ -125,14 +120,12 @@ function settle(project: SvgentProject, messageId: string): Settled {
     skipValidation: true,
     timeMs: scene.durationMs,
   });
-  const bboxes = new Map<string, InspectionBBox>(
-    inspection.bboxes.map((bbox) => [`${bbox.nodeId}\u0000${bbox.type}`, bbox] as const),
-  );
+  const bboxes = bboxesByNode(inspection);
   const leaves: Leaf[] = [];
   let message: Box | undefined;
   const walk = (node: IRNode, inside: boolean): void => {
-    const box = bboxes.get(`${node.nodeId}\u0000${node.type}`)?.visualBBox;
-    const opens = node.type === "group" && node.meta?.edit === messageId;
+    const box = bboxes.get(node)?.visualBBox;
+    const opens = sourceMeta(node)?.edit === messageId;
     if (opens && box !== undefined) {
       message = box;
     }
