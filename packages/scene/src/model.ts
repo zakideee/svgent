@@ -598,10 +598,8 @@ export type DisplaySettings = {
  * What the script claims to be. "fictional" is an invented conversation;
  * "reenactment" is a sanitized summary of a session the author explicitly
  * supplied. The declaration is deliberate opt-in: undeclared scripts are
- * fictional, and only a declared reenactment may carry a real model name —
- * forcing a fictional label onto a faithful summary would itself be a
- * false label. Neither basis weakens the sanitization requirements, and
- * every artifact still records that it is an authored rendering.
+ * fictional. Neither basis weakens the sanitization requirements, and every
+ * artifact still records that it is an authored rendering.
  */
 export type ScriptBasis = "fictional" | "reenactment";
 
@@ -1105,30 +1103,36 @@ export const DISPLAY_PRESETS: DisplayPreset[] = [
 // clamping/merging pipeline absorbs model sloppiness.
 // ————————————————————————————————————————————————————————————————————————————
 
-/** Prompt handed to an external chat model to write a script for a theme. */
-export function buildScriptPrompt(theme: string, lang: "ja" | "en"): string {
-  const topic = theme.trim();
-  if (lang === "en") {
-    return `Write a fictional coding-agent session script as JSON.
+/**
+ * What a script may contain and still render, one rule per line. The chat
+ * prompt adds its authoring defaults; an agent that writes a script directly
+ * gets the rules alone.
+ */
+function scriptRuleLines(withChatDefaults: boolean): string[] {
+  return [
+    `Output ONLY the JSON, as a single code block, no commentary`,
+    `roles: "user" (request), "thinking" (one short line), "tool" (a shell command), "permission" (the action being approved), "assistant" (Markdown allowed: headings, lists, task lists, quotes, tables, strikethrough, fenced code), "image" (an image-generation step; content = the generation prompt), "choice" (an option menu)`,
+    `One tool message is one invocation: its spinner, exit code and duration cover the whole of it. Use several lines ("\\n") only when they run as one script; to show commands finishing one after another, use several tool messages`,
+    `Per-message extras: "language" on a tool message names the code-fence language; "decision" on a permission message is "allow", "allow-always", or "deny"; "options" (up to 5, each "label — hint") plus "chosenIndex" or "freeform" on a choice message; "inputMode": "voice" on a user message stages it as dictated rather than typed; "highlight": true on a thinking message re-opens its status line as a held note below the row, then folds it back — one beat on the step the render is about, at most one or two per script`,
+    ...(withChatDefaults
+      ? [
+          `Commands in a script are read and retyped by whoever sees the artifact, so never show one that fetches or runs code from a package registry: no \`npm i\`, \`npx\`, \`pnpm dlx\`, \`pip install\`, \`cargo install\`, \`brew install\`, or \`curl ... | sh\`, not even for a real and well-known package. Popularity is not safety — a compromised release arrives under the correct name. Local commands are fine (\`pnpm test\`, \`rg\`, \`git\`, project scripts). Use only reserved example domains (\`example.com\`), and no e-mail addresses, IP addresses or token-shaped strings`,
+        ]
+      : []),
+    `Do NOT attach images. An image message renders a built-in placeholder, so content is the prompt alone`,
+    `Do NOT set appearance, timing, pagination, camera, display or basis — the app owns how it looks and how it is declared`,
+    `Keep user lines short and casual`,
+    `A user line may stage a completion with {{finished|typed}}: the typed part is keyed, the rest arrives on one key. The typed part MUST be a shorter prefix of the finished text. Use it only where a completer exists — a command, path or flag in the terminal (\`{{pnpm typecheck|pnpm ty}}\`), or a /command, @file or #reference in the app (\`{{@src/config.ts|@src/co}}\`). Never on ordinary prose words: no composer completes those. At most one or two per script`,
+    `4-10 messages in a natural flow (user -> thinking -> tool -> ... -> assistant)`,
+    `Keep each message under 2400 characters and the whole script under 3000`,
+    ...(withChatDefaults
+      ? [`modelLabel must be a fictional model name (no real AI product names)`]
+      : []),
+    `For non-development topics, set workspaceLabel and branchLabel to "" (they are hidden when empty)`,
+  ];
+}
 
-Topic: ${topic || "(pick an interesting, realistic coding task)"}
-
-Rules:
-- Output ONLY the JSON, as a single code block, no commentary
-- roles: "user" (request), "thinking" (one short line), "tool" (a shell command), "permission" (the action being approved), "assistant" (Markdown allowed: headings, lists, task lists, quotes, tables, strikethrough, fenced code), "image" (an image-generation step; content = the generation prompt), "choice" (an option menu)
-- One tool message is one invocation: its spinner, exit code and duration cover the whole of it. Use several lines ("\\n") only when they run as one script; to show commands finishing one after another, use several tool messages
-- Per-message extras: "language" on a tool message names the code-fence language; "decision" on a permission message is "allow", "allow-always", or "deny"; "options" (up to 5, each "label — hint") plus "chosenIndex" or "freeform" on a choice message; "inputMode": "voice" on a user message stages it as dictated rather than typed; "highlight": true on a thinking message re-opens its status line as a held note below the row, then folds it back — one beat on the step the render is about, at most one or two per script
-- Commands in a script are read and retyped by whoever sees the artifact, so never show one that fetches or runs code from a package registry: no \`npm i\`, \`npx\`, \`pnpm dlx\`, \`pip install\`, \`cargo install\`, \`brew install\`, or \`curl ... | sh\`, not even for a real and well-known package. Popularity is not safety — a compromised release arrives under the correct name. Local commands are fine (\`pnpm test\`, \`rg\`, \`git\`, project scripts). Use only reserved example domains (\`example.com\`), and no e-mail addresses, IP addresses or token-shaped strings
-- Do NOT attach images. An image message renders a built-in placeholder, so content is the prompt alone
-- Do NOT set appearance, timing, pagination, camera, display or basis — the app owns how it looks and how it is declared
-- Keep user lines short and casual
-- A user line may stage a completion with {{finished|typed}}: the typed part is keyed, the rest arrives on one key. The typed part MUST be a shorter prefix of the finished text. Use it only where a completer exists — a command, path or flag in the terminal (\`{{pnpm typecheck|pnpm ty}}\`), or a /command, @file or #reference in the app (\`{{@src/config.ts|@src/co}}\`). Never on ordinary prose words: no composer completes those. At most one or two per script
-- 4-10 messages in a natural flow (user -> thinking -> tool -> ... -> assistant)
-- Keep each message under 2400 characters and the whole script under 3000
-- modelLabel must be a fictional model name (no real AI product names)
-- For non-development topics, set workspaceLabel and branchLabel to "" (they are hidden when empty)
-
-Characters — anything outside these renders as an empty box:
+const SCRIPT_CHARACTERS_AND_FORMAT = `Characters — anything outside these renders as an empty box:
 - No emoji or pictographs of any kind
 - Latin letters, digits, ASCII punctuation, and accented Latin (é, ü, ñ) are safe
 - Do not mix in other scripts: no Hangul, Cyrillic, Greek, Thai, Devanagari, or CJK beyond what a rule below allows
@@ -1137,6 +1141,28 @@ Characters — anything outside these renders as an empty box:
 Format:
 {"version":1,"title":"...","surface":"app","modelLabel":"...","workspaceLabel":"owner/repo-like","branchLabel":"feat/...","messages":[{"role":"user","content":"..."},{"role":"assistant","content":"..."}]}
 "surface" may be "app" (GUI chat) or "tui" (terminal).`;
+
+function englishScriptRules(withChatDefaults: boolean): string {
+  const rules = scriptRuleLines(withChatDefaults)
+    .map((line) => `- ${line}`)
+    .join("\n");
+  return `Rules:\n${rules}\n\n${SCRIPT_CHARACTERS_AND_FORMAT}`;
+}
+
+/** The rules a script must follow, for an agent that writes one directly. */
+export function buildScriptRules(): string {
+  return englishScriptRules(false);
+}
+
+/** Prompt handed to an external chat model to write a script for a theme. */
+export function buildScriptPrompt(theme: string, lang: "ja" | "en"): string {
+  const topic = theme.trim();
+  if (lang === "en") {
+    return `Write a fictional coding-agent session script as JSON.
+
+Topic: ${topic || "(pick an interesting, realistic coding task)"}
+
+${englishScriptRules(true)}`;
   }
   return `創作のcoding-agentセッション台本をJSONで作成してください。
 
@@ -2012,8 +2038,6 @@ export function deserializeProject(source: string, lang: "ja" | "en" = "en"): Pr
   const timingIn = isRecord(parsed.timing) ? parsed.timing : {};
   const paginationIn = isRecord(parsed.pagination) ? parsed.pagination : {};
 
-  // Basis is read before the model label: a declared reenactment is the
-  // one case where a real model name passes through unreplaced.
   const basis = readEnum(parsed.basis, {
     allowed: ["fictional", "reenactment"],
     fallback: defaults.basis,
