@@ -16,12 +16,12 @@ const DEMO_DIR = "assets/readme/demo";
 const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   {
     file: "README.md",
-    claim: "transcript SVG (0.39 MB)",
+    claim: "transcript SVG (0.43 MB)",
     artifact: `${DEMO_DIR}/readme-english-01.transcript.svg`,
   },
   {
     file: "README.md",
-    claim: "animated SVG (1.39 MB)",
+    claim: "animated SVG (1.34 MB)",
     artifact: `${DEMO_DIR}/readme-en-tui-dark-01.animated.svg`,
   },
   {
@@ -81,7 +81,7 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.ja.md",
-    claim: "animated SVG (1.34 MB)",
+    claim: "animated SVG (1.36 MB)",
     artifact: `${DEMO_DIR}/readme-app-image-01.animated.svg`,
   },
   {
@@ -96,7 +96,7 @@ const SIZE_CLAIMS: Array<{ file: string; claim: string; artifact: string }> = [
   },
   {
     file: "README.ja.md",
-    claim: "animated SVG (1.35 MB)",
+    claim: "animated SVG (1.33 MB)",
     artifact: `${DEMO_DIR}/readme-tui-zoom-01.animated.svg`,
   },
   {

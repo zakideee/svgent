@@ -11,6 +11,7 @@ import { readFile } from "node:fs/promises";
 import {
   type AnimationSpec,
   type AnyVNode,
+  type BoxClip,
   createEngineAsync,
   type Engine,
   type InspectionBBox,
@@ -35,6 +36,7 @@ import {
   userLandingMs,
 } from "@svgent/scene";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { bboxesByNode, sourceMeta } from "./inspection-nodes.js";
 
 type Rect = { x: number; y: number; width: number; height: number };
 
@@ -93,33 +95,25 @@ function childrenOf(node: IRNode): IRNode[] {
 
 /** Join the semantic IR tree to the engine's positioned bbox facts. */
 function inspectionTree(inspection: SceneInspection): InspectedNode {
-  const bboxKey = (nodeId: string, type: IRNode["type"]): string => `${nodeId}\u0000${type}`;
-  const bboxesByNode = new Map<string, InspectionBBox>();
-  for (const bbox of inspection.bboxes) {
-    const key = bboxKey(bbox.nodeId, bbox.type);
-    if (bboxesByNode.has(key)) {
-      throw new Error(`inspection has duplicate ${bbox.type} bbox for ${bbox.nodeId}`);
-    }
-    bboxesByNode.set(key, bbox);
-  }
+  const bboxes = bboxesByNode(inspection);
   let visited = 0;
   const walk = (
     node: IRNode,
     inheritedMeta: Record<string, string>,
     inheritedOpacity: number,
     inheritedClip: Rect | null,
+    parentBBox: InspectionBBox | null,
   ): InspectedNode => {
-    const bbox = bboxesByNode.get(bboxKey(node.nodeId, node.type));
-    if (!bbox) {
-      throw new Error(`inspection has no matching bbox for ${node.nodeId}`);
+    const bbox = bboxes.get(node) ?? wrapperBBox(node, parentBBox);
+    if (bboxes.has(node)) {
+      visited += 1;
     }
-    visited += 1;
-    const ownMeta = node.type === "group" ? (node.meta ?? {}) : {};
+    const ownMeta = { ...sourceMeta(node) };
     const meta = { ...inheritedMeta, ...ownMeta };
     const effectiveOpacity = inheritedOpacity * (node.type === "group" ? (node.opacity ?? 1) : 1);
-    const ownClip = node.type === "group" ? node.clipPath : undefined;
+    const ownClip = node.type === "group" ? node.clip : undefined;
     const clip = ownClip
-      ? intersectClips(inheritedClip, transformRect(ownClip, bbox))
+      ? intersectClips(inheritedClip, transformRect(clipRect(ownClip, bbox), bbox))
       : inheritedClip;
     return {
       node,
@@ -128,14 +122,39 @@ function inspectionTree(inspection: SceneInspection): InspectedNode {
       meta,
       effectiveOpacity,
       clip,
-      children: childrenOf(node).map((child) => walk(child, meta, effectiveOpacity, clip)),
+      children: childrenOf(node).map((child) => walk(child, meta, effectiveOpacity, clip, bbox)),
     };
   };
-  const root = walk(inspection.ir.root, {}, 1, null);
+  const root = walk(inspection.ir.root, {}, 1, null, null);
   if (visited !== inspection.bboxes.length) {
     throw new Error(`inspection has ${inspection.bboxes.length - visited} unpaired bboxes`);
   }
   return root;
+}
+
+/**
+ * A wrapper has no bbox of its own; its children carry their composed
+ * geometry. It stands in with its parent's bbox, which projects its clip
+ * correctly only while the wrapper adds no transform of its own.
+ */
+function wrapperBBox(node: IRNode, parentBBox: InspectionBBox | null): InspectionBBox {
+  if (node.ownership.role !== "wrapper" || parentBBox === null) {
+    throw new Error(`inspection has no matching bbox for ${node.nodeId}`);
+  }
+  if (node.type === "group" && node.clip !== undefined && node.transform !== undefined) {
+    throw new Error(`clip wrapper ${node.nodeId} carries its own transform`);
+  }
+  return parentBBox;
+}
+
+/** The clip's rectangle in owner coordinates; an empty clip hides everything. */
+function clipRect(
+  clip: BoxClip,
+  owner: InspectionBBox,
+): { x: number; y: number; w: number; h: number } {
+  return clip.kind === "empty"
+    ? { x: owner.layoutBBox.x, y: owner.layoutBBox.y, w: 0, h: 0 }
+    : clip.bbox;
 }
 
 function findBand(root: InspectedNode): InspectedNode {
@@ -165,7 +184,7 @@ function rectOf(bbox: InspectionBBox): Rect {
 }
 
 /**
- * `clipPath` is stored in pre-transform layout coordinates. Project its four
+ * A group's `clip` is stored in pre-transform layout coordinates. Project its four
  * corners through the same composed affine transform that inspectScene used
  * for the owner's `transformBox`; intersecting the raw coordinates would
  * leave a moving clip behind when its stand-off translates.
@@ -251,7 +270,7 @@ function paintedLeaves(node: InspectedNode): InspectedNode[] {
     return [];
   }
   if (node.children.length === 0) {
-    return node.bbox.drawIndex !== null && isReal(rectOf(node.bbox)) ? [node] : [];
+    return node.bbox.paintOrder !== null && isReal(rectOf(node.bbox)) ? [node] : [];
   }
   return node.children.flatMap(paintedLeaves);
 }
@@ -272,7 +291,7 @@ function visibleChromeLeaf(
   bandRect: Rect,
   canvasRect: Rect,
 ): { node: InspectedNode; rect: Rect } | undefined {
-  if (node.children.length > 0 || node.bbox.drawIndex === null) {
+  if (node.children.length > 0 || node.bbox.paintOrder === null) {
     return undefined;
   }
   const rect = rectOf(node.bbox);
@@ -411,7 +430,7 @@ async function expectNoChromeOverContent(project: SvgentProject, label: string):
     const content = visibleTranscriptPaint(band);
     const intrusions = chromePaint(root, band).flatMap(({ node: chrome, rect: chromeRect }) =>
       content.flatMap(({ node, rect }) =>
-        (chrome.bbox.drawIndex ?? -1) > (node.bbox.drawIndex ?? -1) &&
+        (chrome.bbox.paintOrder ?? -1) > (node.bbox.paintOrder ?? -1) &&
         intersection(chromeRect, rect)
           ? [`${describeNode(chrome)} over ${describeNode(node)}`]
           : [],

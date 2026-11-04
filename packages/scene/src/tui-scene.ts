@@ -1058,9 +1058,11 @@ export function tuiScene(
           height: sizeLeft(height, inset * 2),
           borderRadius: 12,
           background: terminalBackground,
-          borderWidth: TUI_FRAME_STROKE_PX,
-          strokeScaling: "canvas",
-          borderColor: palette.border,
+          outline: {
+            stroke: palette.border,
+            strokeWidth: TUI_FRAME_STROKE_PX,
+            strokeScaling: "canvas",
+          },
         }),
         ...tuiHeaderNodes({
           env,

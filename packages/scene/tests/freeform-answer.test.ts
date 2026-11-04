@@ -34,6 +34,7 @@ import {
   type SvgentProject,
 } from "@svgent/scene";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { bboxesByNode, sourceMeta } from "./inspection-nodes.js";
 
 let engine: Engine;
 
@@ -165,13 +166,11 @@ function answerPaint(inspection: SceneInspection): AnswerPaint[] {
 
 /** Where a message block sits once every ancestor transform is composed. */
 function blockTop(inspection: SceneInspection, edit: string): number {
-  const byNode = new Map(
-    inspection.bboxes.map((bbox) => [`${bbox.nodeId}\u0000${bbox.type}`, bbox]),
-  );
+  const byNode = bboxesByNode(inspection);
   let top: number | null = null;
   const walk = (node: IRNode): void => {
-    if (top === null && node.type === "group" && node.meta?.edit === edit) {
-      top = byNode.get(`${node.nodeId}\u0000${node.type}`)?.visualBBox.y ?? null;
+    if (top === null && sourceMeta(node)?.edit === edit) {
+      top = byNode.get(node)?.visualBBox.y ?? null;
     }
     for (const child of node.type === "group" ? (node.children ?? []) : []) {
       walk(child);

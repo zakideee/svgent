@@ -90,10 +90,9 @@ function appCardSurface(env: SceneEnv, isUser: boolean): Record<string, unknown>
       isUser ? palette.user : palette.panelStrong,
       messageSurfaceAlpha(env.project),
     ),
-    borderWidth: strokePx(env.metrics),
     // The fill already says whose words these are; an accent-coloured edge on
     // top of it was the loudest thing in the transcript.
-    borderColor: palette.border,
+    outline: { stroke: palette.border, strokeWidth: strokePx(env.metrics) },
   };
 }
 
@@ -186,8 +185,7 @@ function appStatusMessage(timing: MessageTiming, env: SceneEnv, width: number): 
         position: "relative",
         borderRadius: 10,
         background: hexToRgba(palette.panelSoft, messageSurfaceAlpha(env.project)),
-        borderWidth: strokePx(metrics),
-        borderColor: palette.border,
+        outline: { stroke: palette.border, strokeWidth: strokePx(metrics) },
         animate: appEntrance(startMs),
         meta: { edit: message.id },
       },
@@ -361,8 +359,7 @@ export function appHighlightNote(options: {
       height: notePx,
       borderRadius: 10,
       background: hexToRgba(palette.panelSoft, messageSurfaceAlpha(env.project)),
-      borderWidth: strokePx(metrics),
-      borderColor: palette.border,
+      outline: { stroke: palette.border, strokeWidth: strokePx(metrics) },
       padding: [spacePx(metrics, APP_NOTE_PAD_PX), inset, spacePx(metrics, APP_NOTE_PAD_PX), inset],
       animate: reveal,
       // The note is a timed overlay: it shares column space with rows that
@@ -409,8 +406,7 @@ export function appHighlightNoteBlock(options: {
       margin: [0, sidePad, 0, sidePad],
       borderRadius: 10,
       background: hexToRgba(palette.panelSoft, messageSurfaceAlpha(env.project)),
-      borderWidth: strokePx(metrics),
-      borderColor: palette.border,
+      outline: { stroke: palette.border, strokeWidth: strokePx(metrics) },
       padding: [spacePx(metrics, APP_NOTE_PAD_PX), inset, spacePx(metrics, APP_NOTE_PAD_PX), inset],
     },
     Text(
@@ -754,8 +750,10 @@ function appPermissionCard(
         ...(spec.primary
           ? { background: palette.accent }
           : {
-              borderWidth: strokePx(metrics),
-              borderColor: spec.active ? palette.danger : palette.border,
+              outline: {
+                stroke: spec.active ? palette.danger : palette.border,
+                strokeWidth: strokePx(metrics),
+              },
             }),
         ...(spec.active ? { animate: press } : {}),
         meta: sceneActionMeta(spec.action, { messageId: message.id }),
@@ -779,8 +777,7 @@ function appPermissionCard(
         height,
         position: "relative",
         borderRadius: 12,
-        borderWidth: strokePx(metrics),
-        borderColor: palette.border,
+        outline: { stroke: palette.border, strokeWidth: strokePx(metrics) },
         background: hexToRgba(palette.panelStrong, messageSurfaceAlpha(project)),
         animate: mode.animate,
         ...(mode.editMeta ? { meta: { edit: message.id } } : {}),
@@ -1132,13 +1129,11 @@ function tuiPickerBlock(
         borderRadius: 4,
         // The same width the window and composer carry: these are the same
         // kind of line, and the picker used to be the only one that grew with
-        // the authored spacing.
-        borderWidth: TUI_FRAME_STROKE_PX,
-        // Both pickers come through here, so this is the choice frame and the
-        // permission frame at once — the two the camera shimmer was reported
-        // on. See the window and composer frames for the reasoning.
-        strokeScaling: "canvas",
-        borderColor: spec.tone,
+        // the authored spacing. Both pickers come through here, so the
+        // canvas-stable stroke covers the choice frame and the permission
+        // frame at once — the two the camera shimmer was reported on. See the
+        // window and composer frames for the reasoning.
+        outline: { stroke: spec.tone, strokeWidth: TUI_FRAME_STROKE_PX, strokeScaling: "canvas" },
         // A window's opacity applies to the whole surface, so no region of the
         // grid may be more solid than the terminal it sits in.
         background: hexToRgba(palette.panelSoft, messageSurfaceAlpha(env.project)),
@@ -1335,8 +1330,7 @@ function appMessageImages(
         width,
         height: bannerHeight,
         borderRadius: 10,
-        borderWidth: strokePx(metrics),
-        borderColor: palette.border,
+        outline: { stroke: palette.border, strokeWidth: strokePx(metrics) },
         overflow: "clip",
         // Banners land one beat apart, like attachments finishing upload.
         animate: appEntrance(anchorMs + 160 + index * 90),
@@ -1705,8 +1699,7 @@ function appImageMessage(timing: MessageTiming, env: SceneEnv, width: number): R
       gap: 8,
       borderRadius: 12,
       background: hexToRgba(palette.panelStrong, messageSurfaceAlpha(project)),
-      borderWidth: strokePx(metrics),
-      borderColor: palette.border,
+      outline: { stroke: palette.border, strokeWidth: strokePx(metrics) },
       animate: appEntrance(startMs),
     },
     // Header band: generating spinner ↔ completion report.
@@ -1749,8 +1742,7 @@ function appImageMessage(timing: MessageTiming, env: SceneEnv, width: number): R
         height: boxH,
         borderRadius: 10,
         overflow: "clip",
-        borderWidth: strokePx(metrics),
-        borderColor: palette.border,
+        outline: { stroke: palette.border, strokeWidth: strokePx(metrics) },
         background: hexToRgba(palette.panelSoft, messageSurfaceAlpha(project)),
         meta: sceneActionMeta("replace-image", { messageId: message.id }),
       },
@@ -2270,8 +2262,7 @@ function appChoiceCard(
               height: rowHeight,
               borderRadius: 8,
               background: hexToRgba(palette.accent, 0.16),
-              borderWidth: strokePx(metrics),
-              borderColor: palette.accent,
+              outline: { stroke: palette.accent, strokeWidth: strokePx(metrics) },
               animate: settleIn,
             }),
           ]
@@ -2377,8 +2368,7 @@ function appChoiceCard(
         height,
         position: "relative",
         borderRadius: 12,
-        borderWidth: strokePx(metrics),
-        borderColor: palette.accent,
+        outline: { stroke: palette.accent, strokeWidth: strokePx(metrics) },
         background: hexToRgba(palette.panelStrong, messageSurfaceAlpha(project)),
         animate: mode.animate,
         ...(mode.editMeta ? { meta: { edit: message.id } } : {}),

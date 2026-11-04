@@ -29,7 +29,7 @@ function authoringProps(node: AnyVNode): {
   animate?: unknown;
   animateUnits?: unknown;
   background?: string;
-  borderWidth?: number;
+  outline?: { strokeWidth?: number };
   height?: number;
   margin?: readonly number[];
   minHeight?: number;
@@ -41,7 +41,7 @@ function authoringProps(node: AnyVNode): {
     animate?: unknown;
     animateUnits?: unknown;
     background?: string;
-    borderWidth?: number;
+    outline?: { strokeWidth?: number };
     height?: number;
     margin?: readonly number[];
     minHeight?: number;
@@ -350,7 +350,7 @@ describe("scene contract", () => {
           return (
             child.type === "Box" &&
             props.background?.startsWith("rgba(") === true &&
-            props.borderWidth === 1
+            props.outline?.strokeWidth === 1
           );
         })
       : [];

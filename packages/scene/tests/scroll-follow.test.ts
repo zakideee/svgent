@@ -29,6 +29,7 @@ import {
   type SvgentProject,
 } from "@svgent/scene";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { bboxesByNode } from "./inspection-nodes.js";
 
 const VISIBLE_OPACITY = 0.01;
 /** Instants sampled across each streamed reply, evenly spaced. */
@@ -101,16 +102,14 @@ function writingOf(
 /** Every line being written at `timeMs`, against the bottom of the clip it sits in. */
 function writingAgainstClip(scene: ReturnType<typeof buildSvgentScene>, timeMs: number): Writing[] {
   const inspection = inspectScene(engine, scene.vnode, { skipValidation: true, timeMs });
-  const boxes = new Map(
-    inspection.bboxes.map((bbox) => [`${bbox.nodeId}\u0000${bbox.type}`, bbox] as const),
-  );
+  const boxes = bboxesByNode(inspection);
   const found: Writing[] = [];
   const walk = (node: IRNode, opacity: number, clipBottom: number): void => {
     const own = opacity * (node.type === "group" ? (node.opacity ?? 1) : 1);
-    const bbox = boxes.get(`${node.nodeId}\u0000${node.type}`);
+    const bbox = boxes.get(node);
     if (node.type === "group") {
       const clip =
-        node.clipPath && bbox
+        node.clip && bbox
           ? Math.min(clipBottom, bbox.visualBBox.y + bbox.visualBBox.h)
           : clipBottom;
       for (const child of node.children ?? []) {

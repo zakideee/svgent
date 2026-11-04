@@ -371,9 +371,11 @@ export function tuiComposerNodes(layout: {
       number,
     ],
     borderRadius: chromePx(6),
-    borderWidth: TUI_FRAME_STROKE_PX,
-    strokeScaling: "canvas" as const,
-    borderColor: palette.accent,
+    outline: {
+      stroke: palette.accent,
+      strokeWidth: TUI_FRAME_STROKE_PX,
+      strokeScaling: "canvas" as const,
+    },
     background: hexToRgba(palette.panel, messageSurfaceAlpha(project)),
   };
   const baseFrameHeight = sizeLeft(composerHeight, chromePx(22));
