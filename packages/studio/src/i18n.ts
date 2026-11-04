@@ -427,7 +427,7 @@ const JA = {
   exportNote:
     "MP4は1回再生、GIF/WebPはループ。animated SVGは「再生」の選択に従います。svgent のバージョンと上の宣言(創作/再現)がメタデータとして記録されます。",
   exportUseNote:
-    "デモ・解説・スライド・創作・自作物の紹介にご自由にどうぞ。事実でない操作・結果や、第三者がしていない発言・実績を、事実として提示しないでください。",
+    "デモ・解説・スライド・創作・自作物の紹介にご自由にどうぞ。事実でない操作・結果や、第三者がしていない発言・実績を、事実として提示しないでください。台本に意図しない内容（個人情報・機密情報・認証情報など）が含まれていないか、書き出す前に確認してください。",
   groupAttribution: "出典表記",
   markPlacements: (name: string, places: string) => `${name} 表記が入るのは ${places} です。`,
   markPlaceBanner: "本文いちばん上の起動行",
@@ -947,7 +947,7 @@ const EN: UiStrings = {
   exportNote:
     "MP4 plays once; GIF/WebP loop; the animated SVG follows the Playback choice. svgent's version and the declared basis above are recorded as metadata.",
   exportUseNote:
-    "Use renders freely for demos, docs, slides, fiction, and showcasing your work. Don't present operations or results that aren't real, or statements and achievements a third party never made, as fact.",
+    "Use renders freely for demos, docs, slides, fiction, and showcasing your work. Don't present operations or results that aren't real, or statements and achievements a third party never made, as fact. Before exporting, check that the script contains nothing you didn't intend, such as personal data, confidential information, or credentials.",
   groupAttribution: "Attribution",
   markPlacements: (name: string, places: string) => `The ${name} mark appears in ${places}.`,
   markPlaceBanner: "the opening line at the top of the transcript",

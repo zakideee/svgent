@@ -25,7 +25,7 @@ import {
   SURFACES,
 } from "@svgent/authoring";
 import {
-  buildScriptPrompt,
+  buildScriptRules,
   buildTimeline,
   deserializeProject,
   draftTimelineIssues,
@@ -255,7 +255,7 @@ export function createStudioTools(host: ToolHost): WebMcpTool[] {
       host.record({ tool: "list_presets", summary: "read the authoring guide", ok: true });
       return result({
         privacy: { rule: PRIVACY_DEFAULT, mode: host.privacy() },
-        scriptRules: buildScriptPrompt("", "en"),
+        scriptRules: buildScriptRules(),
         stagingGuide: STAGING_GUIDE,
         presets: DIRECTION_CHOICES,
         timingRanges: {

@@ -1,8 +1,8 @@
 # Showcase scripts
 
 Every script here is fictional (`basis: fictional`, the default) and was
-written for svgent under the same script rules `list_presets` returns to an
-agent at runtime. No session material of any kind was used.
+written for svgent under the rules of the studio's AI assist prompt. No session
+material of any kind was used.
 
 | File                    | Written for                     | Notes                                                  |
 | ----------------------- | ------------------------------- | ------------------------------------------------------ |

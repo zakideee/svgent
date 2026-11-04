@@ -155,6 +155,7 @@ export {
   BACKDROP_PRESETS,
   buildGoogleFontCssUrl,
   buildScriptPrompt,
+  buildScriptRules,
   bundledFallbackFonts,
   CAMERA_MIN_SHOT_PRESET_MS,
   CAMERA_ZOOM_MAX,

@@ -82,8 +82,7 @@ export function authoringGuide(topic: string): Record<string, unknown> {
       "Complete the user's requested creation, staging, local timing edits, and exports continuously. Propose content changes outside their request instead of applying them. File generation does not authorize upload or publication.",
     sourceMaterial:
       "Default to authored fiction. Only summarize session material the user explicitly supplied; remove secrets, private identifiers, internal instructions, hidden reasoning, raw file contents, command arguments, and incidental I/O. If sanitizing removes the meaning, ask for a fictional replacement. Thinking is short visible status copy. Keep svgent's own visual identity: svgent adds no real-product logos or copied screens; names, logos, and screens the user supplies are their content.",
-    displayedCommands:
-      "Script commands stay local (pnpm test, rg, git, project scripts). Do not show package-install/download commands, except a package svgent itself publishes. URLs in scripts use reserved example domains; omit emails, IPs, and credential-shaped strings.",
+    credentials: "Omit credentials and credential-shaped strings from scripts.",
     creation: [
       "Write authored JSON in the requested local directory.",
       "validate script.json --strict --json; resolve warnings explicitly.",
