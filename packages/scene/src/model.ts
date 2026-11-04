@@ -643,6 +643,8 @@ export function disclosureFor(basis: ScriptBasis): string {
   return basis === "reenactment" ? REENACTMENT_BADGE : SIMULATION_BADGE;
 }
 export const MAX_MESSAGES = 12;
+/** A message id a script may carry: letters, digits, "-" and "_", up to 64. */
+const MESSAGE_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 export const MAX_MESSAGE_CHARS = 2_400;
 export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 export const MAX_MESSAGE_IMAGES = 4;
@@ -1415,6 +1417,7 @@ type ImportStrings = {
   noMessages: string;
   badMessage: (index: number) => string;
   badRole: (index: number, role: string) => string;
+  badMessageId: (index: number) => string;
   fontUpload: (slot: string) => string;
   tooMany: string;
   noValid: string;
@@ -1439,6 +1442,8 @@ const IMPORT_STRINGS: Record<"ja" | "en", ImportStrings> = {
     noMessages: "messages がないため既定の台本を使います。",
     badMessage: (index) => `${index}件目のmessageが不正なためskipしました。`,
     badRole: (index, role) => `${index}件目のrole「${role}」は未対応のためskipしました。`,
+    badMessageId: (index) =>
+      `${index}件目のidは英数字・「-」・「_」の64文字までに限るため、新しいidを割り当てました。`,
     fontUpload: (slot) =>
       `アップロードしたフォント(${slot})はファイルに保存されないため、同梱フォントに戻しました。`,
     tooMany: `messageが${MAX_MESSAGES}件を超えていたため先頭${MAX_MESSAGES}件だけ読み込みました。`,
@@ -1462,6 +1467,8 @@ const IMPORT_STRINGS: Record<"ja" | "en", ImportStrings> = {
     noMessages: "No messages found — using the default script.",
     badMessage: (index) => `Message ${index} was malformed and skipped.`,
     badRole: (index, role) => `Message ${index} has unsupported role "${role}" and was skipped.`,
+    badMessageId: (index) =>
+      `Message ${index} has an id outside letters, digits, "-" and "_" (up to 64) and was given a new id.`,
     fontUpload: (slot) =>
       `Uploaded fonts (${slot}) are not stored in script files; reverted to the bundled font.`,
     tooMany: `More than ${MAX_MESSAGES} messages; only the first ${MAX_MESSAGES} were loaded.`,
@@ -1911,6 +1918,18 @@ function contentTag(content: string): string {
   return hash.toString(36).padStart(6, "0").slice(0, 6);
 }
 
+/** The script's own message id when it is a safe token; null when it has none or another kind. */
+function readMessageId(value: unknown, index: number, warnings: string[]): string | null {
+  if (typeof value !== "string" || value.length === 0) {
+    return null;
+  }
+  if (MESSAGE_ID_PATTERN.test(value)) {
+    return value;
+  }
+  warnings.push(activeImportStrings.badMessageId(index + 1));
+  return null;
+}
+
 function readMessages(
   value: unknown,
   warnings: string[],
@@ -1938,10 +1957,7 @@ function readMessages(
     const content = typeof entry.content === "string" ? entry.content : "";
     const messageTiming = readMessageTiming(entry.timing, index, warnings);
     messages.push({
-      id:
-        typeof entry.id === "string" && entry.id.length > 0
-          ? entry.id
-          : `imported-${index}-${contentTag(content)}`,
+      id: readMessageId(entry.id, index, warnings) ?? `imported-${index}-${contentTag(content)}`,
       role: entry.role as MessageRole,
       content: content.slice(0, MAX_MESSAGE_CHARS),
       ...(typeof entry.language === "string" ? { language: entry.language.slice(0, 20) } : {}),

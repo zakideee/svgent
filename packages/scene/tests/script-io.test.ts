@@ -121,6 +121,23 @@ describe("script file I/O", () => {
     expect(reloaded.messages[0]?.inputMode).toBe("voice");
   });
 
+  it("keeps token message ids and replaces any other id with a warning", () => {
+    const { project, warnings } = deserializeProject(
+      JSON.stringify({
+        ...JSON.parse(serializeProject(DEFAULT_PROJECT)),
+        messages: [
+          { id: "art-user_1", role: "user", content: "Run the tests." },
+          { id: "a note that never appears on screen", role: "assistant", content: "Done." },
+          { id: "x".repeat(65), role: "assistant", content: "Done again." },
+        ],
+      }),
+    );
+    expect(project.messages[0]?.id).toBe("art-user_1");
+    expect(project.messages[1]?.id).toMatch(/^imported-1-/);
+    expect(project.messages[2]?.id).toMatch(/^imported-2-/);
+    expect(warnings).toHaveLength(2);
+  });
+
   it("round-trips a declared reenactment and keeps its real model label", () => {
     const { project, warnings } = deserializeProject(
       JSON.stringify({
